@@ -1,5 +1,11 @@
 import csv
 import json
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import logout as django_logout
+from django.core.files.storage import FileSystemStorage
 from datetime import datetime, timedelta
 
 from django.contrib import auth
@@ -11,9 +17,56 @@ from spbpu.models import Criterion, Option, Value, PairsOfOptions, Model, Histor
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
 
-JWT_SECRET = 'secret'
-JWT_ALGORITHM = 'HS256'
-JWT_EXP_DELTA_SECONDS = 20
+
+def login(request):
+    # Авторизация
+
+    login_error = ""
+    if request.POST:
+        email = request.POST.get("username").lower()
+        password = request.POST.get("password")
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            auth_login(request, user)
+            if user.is_superuser:
+                return redirect("index")
+            else:
+                return redirect("index_recruter")
+        else:
+            login_error = "Неверный логин или пароль! Повторите попытку."
+
+    return render(request, "spbpu/auth.html", {"login_error": login_error})
+
+
+@login_required
+def logout(request):
+    # Выход из системы
+    django_logout(request)
+    return redirect("index")
+
+
+@login_required(login_url="login")
+def index(request):
+    # Главная страница
+
+    return render(request, "spbpu/index.html", {})
+
+
+@login_required(login_url="login")
+def upload(request):
+    # Загрузка модели через CSV
+
+    if request.method == 'POST':
+        uploaded_file = request.FILES['document']
+        fs = FileSystemStorage()
+        path_csv = request.user.username + '/' + uploaded_file.name
+        fs.save(path_csv, uploaded_file)
+        model = create_model(demo_model=False, path_csv=path_csv)
+        if model is False:
+            error = 'Возникла ошибка при загрузке файла. Проверьте файл'
+            return render(request, "spbpu/upload_model.html", {'error': error})
+
+    return render(request, "spbpu/upload_model.html", {})
 
 
 @csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
@@ -31,28 +84,7 @@ def registration(request):
             return JsonResponse({"Message": "Ошибка при создании пользователя"})
 
 
-@csrf_exempt
-def login(request):
-    if request.method == 'POST':
-        json_data: dict = json.loads(request.body)
 
-        try:
-            email: str = json_data["email"]
-            password: str = json_data["password"]
-            user = auth.authenticate(username=email, password=password)
-
-            if user:
-                payload = {
-                    'user_id': user.id,
-                    'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP_DELTA_SECONDS)
-                }
-                # jwt_token = jwt.encode(payload, JWT_SECRET, JWT_ALGORITHM)
-                # return JsonResponse({"token": jwt_token.decode('utf-8'),'user_id': user.id}, status=200)
-
-            return JsonResponse({"Message": "Пользователя не существует"}, status=400)
-
-        except Exception as e:
-            return JsonResponse({"Message": "Ошибка при авторизации пользователя"}, status=400)
 
 
 def demo_create(request):

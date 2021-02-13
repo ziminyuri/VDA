@@ -1,0 +1,26 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    <div class="container">
+    <div class="row">
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Использовать демо модель</h5>
+        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+        <a href="#" class="btn btn-primary">Посмотреть модель</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Создайте свою модель для выбора лучшей альтернативы</h5>
+        <p class="card-text">Загрузите файл в формате CSV или создайте через интерфейс системы</p>
+        <a href="{% url 'upload' %}" class="btn btn-primary">Загрузить</a>
+        <a href="#" class="btn btn-primary">Создать</a>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+{% endblock %}

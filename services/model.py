@@ -1,16 +1,21 @@
-from api.models import Model, Option, Criterion, Value, PairsOfOptions
+from spbpu.models import Model, Option, Criterion, Value, PairsOfOptions
 import os
 import csv
 
 
-def create_model(demo_model: bool = False) -> object:
+def create_model(demo_model: bool = False, path_csv=None) -> object:
     # Создание объекта модели (Поиска лучшей альтернативы для задачи выбора)
     try:
         if demo_model:
             model = Model.objects.create(is_demo=True, name='Демонстрационная')
             filling_model_for_start(model)  # Заполняем модель исходными данными
         else:
-            model = Model.objects.create(is_demo=True, name='Пользовательская')
+            model = Model.objects.create(is_demo=False, name='Пользовательская')
+            if path_csv:
+                result = filling_model_for_start(model, path_csv=path_csv)  # Заполняем модель исходными данными
+                if result is False:
+                    model.delete()
+                    return False
 
         _create_dir(str(model.id))
 
@@ -20,56 +25,67 @@ def create_model(demo_model: bool = False) -> object:
         pass
 
 
-def filling_model_for_start(model: object):
+def filling_model_for_start(model: object, path_csv=None) -> bool:
     # Заполняем модель стартовыми значениями
 
     options_obj_list = []
-    with open("api/files/demo.csv", encoding='utf-8') as r_file:
-        file_reader = csv.reader(r_file, delimiter=",")
-        count = False
+    try:
+        if path_csv:
+            with open(path_csv, encoding='utf-8') as r_file:
+                file_reader = csv.reader(r_file, delimiter=",")
+        else:
+            with open("api/files/demo.csv", encoding='utf-8') as r_file:
+                file_reader = csv.reader(r_file, delimiter=",")
 
-        criterion_number = 1
-        option_number = 1
-        for row in file_reader:
-            if count is False:
+            count = False
 
-                for i in range(2, len(row)):
-                    option = Option.objects.create(name=row[i], id_model=model, number=option_number)
-                    options_obj_list.append(option)
-                    option_number += 1
+            criterion_number = 1
+            option_number = 1
+            for row in file_reader:
+                if count is False:
 
-                count = True
+                    for i in range(2, len(row)):
+                        option = Option.objects.create(name=row[i], id_model=model, number=option_number)
+                        options_obj_list.append(option)
+                        option_number += 1
 
-            else:
+                    count = True
 
-                if row[1] == 'min':
-                    direction = False
                 else:
-                    direction = True
 
-                max = float(row[2])
-                for i in range(3, len(row)):
-                    if max < float(row[i]):
-                        max = float(row[i])
+                    if row[1] == 'min':
+                        direction = False
+                    else:
+                        direction = True
 
-                criterion = Criterion.objects.create(name=row[0], id_model=model, direction=direction, max=max,
-                                                     number=criterion_number)
+                    max = float(row[2])
+                    for i in range(3, len(row)):
+                        if max < float(row[i]):
+                            max = float(row[i])
 
-                criterion_number += 1
+                    criterion = Criterion.objects.create(name=row[0], id_model=model, direction=direction, max=max,
+                                                         number=criterion_number)
 
-                for i in range(2, len(row)):
-                    value = float(row[i])
-                    Value.objects.create(value=value, id_option=options_obj_list[i - 2], id_criterion=criterion)
+                    criterion_number += 1
 
-    n = len(options_obj_list)
-    k = 1
-    for i in range(n):
-        for j in range(k, n):
-            if i != j:
-                PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
-                                              id_model=model)
+                    for i in range(2, len(row)):
+                        value = float(row[i])
+                        Value.objects.create(value=value, id_option=options_obj_list[i - 2], id_criterion=criterion)
 
-        k += 1
+        n = len(options_obj_list)
+        k = 1
+        for i in range(n):
+            for j in range(k, n):
+                if i != j:
+                    PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
+                                                  id_model=model)
+
+            k += 1
+    except Exception as e:
+        # Если произошли ошибки
+        return False
+
+    return True
 
 
 def _create_dir(dir_name: str) -> None:

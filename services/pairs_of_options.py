@@ -1,6 +1,6 @@
 import random
 
-from api.models import Model, Criterion, PairsOfOptions, Value, Option, HistoryAnswer
+from spbpu.models import Model, Criterion, PairsOfOptions, Value, Option, HistoryAnswer
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
