@@ -10,6 +10,7 @@ urlpatterns = [
     path('upload', views.upload_view, name='upload'),
     path('download', views.download_view, name='download'),
     path('models', views.models_view, name='models'),
+    path('models/<int:id>', views.models_view_id, name='models_id'),
     path('model/create', views.create_model_view, name='create_model'),
 
     path('api/v1/registration', views.registration),

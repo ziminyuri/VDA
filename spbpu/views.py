@@ -1,6 +1,8 @@
 import os
 import csv
 import json
+from random import randint
+
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.shortcuts import redirect, render
@@ -61,7 +63,8 @@ def upload_view(request):
     if request.method == 'POST':
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
-        path_csv = request.user.username + '/' + uploaded_file.name
+        r_int = str(randint(0, 100))
+        path_csv = request.user.username + '/' + r_int + uploaded_file.name
         fs.save(path_csv, uploaded_file)
         model = create_model(demo_model=False, path_csv=path_csv)
         if model is False:
@@ -109,8 +112,8 @@ def models_view(request):
     if request.method == 'POST':
         response = create_model(demo_model=False, request=request)
 
-        if response is True:
-            pass
+        if response is not False:
+            return redirect('models_id', id=response.id)
 
         else:
             number_of_criterion = request.POST["number_of_criterion"]
@@ -123,6 +126,9 @@ def models_view(request):
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
 
+@login_required(login_url="login_view")
+def models_view_id(request, id):
+    pass
 
 @csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
 def registration(request):

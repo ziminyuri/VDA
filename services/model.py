@@ -1,6 +1,7 @@
 from spbpu.models import Model, Option, Criterion, Value, PairsOfOptions
 import os
 import csv
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
 def create_model(demo_model: bool = False, path_csv=None, request=None) -> object:
@@ -37,11 +38,30 @@ def _filling_custom_model(model: object, request) -> bool:
         number_of_criterion = int(request.POST["number_of_criterion"])
         number_of_alternatives = int(request.POST["number_of_alternatives"])
 
+        options_obj_list = []
+        for alternatives in range(1, number_of_alternatives + 1):
+            name = request.POST["alternative_" + str(alternatives)]
+            option = Option.objects.create(name=name, id_model=model, number=alternatives)
+            options_obj_list.append(option)
+
         for criterion in range(1, number_of_criterion+1):
             name = request.POST["criteria_"+str(criterion)]
-            direction = request.POST["direction_"+str(criterion)]
+            direction = int(request.POST["direction_"+str(criterion)])
+            if direction == 1:
+                direction = True
+            else:
+                direction = False
 
-        pass
+            max = float (request.POST["value_" + str(criterion)+ "_1"])
+            for alternatives in range(1, number_of_alternatives + 1):
+                if max < float(request.POST["value_" + str(criterion) + "_" + str(alternatives)]):
+                    max = float(request.POST["value_" + str(criterion) + "_" + str(alternatives)])
+            c = Criterion.objects.create(name=name, id_model=model, direction=direction, max=max,
+                                                 number=criterion)
+
+            for alternatives in range(1, number_of_alternatives + 1):
+                value = float(request.POST["value_" + str(criterion) + "_" + str(alternatives)])
+                Value.objects.create(value=value, id_option=options_obj_list[alternatives-1], id_criterion=c)
 
     except Exception as e:
         return False
@@ -53,13 +73,16 @@ def _filling_model_from_file(model: object, path_csv=None) -> bool:
     options_obj_list = []
     try:
         if path_csv:
-            with open(path_csv, encoding='utf-8') as r_file:
-                file_reader = csv.reader(r_file, delimiter=",")
+            path_csv = MEDIA_ROOT + "/" + path_csv
         else:
-            with open("api/files/demo.csv", encoding='utf-8') as r_file:
-                file_reader = csv.reader(r_file, delimiter=",")
+            # Если пути файла нет, то файл демо модели
+            path_csv = MEDIA_ROOT + "/demo/demo.csv"
 
-            count = False
+        with open(path_csv, encoding='utf-8') as r_file:
+            file_reader = csv.reader(r_file, delimiter=",")
+
+            # Обрабатыаем 1ю строку с шапкой, где названия критериев
+            count = False #
 
             criterion_number = 1
             option_number = 1
@@ -72,6 +95,7 @@ def _filling_model_from_file(model: object, path_csv=None) -> bool:
                         option_number += 1
 
                     count = True
+                    # Обработка шапки закончена
 
                 else:
 
@@ -111,8 +135,8 @@ def _filling_model_from_file(model: object, path_csv=None) -> bool:
 
 
 def _create_dir(dir_name: str) -> None:
-    path1 = 'api/files/models/' + dir_name
-    path2 = 'media/' + dir_name
+    path1 = MEDIA_ROOT + '/files/models/' + dir_name
+    path2 = MEDIA_ROOT + '/' + dir_name
 
     try:
         os.mkdir(path1)

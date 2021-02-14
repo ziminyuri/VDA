@@ -16,6 +16,7 @@
             <th scope="col">Направление</th>
             {% for number in number_of_alternatives_for_select %}
                 <th scope="col">Альтернатива {{ number }}</th>
+                <input type="hidden" required class="form-control" name="alternative_{{ number }}" value = "Альтернатива {{ number }}">
             {% endfor %}
         </tr>
         </thead>
