@@ -1,0 +1,46 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+        {{ error }}
+    {% endif %}
+
+<form  action="{% url 'models'  %}" method="post">
+{% csrf_token %}
+    <input type="hidden" required class="form-control" name="number_of_criterion" value = "{{ number_of_criterion }}">
+    <input type="hidden" required class="form-control" name="number_of_alternatives" value = "{{ number_of_alternatives }}">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Критерий</th>
+            <th scope="col">Направление</th>
+            {% for number in number_of_alternatives_for_select %}
+                <th scope="col">Альтернатива {{ number }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for number in number_of_criterion_for_select %}
+            <tr>
+                <td><input type="text" required class="form-control" name="criteria_{{ number }}" placeholder="Название критерия"></td>
+                <td>                <select class="form-select" id="direction" name="direction_{{ number }}">
+
+                    <option value="1">Максимум</option>
+                    <option value="2">Минимум</option>
+                </select>
+                </td>
+                {% for n in number_of_alternatives_for_select %}
+                    <td><input type="text" required class="form-control" name="value_{{ number }}_{{ n }}" placeholder="Введите значение"></td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="btn-group mt-3" role="group" aria-label="Basic example">
+        <a href="{% url 'index' %}" class="btn btn btn-primary mr-2" >Назад</a>
+        <button class="btn btn btn-primary " type="submit">Далее</button>
+    </div>
+</form>
+{% endblock %}

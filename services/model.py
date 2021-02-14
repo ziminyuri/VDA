@@ -3,19 +3,26 @@ import os
 import csv
 
 
-def create_model(demo_model: bool = False, path_csv=None) -> object:
+def create_model(demo_model: bool = False, path_csv=None, request=None) -> object:
     # Создание объекта модели (Поиска лучшей альтернативы для задачи выбора)
     try:
+        result = True   # Результат создания и заполнения модели
+
         if demo_model:
             model = Model.objects.create(is_demo=True, name='Демонстрационная')
-            filling_model_for_start(model)  # Заполняем модель исходными данными
+            result = _filling_model_from_file(model)  # Заполняем модель исходными данными
         else:
             model = Model.objects.create(is_demo=False, name='Пользовательская')
             if path_csv:
-                result = filling_model_for_start(model, path_csv=path_csv)  # Заполняем модель исходными данными
-                if result is False:
-                    model.delete()
-                    return False
+                result = _filling_model_from_file(model, path_csv=path_csv)  # Заполняем модель исходными данными
+
+            elif request:
+                # Данные модели из интерфейса система
+                result = _filling_custom_model(model, request)
+
+        if result is False:
+            model.delete()
+            return False
 
         _create_dir(str(model.id))
 
@@ -25,8 +32,23 @@ def create_model(demo_model: bool = False, path_csv=None) -> object:
         pass
 
 
-def filling_model_for_start(model: object, path_csv=None) -> bool:
-    # Заполняем модель стартовыми значениями
+def _filling_custom_model(model: object, request) -> bool:
+    try:
+        number_of_criterion = int(request.POST["number_of_criterion"])
+        number_of_alternatives = int(request.POST["number_of_alternatives"])
+
+        for criterion in range(1, number_of_criterion+1):
+            name = request.POST["criteria_"+str(criterion)]
+            direction = request.POST["direction_"+str(criterion)]
+
+        pass
+
+    except Exception as e:
+        return False
+
+
+def _filling_model_from_file(model: object, path_csv=None) -> bool:
+    # Заполняем модель стартовыми значениями из файла
 
     options_obj_list = []
     try:

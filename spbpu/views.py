@@ -1,3 +1,4 @@
+import os
 import csv
 import json
 from django.contrib.auth import authenticate
@@ -6,6 +7,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import logout as django_logout
 from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse, FileResponse
 from datetime import datetime, timedelta
 
 from django.contrib import auth
@@ -18,7 +20,7 @@ from services.pairs_of_options import create_files, make_question, write_answer,
 from services.model import create_model, get_model_data
 
 
-def login(request):
+def login_view(request):
     # Авторизация
 
     login_error = ""
@@ -29,7 +31,7 @@ def login(request):
         if user is not None:
             auth_login(request, user)
             if user.is_superuser:
-                return redirect("index")
+                return redirect("index_view")
             else:
                 return redirect("index_recruter")
         else:
@@ -39,21 +41,21 @@ def login(request):
 
 
 @login_required
-def logout(request):
+def logout_view(request):
     # Выход из системы
     django_logout(request)
-    return redirect("index")
+    return redirect("index_view")
 
 
-@login_required(login_url="login")
-def index(request):
+@login_required(login_url="login_view")
+def index_view(request):
     # Главная страница
 
     return render(request, "spbpu/index.html", {})
 
 
-@login_required(login_url="login")
-def upload(request):
+@login_required(login_url="login_view")
+def upload_view(request):
     # Загрузка модели через CSV
 
     if request.method == 'POST':
@@ -67,6 +69,59 @@ def upload(request):
             return render(request, "spbpu/upload_model.html", {'error': error})
 
     return render(request, "spbpu/upload_model.html", {})
+
+
+@login_required(login_url="login_view")
+def download_view(request):
+    if request.method == 'POST':
+        file_path = 'media/demo/demo.csv'
+        data = open(file_path, "rb").read()
+        response = HttpResponse(data, content_type='application;')
+        response['Content-Length'] = os.path.getsize(file_path)
+        response['Content-Disposition'] = 'attachment; filename=%s' % 'demo.csv'
+
+        return response
+
+
+@login_required(login_url="login_view")
+def create_model_view(request):
+    if request.method == 'POST':
+        # Данные для заполнения таблицы
+        number_of_criterion = request.POST["number_of_criterion"]
+        number_of_alternatives = request.POST["number_of_alternatives"]
+        number_of_criterion = int(number_of_criterion)
+        number_of_alternatives = int(number_of_alternatives)
+        number_of_criterion_for_select = list(range(1, number_of_criterion + 1))
+        number_of_alternatives_for_select = list(range(1, number_of_alternatives + 1))
+        return render(request, "spbpu/model/input_data.html", {'number_of_criterion_for_select': number_of_criterion_for_select,
+                                                               'number_of_alternatives_for_select': number_of_alternatives_for_select,
+                                                               'number_of_criterion': number_of_criterion,
+                                                               'number_of_alternatives': number_of_alternatives,
+                                                               'error': None})
+
+    # Данные для задания нужного кол-ва альтернатив и кол-ва критериев в пользовательской модели
+    number_for_select = list(range(1, 11))
+    return render(request, "spbpu/model/choice_number.html", {'number_for_select': number_for_select})
+
+
+@login_required(login_url="login_view")
+def models_view(request):
+    if request.method == 'POST':
+        response = create_model(demo_model=False, request=request)
+
+        if response is True:
+            pass
+
+        else:
+            number_of_criterion = request.POST["number_of_criterion"]
+            number_of_alternatives = request.POST["number_of_alternatives"]
+            number_of_criterion_for_select = list(range(1, int(number_of_criterion) + 1))
+            number_of_alternatives_for_select = list(range(1, int(number_of_alternatives) + 1))
+            return render(request, "spbpu/model/input_data.html",
+                          {'number_of_criterion_for_select': number_of_criterion_for_select,
+                           'number_of_alternatives_for_select': number_of_alternatives_for_select,
+                           'error': "Ошибка при заполнении. Повторите попытку ввода"})
+
 
 
 @csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
