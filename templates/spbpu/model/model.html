@@ -4,19 +4,18 @@
 <table class="table">
   <thead>
     <tr>
-      <th scope="col">#</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
+        {% for h in model_header %}
+      <th scope="col">{{ h }}</th>
+        {% endfor %}
     </tr>
   </thead>
   <tbody>
-  {% for model in models  %}
+  {% for model in model_data  %}
     <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
+    <th scope="row">{{ forloop.counter }}</th>
+    {% for m in model %}
+      <td>{{ m }}</td>
+{% endfor %}
     </tr>
   {% endfor %}
   </tbody>

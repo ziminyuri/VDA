@@ -7,15 +7,22 @@
             <th scope="col">#</th>
             <th scope="col">Модель</th>
             <th scope="col">Посмотреть</th>
+            <th scope="col">Удалить</th>
         </tr>
         </thead>
         <tbody>
 
         {% for model in models  %}
             <tr>
-                <th scope="row">1</th>
+                <th scope="row">{{ forloop.counter }}</th>
                 <td>{{  model.name }}</td>
                 <td><a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть</a></td>
+                <td><form action="{% url 'models_id' id=model.id  %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" required class="form-control" name="_method" value = "DELETE">
+                    <input type="submit" class="btn btn-outline-danger btn-sm" value="Удалить" >
+                </form>
+                </td>
             </tr>
         {% endfor %}
 

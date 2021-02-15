@@ -136,6 +136,12 @@ def models_view(request):
 
 @login_required(login_url="login_view")
 def models_view_id(request, id):
+    if request.method == 'POST':
+        if request.POST["_method"] == 'DELETE':
+            model = Model.objects.get(id=id)
+            model.delete()
+            return redirect(models_view)
+
     try:
         model = Model.objects.get(id=id)
         model_data, model_header = get_model_data(model.id)
@@ -143,7 +149,7 @@ def models_view_id(request, id):
                       {'model_data': model_data,
                        'model_header': model_header})
     except:
-        pass
+        return redirect(models_view)
 
 
 @csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
