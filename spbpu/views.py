@@ -96,11 +96,12 @@ def create_model_view(request):
         number_of_alternatives = int(number_of_alternatives)
         number_of_criterion_for_select = list(range(1, number_of_criterion + 1))
         number_of_alternatives_for_select = list(range(1, number_of_alternatives + 1))
-        return render(request, "spbpu/model/input_data.html", {'number_of_criterion_for_select': number_of_criterion_for_select,
-                                                               'number_of_alternatives_for_select': number_of_alternatives_for_select,
-                                                               'number_of_criterion': number_of_criterion,
-                                                               'number_of_alternatives': number_of_alternatives,
-                                                               'error': None})
+        return render(request, "spbpu/model/input_data.html",
+                      {'number_of_criterion_for_select': number_of_criterion_for_select,
+                       'number_of_alternatives_for_select': number_of_alternatives_for_select,
+                       'number_of_criterion': number_of_criterion,
+                       'number_of_alternatives': number_of_alternatives,
+                       'error': None})
 
     # Данные для задания нужного кол-ва альтернатив и кол-ва критериев в пользовательской модели
     number_for_select = list(range(1, 11))
@@ -125,10 +126,25 @@ def models_view(request):
                            'number_of_alternatives_for_select': number_of_alternatives_for_select,
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
+    elif request.method == 'GET':
+        # Тут надо выводить только модели
+        models = Model.objects.all()
+
+        return render(request, "spbpu/model/models.html",
+                          {'models': models})
+
 
 @login_required(login_url="login_view")
 def models_view_id(request, id):
-    pass
+    try:
+        model = Model.objects.get(id=id)
+        model_data, model_header = get_model_data(model.id)
+        return render(request, "spbpu/model/model.html",
+                      {'model_data': model_data,
+                       'model_header': model_header})
+    except:
+        pass
+
 
 @csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
 def registration(request):
@@ -143,9 +159,6 @@ def registration(request):
 
         except Exception as e:
             return JsonResponse({"Message": "Ошибка при создании пользователя"})
-
-
-
 
 
 def demo_create(request):
@@ -198,7 +211,7 @@ def auto_create(request):
 
                     for i in range(2, len(row)):
                         value = float(row[i])
-                        Value.objects.create(value=value, id_option=options_obj_list[i-2], id_criterion=criterion)
+                        Value.objects.create(value=value, id_option=options_obj_list[i - 2], id_criterion=criterion)
 
         n = len(options_obj_list)
         k = 1
@@ -231,7 +244,6 @@ def question(request, auto=False):
         json_data: dict = json.loads(request.body)
         message = write_answer(json_data)
         return JsonResponse(message, status=200)
-
 
 
 @csrf_exempt
