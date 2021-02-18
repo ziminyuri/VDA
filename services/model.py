@@ -63,6 +63,15 @@ def _filling_custom_model(model: object, request) -> bool:
                 value = float(request.POST["value_" + str(criterion) + "_" + str(alternatives)])
                 Value.objects.create(value=value, id_option=options_obj_list[alternatives-1], id_criterion=c)
 
+        n = len(options_obj_list)
+        k = 1
+        for i in range(n):
+            for j in range(k, n):
+                if i != j:
+                    PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
+                                                  id_model=model)
+            k += 1
+
     except Exception as e:
         return False
 

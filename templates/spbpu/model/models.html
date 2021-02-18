@@ -16,13 +16,20 @@
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{  model.name }}</td>
-                <td><a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть</a></td>
+                <td>
+                    {% if model.id_winner_option_shnur == None %}
+                    <a class="btn btn-outline-secondary" href="{% url 'snod_search' id=model.id %}"> Найти альтернативу по ШНУР</a>
+                    {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть</a>
+                    {% endif %}
+                </td>
                 <td><form action="{% url 'models_id' id=model.id  %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" required class="form-control" name="_method" value = "DELETE">
                     <input type="submit" class="btn btn-outline-danger btn-sm" value="Удалить" >
                 </form>
                 </td>
+
             </tr>
         {% endfor %}
 

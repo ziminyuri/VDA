@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import datetime
 from services.normalisation import normalisation_time
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
 def create_files(model: object):
@@ -342,7 +343,7 @@ def write_answer(response: dict, auto=False) -> dict:
 
 
 def _read_file(model, pair):
-    path = 'api/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+    path = MEDIA_ROOT+ '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
     data = []
 
     with open(path) as f:
@@ -375,7 +376,7 @@ def _write_file(line: str, path: str) -> None:
 
 
 def _count_winner(model: object, pair: object) -> None:
-    path = 'api/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+    path = MEDIA_ROOT + '/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
 
     with open(path) as f:
         lines = f.readlines()
@@ -513,7 +514,7 @@ def _precent(value, max) -> float:
 
 
 def _init_file(data: list, filename: str, modelname: str) -> None:
-    path = 'api/files/models/' + modelname + '/' + filename + '.txt'
+    path = MEDIA_ROOT + '/files/models/' + modelname + '/' + filename + '.txt'
     pair_file = open(path, 'w')
 
     for row in data:
@@ -581,7 +582,8 @@ def _create_image_for_pair(rows, model, pair):
     # Делаем подписи
     img = Image.open(path)
     idraw = ImageDraw.Draw(img)
-    font = ImageFont.truetype('api/files/fonts/9041.ttf', size=18)
+    path_font = MEDIA_ROOT +'/fonts/9041.ttf'
+    font = ImageFont.truetype(path_font, size=18)
 
     distance = 30
     distance += interval * 2
