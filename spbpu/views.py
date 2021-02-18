@@ -24,7 +24,6 @@ from services.model import create_model, get_model_data
 
 def login_view(request):
     # Авторизация
-
     login_error = ""
     if request.POST:
         email = request.POST.get("username").lower()
@@ -52,7 +51,6 @@ def logout_view(request):
 @login_required(login_url="login_view")
 def index_view(request):
     # Главная страница
-
     return render(request, "spbpu/index.html", {})
 
 
@@ -70,6 +68,7 @@ def upload_view(request):
         if model is False:
             error = 'Возникла ошибка при загрузке файла. Проверьте файл'
             return render(request, "spbpu/upload_model.html", {'error': error})
+        create_files(model)
 
     return render(request, "spbpu/upload_model.html", {})
 
@@ -110,10 +109,12 @@ def create_model_view(request):
 
 @login_required(login_url="login_view")
 def models_view(request):
+    # По GET список всех моделей, по POST создание модели после ввода данных в таблице
     if request.method == 'POST':
         response = create_model(demo_model=False, request=request)
 
         if response is not False:
+            create_files(response)  # В response находится обьект модели
             return redirect('models_id', id=response.id)
 
         else:
@@ -130,12 +131,12 @@ def models_view(request):
         # Тут надо выводить только модели
         models = Model.objects.all()
 
-        return render(request, "spbpu/model/models.html",
-                          {'models': models})
+        return render(request, "spbpu/model/models.html", {'models': models})
 
 
 @login_required(login_url="login_view")
 def models_view_id(request, id):
+    # Просмотр информации о модели по GET, удаление модели по DELETE
     if request.method == 'POST':
         if request.POST["_method"] == 'DELETE':
             model = Model.objects.get(id=id)
@@ -147,24 +148,24 @@ def models_view_id(request, id):
         model_data, model_header = get_model_data(model.id)
         return render(request, "spbpu/model/model.html",
                       {'model_data': model_data,
-                       'model_header': model_header})
+                       'model_header': model_header,
+                       'model': model})
     except:
         return redirect(models_view)
 
 
-@csrf_exempt  # to make true read https://stackoverflow.com/questions/17716624/django-csrf-cookie-not-set
-def registration(request):
+@login_required(login_url="login_view")
+def snod_search(request, id):
+
     if request.method == 'POST':
-        json_data: dict = json.loads(request.body)
+        pass
+    else:
+        model = Model.objects.get(id=id)
+        message = make_question(model)
+        return render(request, "spbpu/snod/question.html",
+                      {'message': message,
+                       'model': model})
 
-        try:
-            email: str = json_data["email"]
-            password: str = json_data["password"]
-            User.objects.create_user(email, email, password)
-            return JsonResponse({"Message": "Пользователь создан"})
-
-        except Exception as e:
-            return JsonResponse({"Message": "Ошибка при создании пользователя"})
 
 
 def demo_create(request):

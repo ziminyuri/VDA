@@ -21,4 +21,10 @@
   </tbody>
 </table>
 
+    {% if model.id_winner_option_shnur is None %}
+    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Найти лучшую альтернативу по ШНУР</a>
+    {% else %}
+    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть результаты ШНУР</a>
+    {% endif %}
+
 {% endblock %}
