@@ -108,9 +108,9 @@ def make_question(model):
                     return Message
 
 
-def write_answer(response: dict, auto=False) -> dict:
+def write_answer(response, answer, auto=False) -> dict:
     if auto is False:
-        answer: int = response["answer"]
+        answer: int = int(answer)
     else:
         answer: int = random.randint(0,2)
     option_1: int = response["option_1"]

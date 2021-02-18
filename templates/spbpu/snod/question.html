@@ -8,9 +8,27 @@
                     <div class="card-body">
                         <h5 class="card-title">Ответьте на вопрос:</h5>
                         <p class="card-text">{{ message.question }}</p>
-                        <a href="#" class="btn btn-primary">Важнее</a>
-                        <a href="#" class="btn btn-primary">Посмотреть модель</a>
-                        <a href="#" class="btn btn-primary">Посмотреть модель</a>
+
+                        <form action="{% url 'snod_search' id=model.id  %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" required class="form-control" name="answer" value = "1">
+                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="submit" class="btn btn-outline-danger btn-sm" value="Важнее 1ое преимущество" >
+                </form>
+                        <form action="{% url 'snod_search' id=model.id  %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" required class="form-control" name="answer" value = "0">
+                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="submit" class="btn btn-outline-danger btn-sm" value="Одинаково важны" >
+                </form>
+
+                        <form action="{% url 'snod_search' id=model.id  %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" required class="form-control" name="answer" value = "2">
+                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="submit" class="btn btn-outline-danger btn-sm" value="Важнее 2ое преимущество" >
+                </form>
+
                     </div>
                 </div>
             </div>

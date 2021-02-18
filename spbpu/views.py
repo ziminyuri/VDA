@@ -158,7 +158,9 @@ def models_view_id(request, id):
 def snod_search(request, id):
 
     if request.method == 'POST':
-        pass
+        message = request.POST["message"]
+        answer = request.POST["message"]
+        message = write_answer(message, answer)
     else:
         model = Model.objects.get(id=id)
         message = make_question(model)
