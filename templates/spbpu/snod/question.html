@@ -12,20 +12,38 @@
                         <form action="{% url 'snod_search' id=model.id  %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" required class="form-control" name="answer" value = "1">
-                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="hidden" required class="form-control" name="option_1" value = "{{ message.option_1 }}">
+                    <input type="hidden" required class="form-control" name="option_2" value = "{{ message.option_2 }}">
+                    <input type="hidden" required class="form-control" name="option_1_line" value = "{{ message.option_1_line }}">
+                    <input type="hidden" required class="form-control" name="option_2_line" value = "{{ message.option_2_line }}">
+                    <input type="hidden" required class="form-control" name="flag_find_winner" value = "{{ message.flag_find_winner }}">
+                    <input type="hidden" required class="form-control" name="question" value = "{{ message.question }}">
+                    <input type="hidden" required class="form-control" name="model" value = "{{ model.id }}">
                     <input type="submit" class="btn btn-outline-danger btn-sm" value="Важнее 1ое преимущество" >
                 </form>
                         <form action="{% url 'snod_search' id=model.id  %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" required class="form-control" name="answer" value = "0">
-                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="hidden" required class="form-control" name="option_1" value = "{{ message.option_1 }}">
+                    <input type="hidden" required class="form-control" name="option_2" value = "{{ message.option_2 }}">
+                    <input type="hidden" required class="form-control" name="option_1_line" value = "{{ message.option_1_line }}">
+                    <input type="hidden" required class="form-control" name="option_2_line" value = "{{ message.option_2_line }}">
+                    <input type="hidden" required class="form-control" name="flag_find_winner" value = "{{ message.flag_find_winner }}">
+                    <input type="hidden" required class="form-control" name="question" value = "{{ message.question }}">
+                    <input type="hidden" required class="form-control" name="model" value = "{{ model.id }}">
                     <input type="submit" class="btn btn-outline-danger btn-sm" value="Одинаково важны" >
                 </form>
 
                         <form action="{% url 'snod_search' id=model.id  %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" required class="form-control" name="answer" value = "2">
-                    <input type="hidden" required class="form-control" name="message" value = "{{ message }}">
+                    <input type="hidden" required class="form-control" name="option_1" value = "{{ message.option_1 }}">
+                    <input type="hidden" required class="form-control" name="option_2" value = "{{ message.option_2 }}">
+                    <input type="hidden" required class="form-control" name="option_1_line" value = "{{ message.option_1_line }}">
+                    <input type="hidden" required class="form-control" name="option_2_line" value = "{{ message.option_2_line }}">
+                    <input type="hidden" required class="form-control" name="flag_find_winner" value = "{{ message.flag_find_winner }}">
+                    <input type="hidden" required class="form-control" name="question" value = "{{ message.question }}">
+                    <input type="hidden" required class="form-control" name="model" value = "{{ model.id }}">
                     <input type="submit" class="btn btn-outline-danger btn-sm" value="Важнее 2ое преимущество" >
                 </form>
 

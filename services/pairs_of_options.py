@@ -113,12 +113,12 @@ def write_answer(response, answer, auto=False) -> dict:
         answer: int = int(answer)
     else:
         answer: int = random.randint(0,2)
-    option_1: int = response["option_1"]
-    option_2: int = response["option_2"]
-    option_1_line: str = response["option_1_line"]
-    option_2_line: str = response["option_2_line"]
-    model_id: int = response["model"]
-    question: str = response["question"]
+    option_1: int = int(response.POST["option_1"])
+    option_2: int = int(response.POST["option_2"])
+    option_1_line: str = response.POST["option_1_line"]
+    option_2_line: str = response.POST["option_2_line"]
+    model_id: int = int(response.POST["model"])
+    question: str = response.POST["question"]
 
     _write_answer_to_history(question, answer, option_1, option_2, model_id)
 
@@ -132,7 +132,7 @@ def write_answer(response, answer, auto=False) -> dict:
     name_1 = ''
     name_2 = ''
 
-    path = 'api/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
 
     if answer == 1:
         # Важнее преимущество по критерию а1
@@ -376,7 +376,7 @@ def _write_file(line: str, path: str) -> None:
 
 
 def _count_winner(model: object, pair: object) -> None:
-    path = MEDIA_ROOT + '/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
 
     with open(path) as f:
         lines = f.readlines()
@@ -644,7 +644,7 @@ def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: 
         line += str(option) + ';'
     line += '|=' + str(answer) + '\n'
 
-    path = 'api/files/models/' + str(model_id) + '.txt'
+    path = MEDIA_ROOT + '/files/models/' + str(model_id) + '.txt'
     _write_file(line, path)
 
 

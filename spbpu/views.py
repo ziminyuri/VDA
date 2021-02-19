@@ -158,9 +158,20 @@ def models_view_id(request, id):
 def snod_search(request, id):
 
     if request.method == 'POST':
-        message = request.POST["message"]
-        answer = request.POST["message"]
-        message = write_answer(message, answer)
+
+        answer = request.POST["answer"]
+        message = write_answer(request, answer)
+
+        # Проверяем, что нашли лучшую альтернативу в модели
+        flag_find_winner = message['flag_find_winner']
+        if flag_find_winner == 0:
+            model = Model.objects.get(id=id)
+            return render(request, "spbpu/snod/question.html",
+                          {'message': message,
+                           'model': model})
+        else:
+            return render(request, "spbpu/snod/result.html",
+                          {})
     else:
         model = Model.objects.get(id=id)
         message = make_question(model)
