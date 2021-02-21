@@ -24,11 +24,10 @@ def _get_range_data(model, pair):
     data = []
     criterions = Criterion.objects.filter(id_model=model.id)
     for criterion in criterions:
-        line = [criterion.name]
-        value = Value.objects.get(id_option=pair.id_option_1, id_criterion=criterion)
-        line.append(value.value)
-        value = Value.objects.get(id_option=pair.id_option_2, id_criterion=criterion)
-        line.append(value.value)
+        value_1 = Value.objects.get(id_option=pair.id_option_1, id_criterion=criterion)
+        value_2 = Value.objects.get(id_option=pair.id_option_2, id_criterion=criterion)
+        line = {'criterion': criterion.name, 'criterion_id': criterion.id, 'direction': criterion.direction, 'pair': pair.id,
+                'option_1': value_1.value, 'option_2': value_2.value}
         data.append(line)
 
     return data, pair.id_option_1.name, pair.id_option_2.name

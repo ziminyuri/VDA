@@ -1,29 +1,64 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
     <div class="container">
-<form  action="{% url 'park_search' id=model.id  %}" method="post">
-{% csrf_token %}
-    <input type="hidden" required class="form-control" name="range" value = "True">
-    <input type="hidden" required class="form-control" name="pair" value = "{{ response.pair }}">
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">Критерий</th>
-            <th scope="col">Направление</th>
-            <th scope="col">{{ response.option_1 }}</th>
-            <th scope="col">Укажите ранг</th>
-            <th scope="col">Укажите ранг</th>
-            <th scope="col">{{ response.option_2 }}</th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+        <form  action="{% url 'park_search' id=model.id  %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" required class="form-control" name="range" value = "True">
+            <input type="hidden" required class="form-control" name="pair" value = "{{ response.pair }}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Критерий</th>
+                    <th scope="col">Направление</th>
+                    <th scope="col">{{ response.option_1 }}</th>
+                    <th scope="col">Укажите ранг</th>
+                    <th scope="col">Укажите ранг</th>
+                    <th scope="col">{{ response.option_2 }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tbody>
+                {% for row in response.data %}
+                    <tr>
+                        <td>{{ row.criterion }}</td>
 
-    <div class="btn-group mt-3" role="group" aria-label="Basic example">
-        <a href="{% url 'index' %}" class="btn btn btn-primary mr-2" >Назад</a>
-        <button class="btn btn btn-primary " type="submit">Далее</button>
-    </div>
-</form>
+                        {% if row.direction is True %}
+                            <td>Максимум</td>
+                        {% else %}
+                            <td>Минимум</td>
+                        {% endif %}
+
+                         <td>{{ row.option_1 }}</td>
+
+                             {% if row.direction is True and row.option_1 < row.option_2 %}
+                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                            {% elif row.direction is False and row.option_1 > row.option_2 %}
+                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                            {% else %}
+                                <td>-</td>
+                            {% endif %}
+
+
+                        {% if row.direction is True and row.option_1 > row.option_2 %}
+                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                            {% elif row.direction is False and row.option_1 < row.option_2 %}
+                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                            {% else %}
+                                <td>-</td>
+                            {% endif %}
+
+                         <td>{{ row.option_2 }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+                </tbody>
+            </table>
+
+            <div class="btn-group mt-3" role="group" aria-label="Basic example">
+                <a href="{% url 'index' %}" class="btn btn btn-primary mr-2" >Назад</a>
+                <button class="btn btn btn-primary " type="submit">Далее</button>
+            </div>
+        </form>
     </div>
 {% endblock %}
