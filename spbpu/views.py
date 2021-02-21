@@ -214,8 +214,9 @@ def park_search(request, id):
 
     else:
         model = Model.objects.get(id=id)
-        message = get_park_question(model)
-        return render(request, "spbpu/",
-                      {'message': message,
+        response = get_park_question(model)
+        if response['flag_range'] is False:
+            return render(request, "spbpu/park/range.html",
+                      {'response': response,
                        'model': model})
 

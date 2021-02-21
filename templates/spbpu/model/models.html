@@ -1,12 +1,14 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
-
+ <div class="container">
     <table class="table">
         <thead>
         <tr>
             <th scope="col">#</th>
             <th scope="col">Модель</th>
-            <th scope="col">Посмотреть</th>
+            <th scope="col">Исходные данные</th>
+            <th scope="col">Метод ШНУР</th>
+            <th scope="col">Метод ПАРК</th>
             <th scope="col">Удалить</th>
         </tr>
         </thead>
@@ -16,11 +18,19 @@
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{  model.name }}</td>
+                <td> <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть</a></td>
                 <td>
                     {% if model.id_winner_option_shnur == None %}
-                    <a class="btn btn-outline-secondary" href="{% url 'snod_search' id=model.id %}"> Найти альтернативу по ШНУР</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'snod_search' id=model.id %}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Посмотреть</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Результат</a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if model.id_winner_option_park == None %}
+                    <a class="btn btn-outline-secondary" href="{% url 'park_search' id=model.id %}"> Найти альтернативу</a>
+                    {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Результат</a>
                     {% endif %}
                 </td>
                 <td><form action="{% url 'models_id' id=model.id  %}" method="POST">
@@ -35,5 +45,5 @@
 
         </tbody>
     </table>
-
+ </div>
 {% endblock %}
