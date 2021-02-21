@@ -13,13 +13,8 @@ urlpatterns = [
     path('models/<int:id>', views.models_view_id, name='models_id'),
     path('model/create', views.create_model_view, name='create_model'),
     path('model/snod/<int:id>', views.snod_search, name='snod_search'),
-
-    path('api/v1/model/demo/create', views.demo_create),
-    path('api/v1/model/auto/create', views.auto_create),
-    path('api/v1/question', views.question),
-    path('api/v1/model/result/<int:id>', views.get_model),
-    path('api/v1/models', views.get_models),
-    path('api/v1/model/demo/park/create', views.demo_park_create),
+    path('model/snod/result/<int:id>', views.snod_result, name='snod_result'),
+    path('model/park/<int:id>', views.park_search, name='park_search'),
 ]
 
 if settings.DEBUG:

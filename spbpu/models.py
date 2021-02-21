@@ -20,6 +20,7 @@ class Model(models.Model):
     name = models.CharField(max_length=255)
     id_winner_option_shnur = models.IntegerField(null=True)    # id победителя по методу ШНУР
     id_winner_option_many = models.IntegerField(null=True)      # id победителя по многокриетриальному методу
+    id_winner_option_park = models.IntegerField(null=True)      # id победителя по методу ПАРК
     time_shnur = models.CharField(max_length=255)
     time_answer_shnur = models.CharField(max_length=255)
     time_many = models.CharField(max_length=255)
@@ -58,7 +59,7 @@ class Value(models.Model):
 
 
 class PairsOfOptions(models.Model):
-    # Пары вариантов и результаты их сравнения
+    # Пары вариантов и результаты их сравнения по методу ШНУР
 
     id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_1')
     id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_2')
@@ -73,9 +74,31 @@ class PairsOfOptions(models.Model):
 
 
 class HistoryAnswer(models.Model):
-    # Хранятся ответы на вопросы к ЛПР
+    # Хранятся ответы на вопросы к ЛПР по методу ШНУР
 
     question = models.TextField(max_length=1000)
     answer = models.CharField(max_length=255)
     pair = models.ForeignKey(PairsOfOptions, on_delete=models.CASCADE, related_name='pair')
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+
+
+class PairsOfOptionsPARK(models.Model):
+    # Пары вариантов и результаты их сравнения по методу ПАРК
+
+    id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_park_option_1')
+    id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_park_option_2')
+    winner_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='park_winner_option', blank=True,
+                                      null=True)
+    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+    already_range = models.BooleanField(default=False)
+
+    def __str__(self):
+       return str(self.id_option_1) + '' + str(self.id_option_2)
+
+
+class RangeValue(models.Model):
+    # Ранжирование вариантов
+    pair = models.ForeignKey(PairsOfOptionsPARK, on_delete=models.CASCADE)
+    option = models.ForeignKey(Option, on_delete=models.CASCADE)
+    criteria = models.ForeignKey(Criterion, on_delete=models.CASCADE)
+    value = models.ForeignKey(Value, on_delete=models.CASCADE)
