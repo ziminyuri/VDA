@@ -1,0 +1,28 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-6">
+                 <div class="card-body">
+                     <h5 class="card-title">Альтернатива 1</h5>
+                 </div>
+            </div>
+
+
+            <div class="col-sm-6">
+                <div class="card-body">
+                     <h5 class="card-title">Альтернатива 2</h5>
+                 </div>
+            </div>
+
+            <h5 class="card-title">Какую альтернативу Вы предпочтете?</h5>
+            <form action="{% url 'park_search' id=model.id  %}" method="POST">
+                <input type="submit" class="btn btn-outline-danger btn-sm" value="Альтернатива 1" >
+                <input type="submit" class="btn btn-outline-danger btn-sm" value="Альтернатива 2" >
+            </form>
+
+
+        </div>
+    </div>
+{% endblock %}
