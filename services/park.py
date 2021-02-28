@@ -1,4 +1,5 @@
 from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value
+from services.range_value import create_range_value
 
 
 def get_park_question(model):
@@ -7,8 +8,32 @@ def get_park_question(model):
         # Впервые пришли к сранению -> Пар сравнения нет
         pair = _create_pair(model, FIRST=True)
         data, option_1, option_2 = _get_range_data(model, pair)
+
+        _create_perfect_fit(pair)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
         return {'flag_find_winner': 0, 'flag_range': False, 'pair': pair.id, 'option_1': option_1, 'option_2': option_2,
                 'data': data}
+
+
+def write_range_data(response, model):
+    # Записываем данные о ранжировании критериев в паре
+    criterions = Criterion.objects.filter(id_model=model.id)
+    pair_id = int(response.POST["pair"])
+    pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
+    for criterion in criterions:
+        try:
+            value_name = 'value_' + str(criterion.id) + '_1'
+            value = int(response.POST[value_name])
+            create_range_value(pair, pair.id_option_1, criterion, value)
+        except:
+            try:
+                value_name = 'value_' + str(criterion.id) + '_2'
+                value = int(response.POST[value_name])
+                create_range_value(pair, pair.id_option_2, criterion, value)
+            except:
+                pass
+
+    pass
 
 
 def _create_pair(model, FIRST=False):
@@ -32,4 +57,12 @@ def _get_range_data(model, pair):
 
     return data, pair.id_option_1.name, pair.id_option_2.name
 
+
+def _create_perfect_fit(pair: object) -> None:
+    # Создаем идеальную альтернативу в паре: лучшие значения критериев в паре
+
+    try:
+        pass
+    except Exception as e:
+        print(e)
 

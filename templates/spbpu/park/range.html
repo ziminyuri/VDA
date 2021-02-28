@@ -3,7 +3,7 @@
     <div class="container">
         <form  action="{% url 'park_search' id=model.id  %}" method="post">
             {% csrf_token %}
-            <input type="hidden" required class="form-control" name="range" value = "True">
+            <input type="hidden" required class="form-control" name="range" value = True>
             <input type="hidden" required class="form-control" name="pair" value = "{{ response.pair }}">
             <table class="table">
                 <thead>
@@ -31,18 +31,18 @@
                          <td>{{ row.option_1 }}</td>
 
                              {% if row.direction is True and row.option_1 < row.option_2 %}
-                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}_1" placeholder="Введите ранг"></td>
                             {% elif row.direction is False and row.option_1 > row.option_2 %}
-                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}_1" placeholder="Введите ранг"></td>
                             {% else %}
                                 <td>-</td>
                             {% endif %}
 
 
                         {% if row.direction is True and row.option_1 > row.option_2 %}
-                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                                <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}_2" placeholder="Введите ранг"></td>
                             {% elif row.direction is False and row.option_1 < row.option_2 %}
-                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}" placeholder="Введите ранг"></td>
+                     <td><input type="text" required class="form-control" name="value_{{ row.criterion_id }}_2" placeholder="Введите ранг"></td>
                             {% else %}
                                 <td>-</td>
                             {% endif %}

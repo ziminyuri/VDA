@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
-from services.park import get_park_question
+from services.park import get_park_question, write_range_data
 
 
 def login_view(request):
@@ -25,7 +25,7 @@ def login_view(request):
         if user is not None:
             auth_login(request, user)
             if user.is_superuser:
-                return redirect("index_view")
+                return redirect("index")
             else:
                 return redirect("index_recruter")
         else:
@@ -38,16 +38,16 @@ def login_view(request):
 def logout_view(request):
     # Выход из системы
     django_logout(request)
-    return redirect("index_view")
+    return redirect("index")
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def index_view(request):
     # Главная страница
     return render(request, "spbpu/index.html", {})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def upload_view(request):
     # Загрузка модели через CSV
 
@@ -66,7 +66,7 @@ def upload_view(request):
     return render(request, "spbpu/upload_model.html", {})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def download_view(request):
     if request.method == 'POST':
         file_path = 'media/demo/demo.csv'
@@ -78,7 +78,7 @@ def download_view(request):
         return response
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def create_model_view(request):
     if request.method == 'POST':
         # Данные для заполнения таблицы
@@ -100,7 +100,7 @@ def create_model_view(request):
     return render(request, "spbpu/model/choice_number.html", {'number_for_select': number_for_select})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def models_view(request):
     # По GET список всех моделей, по POST создание модели после ввода данных в таблице
     if request.method == 'POST':
@@ -127,7 +127,7 @@ def models_view(request):
         return render(request, "spbpu/model/models.html", {'models': models})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def models_view_id(request, id):
     # Просмотр информации о модели по GET, удаление модели по DELETE
     if request.method == 'POST':
@@ -147,7 +147,7 @@ def models_view_id(request, id):
         return redirect(models_view)
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def snod_search(request, id):
 
     if request.method == 'POST':
@@ -173,7 +173,7 @@ def snod_search(request, id):
                        'model': model})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def snod_result(request, id):
     model = Model.objects.get(id=id)
     option_shnur = Option.objects.get(id=model.id_winner_option_shnur)
@@ -207,13 +207,16 @@ def snod_result(request, id):
                   {response})
 
 
-@login_required(login_url="login_view")
+@login_required(login_url="login")
 def park_search(request, id):
+    model = Model.objects.get(id=id)
+
     if request.method == 'POST':
-        pass
+        range = bool(request.POST["range"])
+        if range is True:
+            response = write_range_data(request, model)
 
     else:
-        model = Model.objects.get(id=id)
         response = get_park_question(model)
         if response['flag_range'] is False:
             return render(request, "spbpu/park/range.html",
