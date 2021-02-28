@@ -128,4 +128,4 @@ class ValueOfPerfectAlternativePARK(models.Model):
 
     value = models.IntegerField(null=True)
     criteria = models.ForeignKey(Criterion, on_delete=models.CASCADE)
-    perfect_alternative = models.ForeignKey(PairsOfOptionsPARK, on_delete=models.CASCADE)
+    perfect_alternative = models.ForeignKey(PerfectAlternativePARK, on_delete=models.CASCADE)
