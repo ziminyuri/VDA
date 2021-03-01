@@ -97,6 +97,7 @@ class PairsOfOptionsPARK(models.Model):
                                       null=True)
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
     already_range = models.BooleanField(default=False)
+    init_file = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id_option_1) + '' + str(self.id_option_2)
@@ -130,24 +131,3 @@ class ValueOfPerfectAlternativePARK(models.Model):
     criteria = models.ForeignKey(Criterion, on_delete=models.CASCADE)
     perfect_alternative = models.ForeignKey(PerfectAlternativePARK, on_delete=models.CASCADE)
 
-
-class SetOfOptions(models.Model):
-    # Набор критериев
-    option = models.ForeignKey(Option, on_delete=models.CASCADE)
-
-
-class ValueOfSetOfOptions(models.Model):
-    # Элементы набора критериев
-    set_option = models.ForeignKey(SetOfOptions, on_delete=models.CASCADE)
-    value = models.ForeignKey(Value, on_delete=models.CASCADE)
-
-
-class HistoryAnswerPARK(models.Model):
-    # История ответов
-
-    set_option_1 = models.ForeignKey(SetOfOptions, on_delete=models.CASCADE, related_name='set_option_1')
-    set_option_2 = models.ForeignKey(SetOfOptions, on_delete=models.CASCADE, related_name='set_option_2')
-    winner_set = models.ForeignKey(SetOfOptions, on_delete=models.CASCADE, related_name='winner_set', blank=True,
-                                   null=True)
-    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
-    pair = models.ForeignKey(PairsOfOptionsPARK, on_delete=models.CASCADE)

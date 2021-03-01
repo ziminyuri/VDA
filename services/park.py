@@ -1,6 +1,9 @@
 from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value, PerfectAlternativePARK, \
-    ValueOfPerfectAlternativePARK, HistoryAnswerPARK, ValueOfSetOfOptions, SetOfOptions, RangeValue
+    ValueOfPerfectAlternativePARK, RangeValue
 from services.range_value import create_range_value
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from services.pairs_of_options import _write_file
+from collections import deque
 
 
 def get_park_question(model):
@@ -17,18 +20,15 @@ def get_park_question(model):
 
     # Пары для сравнения существуют
     pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(winner_option=None).first()
-
-    history_of_answer_of_pair = HistoryAnswerPARK.objects.filter(id_model=model).filter(pair=pair)
-    if not history_of_answer_of_pair:
-        history_of_answer_of_pair = _create_history_of_answer_of_pair(model, pair)
-
+    if pair.init_file is False:
+        _init_file_for_PARK(model, pair)
     perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
     criterions = Criterion.objects.filter(id_model=model.id)
 
-    new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative,
-                                                                 history_of_answer_of_pair)
+    new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
 
-    return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2}
+    return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
+            'criterions': criterions}
 
 
 # Записываем данные о ранжировании критериев в паре
@@ -106,39 +106,58 @@ def _create_perfect_fit(pair: object, model: object) -> None:
 
 
 # Создаем историю ответов для пары альтернатив
-def _create_history_of_answer_of_pair(model: object, pair: object, first: bool = False) -> object:
-    set_1 = SetOfOptions.objects.create(option=pair.id_option_1)
-    set_2 = SetOfOptions.objects.create(option=pair.id_option_2)
-    history_of_answer_of_pair = HistoryAnswerPARK.objects.create(set_option_1=set_1, set_option_2=set_2,
-                                                                 id_model=model, pair=pair)
+def _init_file_for_PARK(model: object, pair: object) -> None:
+    range_1 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_1).filter(value=1).first()
+    range_2 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_2).filter(value=1).first()
 
-    if first is True:
-        range_1 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_1).filter(value=1).first()
-        range_2 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_2).filter(value=1).first()
+    value_1 = Value.objects.filter(id_option=pair.id_option_1).filter(id_criterion=range_1.criteria).first()
+    value_2 = Value.objects.filter(id_option=pair.id_option_2).filter(id_criterion=range_2.criteria).first()
 
-        value_1 = Value.objects.filter(id_option=pair.id_option_1).filter(id_criterion=range_1.criteria).first()
-        value_2 = Value.objects.filter(id_option=pair.id_option_2).filter(id_criterion=range_2.criteria).first()
-
-        ValueOfSetOfOptions.objects.create(set_option=set_1, value=value_1)
-        ValueOfSetOfOptions.objects.create(set_option=set_2, value=value_2)
-
-
-    return history_of_answer_of_pair
+    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/PAIR' + str(pair.id) + '.txt'
+    line = str(value_1.id_criterion.number) + '|' + str(value_2.id_criterion.number)
+    _write_file(line, path)
+    PairsOfOptionsPARK.objects.filter(id=pair.id).update(init_file=True)
 
 
 # Заполняем новые варианты
-def _fill_new_alternative(criterions: list, perfect_alternative: object, history_of_answer_of_pair: object):
+def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: object):
     new_alternative_1 = []
     new_alternative_2 = []
 
-    value_of_set_1 = ValueOfSetOfOptions.objects.filter(set_option=history_of_answer_of_pair.set_option_1)
-    value_of_set_2 = ValueOfSetOfOptions.objects.filter(set_option=history_of_answer_of_pair.set_option_2)
+    path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/PAIR' + str(pair.id) + '.txt'
+    with open(path) as file:
+        [last_line] = deque(file, maxlen=1) or ['']
 
+    set_1 = last_line.split('|')[0]
+    set_2 = last_line.split('|')[1]
+    set_1 = set_1.split(';')
+    set_2 = set_2.split(';')
     for criterion in criterions:
-        for v in value_of_set_1:
-            if v.value.id_criterion == criterion:
-                pass
+        already_get_value = False
+        for s1 in set_1:
+            if criterion.number == int(s1):
+                value_1 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_1)
+                value_2 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_2)
+                already_get_value = True
+        for s2 in set_2:
+            if criterion.number == int(s2):
+                value_1 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_1)
+                value_2 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_2)
+                already_get_value = True
 
+        if already_get_value is False:
+            try:
+                value_1 = ValueOfPerfectAlternativePARK.objects.get(criteria=criterion,
+                                                                         perfect_alternative=perfect_alternative)
+                value_2 = value_1
+            except Exception as e:
+                print(e)
+
+        value_1 = value_1.value
+        value_2 = value_2.value
+
+        new_alternative_1.append(value_1)
+        new_alternative_2.append(value_2)
 
     return new_alternative_1, new_alternative_2
 

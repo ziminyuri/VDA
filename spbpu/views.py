@@ -215,7 +215,7 @@ def park_search(request, id):
         range = bool(request.POST["range"])
         if range is True:
             response = write_range_data(request, model)
-            return render(request, 'spbpu/park/compare_alternative.html')
+            return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
     else:
         response = get_park_question(model)
