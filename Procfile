@@ -1,0 +1,1 @@
+web: gunicorn Verbal_Decision_Analysis.wsgi --log-file -
