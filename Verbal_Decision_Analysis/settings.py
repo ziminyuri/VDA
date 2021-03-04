@@ -7,7 +7,7 @@ SECRET_KEY = '$$o6c5vyswjznfnf%c=s6ux%9v+kcz^%g1la0kw!ljrnlyqdeq'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['glacial-everglades-54891.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['glacial-everglades-54891.herokuapp.com', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
