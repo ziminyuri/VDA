@@ -16,6 +16,8 @@ from services.pairs_of_options import create_files, make_question, write_answer,
 from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data
 
+if 'DATABASE_URL' in os.environ:
+    path_img = ''
 
 
 def login_view(request):
