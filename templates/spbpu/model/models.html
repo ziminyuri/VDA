@@ -23,14 +23,14 @@
                     {% if model.id_winner_option_shnur == None %}
                     <a class="btn btn-outline-secondary" href="{% url 'snod_search' id=model.id %}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Результат</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'snod_result' id=model.id %}">Результат</a>
                     {% endif %}
                 </td>
                 <td>
                     {% if model.id_winner_option_park == None %}
                     <a class="btn btn-outline-secondary" href="{% url 'park_search' id=model.id %}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary" href="{% url 'models_id' id=model.id %}">Результат</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'snod_result' id=model.id %}">Результат</a>
                     {% endif %}
                 </td>
                 <td><form action="{% url 'models_id' id=model.id  %}" method="POST">

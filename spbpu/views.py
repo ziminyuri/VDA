@@ -204,7 +204,7 @@ def snod_result(request, id):
                 'winners_data': winners_data, 'winners_header': winners_header}
 
     return render(request, "spbpu/snod/result.html",
-                  {response})
+                  response)
 
 
 @login_required(login_url="login")

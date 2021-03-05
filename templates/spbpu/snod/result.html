@@ -1,4 +1,107 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
-    <p> Результат найден</p>
+    <div class="container">
+        <h3>Исходные данные</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                {% for h in model_header %}
+                    <th scope="col">{{ h }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for model in model_data  %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    {% for m in model %}
+                        <td>{{ m }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h3>Шкалы Нормализованных Упорядоченных Различий</h3>
+        <p>ШНУР был рассчитан на основе исходных данных по альтернативам</p>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">№</th>
+                <th scope="col">Пара альтернатив</th>
+                <th scope="col">Иллюстрация ШНУР</th>
+                <th scope="col">Нормализованные упорядоченные значения ШНУР</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in img %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.pair }}</td>
+                    <td><img src="{{ item.path}}" class="rounded float-start"></td>
+                    <td>
+                        {% for i in item.absolute_value %}
+                            <p>{{ i }}</p>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <h3>История ответов</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">№</th>
+                <th scope="col">Вопрос</th>
+                <th scope="col">Пара альтернатив</th>
+                <th scope="col">Ответ</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in history  %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.question }}</td>
+                    <td>{{ item.answer }}</td>
+                    <td>{{ item.pair }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Лучшая альтернатива по методу ШНУР</h5>
+                        <p class="card-text">{{ option_shnur }}</p>
+                        <p class="card-text">Время затраченное на построение графиков ШНУР <br>{{ time_shnur_elapsed }}</p>
+                        <p class="card-text">Время затраченное на ответы на вопросы пользователем <br>
+                            {{ time_answer_elapsed }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Лучшая альтернатива по MAUT</h5>
+                        <p class="card-text">{{ option_many }}</p>
+                        <p class="card-text">Время затраченное на поиск альтернативы: <br>{{ time_many_elapsed }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
