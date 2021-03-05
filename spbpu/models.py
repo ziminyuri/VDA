@@ -9,10 +9,10 @@ class UserProfile(models.Model):
     # Модель пользователя расширяет стандартную модель пользователя Django
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=30, blank=True)
+    username = models.CharField(max_length=30, blank=True)
 
     def __str__(self):
-        return self.first_name
+        return self.username
 
 
 class Model(models.Model):

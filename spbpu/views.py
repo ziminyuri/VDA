@@ -8,11 +8,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as django_logout
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
+from django.contrib import auth
+from django.contrib.auth.models import User
 
-from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer
+from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data
+
 
 
 def login_view(request):
@@ -24,15 +27,40 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             auth_login(request, user)
-            if user.is_superuser:
-                return redirect("index")
-            else:
-                return redirect("index_recruter")
+            return redirect("index")
+
         else:
             login_error = "Неверный логин или пароль! Повторите попытку."
 
     return render(request, "spbpu/auth.html", {"login_error": login_error})
 
+
+def registration_view(request):
+    # Регистрация
+    if request.POST:
+        email = request.POST.get("username").lower()
+        password = request.POST.get("password")
+        password_2 = request.POST.get("password_2")
+
+        if password != password_2:
+            error = 'Пароли не совпадают'
+            return render(request, "spbpu/registration.html", {'error': error})
+
+        user = UserProfile.objects.filter(username=email)
+        if not user:
+            User.objects.create_user(email, email, password)
+            user = auth.authenticate(username=email, password=password)
+            UserProfile.objects.create(
+                user=user,
+                username=email,
+            )
+            return redirect('login')
+        else:
+            error = 'Пользователь с таким e-mail существует'
+            return render(request, "spbpu/registration.html", {'error': error})
+
+    else:
+        return render(request, "spbpu/registration.html", {'error': None})
 
 @login_required
 def logout_view(request):

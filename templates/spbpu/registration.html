@@ -18,15 +18,26 @@
   </head>
 
   <body class="text-center">
-    <form class="form-signin" action="{% url 'login'  %}" method="post">
+
+    <form class="form-signin" action="{% url 'registration'  %}" method="post">
         {% csrf_token %}
       <h1 class="h3 mb-3 font-weight-normal">Система принятия решения</h1>
       <label for="inputEmail" class="sr-only">Логин</label>
       <input type="text" id="inputEmail" class="form-control" placeholder="Введите логин" required autofocus name="username">
       <label for="inputPassword" class="sr-only">Пароль</label>
       <input type="password" id="inputPassword" class="form-control" placeholder="Введите пароль" required name="password">
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Войти</button>
-        <a class="btn btn-lg btn-primary btn-block" href="{% url 'registration' %}"> Регистрация</a>
+              <label for="inputPassword" class="sr-only">Повторите пароль</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Повторите пароль" required name="password_2">
+              {% if error %}
+    <div class="alert alert-danger" role="alert">
+  {{ error }}
+</div>
+    {% endif %}
+
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Зарегистрироваться</button>
+        <a class="btn btn-lg btn-primary btn-block" href="{% url 'login' %}"> Войти в профиль</a>
       <p class="mt-5 mb-3 text-muted">Санкт-Петербургский политехнический университет Петра Великого<br>2021 </p>
     </form>
+
+
   </body>
