@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
-import django_heroku
-django_heroku.settings(locals())
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -99,3 +98,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+if 'DATABASE_URL' in os.environ:
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config()}
