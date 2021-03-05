@@ -3,63 +3,73 @@
     <div class="container">
         <div class="row">
 
-            <div class="col card ">
-                <div class="card-body">
-                    <h5 class="card-title">Альтернатива 1</h5>
-                    <table class="table">
-                        <tbody>
-                        {% for a in response.alternative_1  %}
-                        <tr>
-                            <th scope="row">К: {{ forloop.counter }}</th>
-                            <td>{{ a }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Альтернатива 1</h5>
+                        <table class="table">
+                            <tbody>
+                            {% for a in response.alternative_1  %}
+                                <tr>
+                                    <th scope="row">К: {{ forloop.counter }}</th>
+                                    <td>{{ a }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
 
-            <div class="col card">
-                <div class="card-body">
-                    <h5 class="card-title">Альтернатива 2</h5>
-                     <table class="table">
-                        <tbody>
-                        {% for a in response.alternative_2  %}
-                        <tr>
-                            <th scope="row">К: {{ forloop.counter }}</th>
-                            <td>{{ a }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Альтернатива 2</h5>
+                        <table class="table">
+                            <tbody>
+                            {% for a in response.alternative_2  %}
+                                <tr>
+                                    <th scope="row">К: {{ forloop.counter }}</th>
+                                    <td>{{ a }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="col-1">
             </div>
-            <div class="col-5 alert-success border card">
-                <div class="card-body">
-                    <h5 class="card-title">Критерия</h5>
-                     <table class="table">
-                        <tbody>
-                        {% for criterion in response.criterions  %}
-                        <tr>
-                            <th scope="row">К: {{ forloop.counter }}</th>
-                            <td>{{ criterion.name }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col-5">
+                <div class="card alert-success border">
+                    <div class="card-body">
+                        <h5 class="card-title">Критерия</h5>
+                        <table class="table">
+                            <tbody>
+                            {% for criterion in response.criterions  %}
+                                <tr>
+                                    <th scope="row">К: {{ forloop.counter }}</th>
+                                    <td>{{ criterion.name }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
                 </div>
             </div>
 
-            <h5 class="card-title mt-5">Какую альтернативу Вы предпочтете?</h5>
-            <form action="{% url 'park_search' id=model.id  %}" method="POST">
-                <input type="submit" class="btn btn-outline-danger btn-sm" value="Альтернатива 1" >
-                <input type="submit" class="btn btn-outline-danger btn-sm" value="Альтернатива 2" >
-            </form>
+            <div class="container">
 
-
+                <h5 class="mt-5">Какую альтернативу Вы предпочтете?</h5>
+                <div class="row ml-1">
+                    <form action="{% url 'park_search' id=model.id  %}" method="POST">
+                        <input type="submit" class="btn btn-danger btn-sm" value="Альтернатива 1" >
+                        <input type="submit" class="btn btn-danger btn-sm" value="Альтернатива 2" >
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
