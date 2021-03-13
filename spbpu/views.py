@@ -17,7 +17,7 @@ from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data
 
 if 'DATABASE_URL' in os.environ:
-    path_img = ''
+    path_img = 'glacial-everglades-54891.herokuapp.com'
 
 
 def login_view(request):
@@ -221,7 +221,13 @@ def snod_result(request, id):
     if len(pairs) < 10:
         for pair in pairs:
             absolute_value = absolute_value_in_str(model.id, pair.id)
-            img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+            if 'DATABASE_URL' in os.environ:
+                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+                        'path': path_img + '/media/' + str(model.id) + '/' + str(pair.id) + '.png',
+                        'absolute_value': absolute_value})
+
+            else:
+                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
                         'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
                         'absolute_value': absolute_value})
 
