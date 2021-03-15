@@ -65,6 +65,7 @@ def registration_view(request):
     else:
         return render(request, "spbpu/registration.html", {'error': None})
 
+
 @login_required
 def logout_view(request):
     # Выход из системы
@@ -93,6 +94,7 @@ def upload_view(request):
             error = 'Возникла ошибка при загрузке файла. Проверьте файл'
             return render(request, "spbpu/upload_model.html", {'error': error})
         create_files(model)
+        return redirect('models_id', id=model.id)
 
     return render(request, "spbpu/upload_model.html", {})
 
