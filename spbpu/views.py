@@ -224,7 +224,7 @@ def snod_result(request, id):
             absolute_value = absolute_value_in_str(model.id, pair.id)
             if 'DATABASE_URL' in os.environ:
                 img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path':  MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
+                        'path':  MEDIA_ROOT + '/' + str(model.id) + '/' + str(pair.id) + '.png',
                         'absolute_value': absolute_value})
 
             else:
