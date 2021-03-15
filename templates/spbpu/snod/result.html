@@ -41,8 +41,7 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.pair }}</td>
-                {% load static %}
-                    <td><img src={% static item.path %} "" class="rounded float-start"></td>
+                    <td><img src="{{ item.path}}" class="rounded float-start"></td>
                     <td>
                         {% for i in item.absolute_value %}
                             <p>{{ i }}</p>
