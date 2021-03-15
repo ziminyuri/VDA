@@ -15,7 +15,7 @@ from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfi
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT, STATIC_URL
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -224,7 +224,7 @@ def snod_result(request, id):
             absolute_value = absolute_value_in_str(model.id, pair.id)
             if 'DATABASE_URL' in os.environ:
                 img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path':  MEDIA_ROOT + '/' + str(model.id) + '/' + str(pair.id) + '.png',
+                        'path': str(model.id) + '/' + str(pair.id) + '.png',
                         'absolute_value': absolute_value})
 
             else:
