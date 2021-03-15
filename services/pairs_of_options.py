@@ -576,7 +576,7 @@ def _create_image_for_pair(rows, model, pair):
         na = cv2.arrowedLine(na, (distance, h_begin), (distance, h_end), (0, 0, 0), 4)
         distance += interval
 
-    path = MEDIA_ROOT + model + '/' + pair + '.png'
+    path = MEDIA_ROOT + '/' + model + '/' + pair + '.png'
     Image.fromarray(na).save(path)
 
     # Делаем подписи
