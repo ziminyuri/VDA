@@ -1,13 +1,22 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
 
-    <div class="mt-5 row justify-content-center">
-        <div class="col-sm-6">
+    <div class="mt-5 row">
+        <div class="col 6">
             <form  action="{% url 'create_model'  %}" method="post">
                 {% csrf_token %}
                 <h3 class="mb-3 font-weight-normal">Выберите кол-во критериев и кол-во альтернатив</h3>
 
                 <label>Кол-во критериев</label>
+              <div class="input-field col s12">
+    <select>
+        {% for number in number_for_select %}
+                        <option  selected value= "{{ number }}">
+                        {{ number }}
+                    {% endfor %}
+    </select>
+    <label>Materialize Select</label>
+  </div>
                 <select class="form-select" id="number_of_criterion" name="number_of_criterion">
                     {% for number in number_for_select %}
                         <option  selected value= "{{ number }}">

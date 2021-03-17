@@ -1,7 +1,6 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
     <div class="container">
-        <div class="row">
 
             <!--
             <div class="col-sm-6">
@@ -15,17 +14,19 @@
             </div>
             -->
 
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Создайте свою модель для выбора лучшей альтернативы</h5>
-                        <p class="card-text">Загрузите файл в формате CSV или создайте через интерфейс системы</p>
-                        <a href="{% url 'upload' %}" class="btn btn-primary">Загрузить</a>
-                        <a href="{% url 'create_model' %}" class="btn btn-primary">Создать</a>
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="card teal darken-3">
+                        <div class="card-content white-text">
+                            <span class="card-title">Создайте свою модель для выбора лучшей альтернативы</span>
+                            <p>Загрузите файл в формате CSV или создайте через интерфейс системы</p>
+                        </div>
+                        <div class="card-action">
+                            <a href="{% url 'upload' %}">Загрузить</a>
+                            <a href="{% url 'create_model' %}">Создать</a>
+                        </div>
                     </div>
                 </div>
             </div>
-
-        </div>
     </div>
 {% endblock %}

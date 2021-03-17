@@ -2,27 +2,35 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Загрузить модель</h5>
-                        <p class="card-text">Вы можете загрузить свою модель в формате CSV. Пример корректного файла Вы можете скачать нажав на кнопку "Скачать"</p>
+                    <div class="card-content">
+                        <span class="card-title">Загрузить модель</span>
+                        <p>Вы можете загрузить свою модель в формате CSV. Пример корректного файла Вы можете скачать нажав на кнопку "Скачать шаблон"</p>
+                    </div>
+                    <div class="card-action">
+                        <form action="{% url 'download'%}" method="POST">
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2">
-                            <form action="{% url 'download'%}" method="POST">
-                                {% csrf_token %}
-                                <input type="submit" class="btn btn-outline-dark" value="Скачать">
-                            </form>
-                        </div>
-
+                            {% csrf_token %}
+                            <button type="submit" class="waves-effect waves-light btn">Скачать шаблон</button>
+                        </form>
+                    </div>
+                    <div class="card-action">
                         <form action="{% url 'upload' %}" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" name="document">
-                                <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Загрузить</button>
+
+                            <div class="file-field input-field">
+                                <div class="btn">
+                                    <span>Выбрать CSV</span>
+                                    <input type="file" name="document">
+                                </div>
+
+                                <div class="file-path-wrapper">
+                                    <input class="file-path validate" type="text" >
+                                    <button type="submit" class="waves-effect waves-light btn right">Загрузить</button>
+                                </div>
                             </div>
                         </form>
-
                     </div>
                 </div>
             </div>
