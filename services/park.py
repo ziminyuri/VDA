@@ -1,34 +1,40 @@
 from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value, PerfectAlternativePARK, \
-    ValueOfPerfectAlternativePARK, RangeValue
+    ValueOfPerfectAlternativePARK, RangeValue, WinnerOptionsPACOM
 from services.range_value import create_range_value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.pairs_of_options import _write_file
 from collections import deque
 
 
+
 def get_park_question(model):
     pairs = PairsOfOptionsPARK.objects.filter(id_model=model)
+
     if not pairs:
         # Впервые пришли к сранению -> Пар сравнения нет
+        # Процесс подготовки данных для ранжирования
         pair = _create_pair(model, FIRST=True)
         data, option_1, option_2 = _get_range_data(model, pair)
 
         _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
-        return {'flag_find_winner': 0, 'flag_range': False, 'pair': pair.id, 'option_1': option_1, 'option_2': option_2,
-                'data': data}
+        return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
+                'option_2': option_2, 'data': data}
 
     # Пары для сравнения существуют
-    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(winner_option=None).first()
+    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(winners_option=None).first()
+
     if pair.init_file is False:
+        # Подготавливаем данные для первого сравнения
         _init_file_for_PARK(model, pair)
+
     perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
     criterions = Criterion.objects.filter(id_model=model.id)
 
     new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
 
     return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
-            'criterions': criterions}
+            'criterions': criterions, 'pair': pair.id}
 
 
 # Записываем данные о ранжировании критериев в паре
@@ -50,6 +56,29 @@ def write_range_data(response, model):
                 create_range_value(pair, pair.id_option_2, criterion, value)
             except:
                 pass
+
+
+# Записываем результаты сравнения парной компенсации
+def write_result_of_compare_pacom(response, model):
+    criterions = Criterion.objects.filter(id_model=model.id)
+    pair_id = int(response.POST["pair"])
+    pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
+    answer = int(response.POST["answer"])
+
+    if pair.compensable_option is None:
+        # Не найдена компенсируемая альтернатива
+
+        if answer == 1:
+            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(compensable_option=pair.id_option_1)
+        if answer == 2:
+            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(compensable_option=pair.id_option_2)
+        if answer == 3:
+            winners_options = WinnerOptionsPACOM.objects.create(id_option_1=pair.id_option_1,
+                                                                id_option_2=pair.id_option_2, incomparable=True)
+            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(winners_option=winners_options)
+
+
+    print('dsf')
 
 
 def _create_pair(model, FIRST=False):
@@ -107,13 +136,23 @@ def _create_perfect_fit(pair: object, model: object) -> None:
 
 # Создаем историю ответов для пары альтернатив
 def _init_file_for_PARK(model: object, pair: object) -> None:
+    import os
+
     range_1 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_1).filter(value=1).first()
     range_2 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_2).filter(value=1).first()
 
     value_1 = Value.objects.filter(id_option=pair.id_option_1).filter(id_criterion=range_1.criteria).first()
     value_2 = Value.objects.filter(id_option=pair.id_option_2).filter(id_criterion=range_2.criteria).first()
 
-    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/PAIR' + str(pair.id) + '.txt'
+    path_dir = MEDIA_ROOT + '/files/models/' + str(model.id)
+    try:
+        os.mkdir(path_dir)
+    except: pass
+
+    path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
+    os.mkdir(path_dir)
+
+    path = path_dir + 'PAIR' + str(pair.id) + '.txt'
     line = str(value_1.id_criterion.number) + '|' + str(value_2.id_criterion.number)
     _write_file(line, path)
     PairsOfOptionsPARK.objects.filter(id=pair.id).update(init_file=True)
@@ -124,7 +163,7 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
     new_alternative_1 = []
     new_alternative_2 = []
 
-    path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/PAIR' + str(pair.id) + '.txt'
+    path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
     with open(path) as file:
         [last_line] = deque(file, maxlen=1) or ['']
 

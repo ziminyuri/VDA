@@ -3,7 +3,8 @@
     <div class="container">
         <form  action="{% url 'park_search' id=model.id  %}" method="post">
             {% csrf_token %}
-            <input type="hidden" required class="form-control" name="range" value = True>
+            <input type="hidden" required class="form-control" name="range" value = 1>
+            <input type="hidden" required class="form-control" name="compare" value = 0>
             <input type="hidden" required class="form-control" name="pair" value = "{{ response.pair }}">
             <table class="table">
                 <thead>

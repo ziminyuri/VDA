@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
-from services.park import get_park_question, write_range_data
+from services.park import get_park_question, write_range_data, write_result_of_compare_pacom
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 if 'DATABASE_URL' in os.environ:
@@ -166,6 +166,16 @@ def models_view_id(request, id):
     if request.method == 'POST':
         if request.POST["_method"] == 'DELETE':
             model = Model.objects.get(id=id)
+
+            try:
+                import shutil
+                path_files = MEDIA_ROOT + '/files/models/' + str(model.id)
+                shutil.rmtree(path_files)
+                path_img = MEDIA_ROOT + '/' + str(model.id)
+                shutil.rmtree(path_img)
+
+            except: pass
+
             model.delete()
             return redirect(models_view)
 
@@ -251,11 +261,28 @@ def park_search(request, id):
     model = Model.objects.get(id=id)
 
     if request.method == 'POST':
-        range = bool(request.POST["range"])
-        if range is True:
-            response = write_range_data(request, model)
+
+        try:
+            # Флаги после ранжирование
+            range = bool(int(request.POST["range"]))
+
+        except:
+            # Флаги после сравнения критериев
+            range = bool(request.POST["range"])
+
+        compare = bool(int(request.POST["compare"]))
+
+        if range is True and compare is False:
+            # Запись данных после ранжирования
+            response = write_range_data(request, model)   # TODO Проверить что нет ошибок ранжирования
+            response = get_park_question(model)
             return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
+        elif compare is True:
+            # Запись после сравнения критериев
+            write_result_of_compare_pacom(request, model)
+            response = get_park_question(model)
+            return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
     else:
         response = get_park_question(model)
         if response['flag_range'] is False:

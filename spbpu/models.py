@@ -88,16 +88,27 @@ class HistoryAnswer(models.Model):
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
 
 
+class WinnerOptionsPACOM(models.Model):
+    # Альтернатива или альтенативы победившие в результате сравнение
+    id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_winner_pacom_option_1')
+    id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_winner_pacom_option_2',
+                                    blank=True, null=True)
+    identical = models.BooleanField(default=False)
+    incomparable = models.BooleanField(default=False)
+
+
 class PairsOfOptionsPARK(models.Model):
     # Пары вариантов и результаты их сравнения по методу ПАРК
 
     id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_park_option_1')
     id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_park_option_2')
-    winner_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='park_winner_option', blank=True,
-                                      null=True)
+    winners_option = models.ForeignKey(WinnerOptionsPACOM, on_delete=models.CASCADE, related_name='pacom_winners_option',
+                                      blank=True, null=True)
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
     already_range = models.BooleanField(default=False)
     init_file = models.BooleanField(default=False)
+    compensable_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='park_compensable_option', blank=True,
+                                      null=True)
 
     def __str__(self):
         return str(self.id_option_1) + '' + str(self.id_option_2)
