@@ -282,7 +282,13 @@ def park_search(request, id):
             # Запись после сравнения критериев
             write_result_of_compare_pacom(request, model)
             response = get_park_question(model)
-            return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
+
+            if response['flag_find_winner'] is True:
+                return render(request, 'spbpu/park/result.html', {})
+            elif response['flag_range'] is False:
+                return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
+            else:
+                return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
     else:
         response = get_park_question(model)
         if response['flag_range'] is False:

@@ -1,28 +1,47 @@
 from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value, PerfectAlternativePARK, \
-    ValueOfPerfectAlternativePARK, RangeValue, WinnerOptionsPACOM
+    ValueOfPerfectAlternativePARK, RangeValue
 from services.range_value import create_range_value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.pairs_of_options import _write_file
 from collections import deque
-
+from django.db.models import Max
 
 
 def get_park_question(model):
-    pairs = PairsOfOptionsPARK.objects.filter(id_model=model)
-
-    if not pairs:
-        # Впервые пришли к сранению -> Пар сравнения нет
-        # Процесс подготовки данных для ранжирования
-        pair = _create_pair(model, FIRST=True)
-        data, option_1, option_2 = _get_range_data(model, pair)
-
-        _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
-
-        return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
-                'option_2': option_2, 'data': data}
-
     # Пары для сравнения существуют
-    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(winners_option=None).first()
+    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False).first()
+
+    if not pair:
+        pair = PairsOfOptionsPARK.objects.filter(id_model=model)
+
+        if not pair:
+            # Впервые пришли к сранению -> Пар сравнения нет
+            # Процесс подготовки данных для ранжирования
+            pair = _create_pair(model, FIRST=True)
+            data, option_1, option_2 = _get_range_data(model, pair)
+
+            _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
+            return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
+                    'option_2': option_2, 'data': data}
+        else:
+            quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))['quasi_order_pacom__max']
+            options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
+            options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
+
+            if options_with_quasi_0:
+                # Пока есть альтернативы с квазипорядком равным 0
+                for option in options_with_quasi_max_order:
+                    pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
+                    _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
+                data, option_1, option_2 = _get_range_data(model, pair)
+                return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                        'option_1': option_1,
+                        'option_2': option_2, 'data': data}
+            else:
+                # Нашли победителей
+                return {'flag_find_winner': True}
 
     if pair.init_file is False:
         # Подготавливаем данные для первого сравнения
@@ -69,34 +88,41 @@ def write_result_of_compare_pacom(response, model):
         # Не найдена компенсируемая альтернатива
 
         if answer == 1:
-            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(compensable_option=pair.id_option_1)
+            PairsOfOptionsPARK.objects.filter(id=pair_id).update(compensable_option=pair.id_option_1)
         if answer == 2:
-            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(compensable_option=pair.id_option_2)
+            PairsOfOptionsPARK.objects.filter(id=pair.id).update(compensable_option=pair.id_option_2)
         if answer == 3:
-            winners_options = WinnerOptionsPACOM.objects.create(id_option_1=pair.id_option_1,
-                                                                id_option_2=pair.id_option_2, incomparable=True)
-            PairsOfOptionsPARK.objects.objects.filter(id=pair.id).update(winners_option=winners_options)
+            Option.objects.filter(id=pair.id_option_1.id).update(quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
+            Option.objects.filter(id=pair.id_option_2.id).update(quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
+            PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True)
 
 
     print('dsf')
 
 
-def _create_pair(model, FIRST=False):
+def _create_pair(model, FIRST=False, option_1=None, option_2=None):
     if FIRST:
         options = Option.objects.filter(id_model=model)
         pair = PairsOfOptionsPARK.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model)
+        return pair
+
+    else:
+        pair = PairsOfOptionsPARK.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model)
         return pair
 
 
 # Возвращает данные для ранжирования: 2 модели и значения критериев
 def _get_range_data(model, pair):
 
-
     data = []
     criterions = Criterion.objects.filter(id_model=model.id)
     for criterion in criterions:
-        value_1 = Value.objects.get(id_option=pair.id_option_1, id_criterion=criterion)
-        value_2 = Value.objects.get(id_option=pair.id_option_2, id_criterion=criterion)
+        id_option_1 = pair.id_option_1
+        id_option_2 = pair.id_option_2
+
+        value_2 = Value.objects.filter(id_option=id_option_2, id_criterion=criterion).first()
+        value_1 = Value.objects.filter(id_option=id_option_1, id_criterion=criterion).first()
+
         line = {'criterion': criterion.name, 'criterion_id': criterion.id, 'direction': criterion.direction, 'pair': pair.id,
                 'option_1': value_1.value, 'option_2': value_2.value}
         data.append(line)
