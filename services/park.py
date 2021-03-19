@@ -9,39 +9,47 @@ from django.db.models import Max
 
 def get_park_question(model):
     # Пары для сравнения существуют
-    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False).first()
+    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False).\
+        filter(already_range=True).first()
 
     if not pair:
-        pair = PairsOfOptionsPARK.objects.filter(id_model=model)
+        pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
+            filter(already_range=False).first()
 
-        if not pair:
-            # Впервые пришли к сранению -> Пар сравнения нет
-            # Процесс подготовки данных для ранжирования
-            pair = _create_pair(model, FIRST=True)
+        if pair:
             data, option_1, option_2 = _get_range_data(model, pair)
-
-            _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
-
-            return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
-                    'option_2': option_2, 'data': data}
+            return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                'option_1': option_1, 'option_2': option_2, 'data': data}
         else:
-            quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))['quasi_order_pacom__max']
-            options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
-            options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
+            pair = PairsOfOptionsPARK.objects.filter(id_model=model)
 
-            if options_with_quasi_0:
-                # Пока есть альтернативы с квазипорядком равным 0
-                for option in options_with_quasi_max_order:
-                    pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
-                    _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
-
+            if not pair:
+                # Впервые пришли к сранению -> Пар сравнения нет
+                # Процесс подготовки данных для ранжирования
+                pair = _create_pair(model, FIRST=True)
                 data, option_1, option_2 = _get_range_data(model, pair)
-                return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
-                        'option_1': option_1,
+
+                _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
+                return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
                         'option_2': option_2, 'data': data}
             else:
-                # Нашли победителей
-                return {'flag_find_winner': True}
+                quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))['quasi_order_pacom__max']
+                options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
+                options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
+
+                if options_with_quasi_0:
+                    # Пока есть альтернативы с квазипорядком равным 0
+                    for option in options_with_quasi_max_order:
+                        pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
+                        _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
+                    data, option_1, option_2 = _get_range_data(model, pair)
+                    return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                            'option_1': option_1, 'option_2': option_2, 'data': data}
+                else:
+                    # Нашли победителей
+                    return {'flag_find_winner': True}
 
     if pair.init_file is False:
         # Подготавливаем данные для первого сравнения
@@ -75,6 +83,8 @@ def write_range_data(response, model):
                 create_range_value(pair, pair.id_option_2, criterion, value)
             except:
                 pass
+
+    PairsOfOptionsPARK.objects.filter(id=pair_id).update(already_range=True)
 
 
 # Записываем результаты сравнения парной компенсации
@@ -176,7 +186,10 @@ def _init_file_for_PARK(model: object, pair: object) -> None:
     except: pass
 
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
-    os.mkdir(path_dir)
+    try:
+        os.mkdir(path_dir)
+    except:
+        pass
 
     path = path_dir + 'PAIR' + str(pair.id) + '.txt'
     line = str(value_1.id_criterion.number) + '|' + str(value_2.id_criterion.number)
