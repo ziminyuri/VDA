@@ -2,14 +2,14 @@ from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value, PerfectAl
     ValueOfPerfectAlternativePARK, RangeValue
 from services.range_value import create_range_value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from services.pairs_of_options import _write_file
+from services.pairs_of_options import _write_file, _replace_line_file
 from collections import deque
 from django.db.models import Max
 
 
 def get_park_question(model):
     # Пары для сравнения существуют
-    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False).\
+    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
         filter(already_range=True).first()
 
     if not pair:
@@ -19,7 +19,7 @@ def get_park_question(model):
         if pair:
             data, option_1, option_2 = _get_range_data(model, pair)
             return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
-                'option_1': option_1, 'option_2': option_2, 'data': data}
+                    'option_1': option_1, 'option_2': option_2, 'data': data}
         else:
             pair = PairsOfOptionsPARK.objects.filter(id_model=model)
 
@@ -29,12 +29,14 @@ def get_park_question(model):
                 pair = _create_pair(model, FIRST=True)
                 data, option_1, option_2 = _get_range_data(model, pair)
 
-                _create_perfect_fit(pair, model)   # Создаем идеальный вариант в паре (лучшие значения по критериям)
+                _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
-                return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id, 'option_1': option_1,
+                return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                        'option_1': option_1,
                         'option_2': option_2, 'data': data}
             else:
-                quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))['quasi_order_pacom__max']
+                quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))[
+                    'quasi_order_pacom__max']
                 options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
                 options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
 
@@ -42,7 +44,8 @@ def get_park_question(model):
                     # Пока есть альтернативы с квазипорядком равным 0
                     for option in options_with_quasi_max_order:
                         pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
-                        _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+                        _create_perfect_fit(pair,
+                                            model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
                     data, option_1, option_2 = _get_range_data(model, pair)
                     return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
@@ -54,6 +57,9 @@ def get_park_question(model):
     if pair.init_file is False:
         # Подготавливаем данные для первого сравнения
         _init_file_for_PARK(model, pair)
+    else:
+        # Данные в файл для второго сравнения
+        _fill_file_alternative(model, pair)
 
     perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
     criterions = Criterion.objects.filter(id_model=model.id)
@@ -61,12 +67,11 @@ def get_park_question(model):
     new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
 
     return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
-            'criterions': criterions, 'pair': pair.id}
+            'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False}
 
 
 # Записываем данные о ранжировании критериев в паре
 def write_range_data(response, model):
-
     criterions = Criterion.objects.filter(id_model=model.id)
     pair_id = int(response.POST["pair"])
     pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
@@ -89,7 +94,6 @@ def write_range_data(response, model):
 
 # Записываем результаты сравнения парной компенсации
 def write_result_of_compare_pacom(response, model):
-    criterions = Criterion.objects.filter(id_model=model.id)
     pair_id = int(response.POST["pair"])
     pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
     answer = int(response.POST["answer"])
@@ -99,15 +103,22 @@ def write_result_of_compare_pacom(response, model):
 
         if answer == 1:
             PairsOfOptionsPARK.objects.filter(id=pair_id).update(compensable_option=pair.id_option_1)
-        if answer == 2:
+        elif answer == 2:
             PairsOfOptionsPARK.objects.filter(id=pair.id).update(compensable_option=pair.id_option_2)
-        if answer == 3:
-            Option.objects.filter(id=pair.id_option_1.id).update(quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
-            Option.objects.filter(id=pair.id_option_2.id).update(quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
+        elif answer == 3:
+            Option.objects.filter(id=pair.id_option_1.id).update(
+                quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
+            Option.objects.filter(id=pair.id_option_2.id).update(
+                quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
             PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True)
 
-
-    print('dsf')
+    from collections import deque
+    path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
+    path = path_dir + 'PAIR' + str(pair.id) + '.txt'
+    with open(path) as file:
+        [last_line] = deque(file, maxlen=1) or ['']
+    new_line = last_line + '=' + str(answer) + '\n'
+    _replace_line_file(new_line, last_line, path)
 
 
 def _create_pair(model, FIRST=False, option_1=None, option_2=None):
@@ -123,7 +134,6 @@ def _create_pair(model, FIRST=False, option_1=None, option_2=None):
 
 # Возвращает данные для ранжирования: 2 модели и значения критериев
 def _get_range_data(model, pair):
-
     data = []
     criterions = Criterion.objects.filter(id_model=model.id)
     for criterion in criterions:
@@ -133,7 +143,8 @@ def _get_range_data(model, pair):
         value_2 = Value.objects.filter(id_option=id_option_2, id_criterion=criterion).first()
         value_1 = Value.objects.filter(id_option=id_option_1, id_criterion=criterion).first()
 
-        line = {'criterion': criterion.name, 'criterion_id': criterion.id, 'direction': criterion.direction, 'pair': pair.id,
+        line = {'criterion': criterion.name, 'criterion_id': criterion.id, 'direction': criterion.direction,
+                'pair': pair.id,
                 'option_1': value_1.value, 'option_2': value_2.value}
         data.append(line)
 
@@ -183,7 +194,8 @@ def _init_file_for_PARK(model: object, pair: object) -> None:
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id)
     try:
         os.mkdir(path_dir)
-    except: pass
+    except:
+        pass
 
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
     try:
@@ -197,6 +209,53 @@ def _init_file_for_PARK(model: object, pair: object) -> None:
     PairsOfOptionsPARK.objects.filter(id=pair.id).update(init_file=True)
 
 
+# Заполняем файл НЕ для первого сравнения
+def _fill_file_alternative(model, pair):
+    path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
+    with open(path) as file:
+        [last_line] = deque(file, maxlen=1) or ['']
+
+    set_1_line = last_line.split('|')[0]
+    set_2_line = last_line.split('|')[1].split('=')[0]
+    result = int(last_line.split('|')[1].split('=')[1])
+    set_1 = set_1_line.split(';')
+    set_2 = set_2_line.split(';')
+
+    if not _checking_comparable(pair, set_1, set_2, result):
+        _find_winner_in_pair(model, pair)
+        return
+
+    criterion_1 = Criterion.objects.get(id_model=model, number=set_1[-1])
+    criterion_2 = Criterion.objects.get(id_model=model, number=set_2[-1])
+
+    if result == 0 or result == 1:
+        range_obj_old_1 = RangeValue.objects.filter(pair=pair, option=pair.id_option_1, criteria=criterion_1).first()
+        range_obj_next_1 = RangeValue.objects.filter(pair=pair, option=pair.id_option_1, value=range_obj_old_1.value + 1).first()
+
+    elif result == 0 or result == 2:
+        range_obj_old_2 = RangeValue.objects.filter(pair=pair, option=pair.id_option_1, criteria=criterion_2).first()
+        range_obj_next_2 = RangeValue.objects.filter(pair=pair, option=pair.id_option_1, value=range_obj_old_2.value + 1).first()
+
+    if result == 0 and (range_obj_next_1 is not None) and (range_obj_next_2 is not None):
+        line = str(range_obj_next_1.criteria.number) + '|' + str(range_obj_next_2.criteria.number)
+        _write_file(line, path)
+
+    elif result == 1 and (range_obj_next_1 is not None):
+        set_1.append(range_obj_next_1.criteria.number)
+        new_line = _fill_line_from_list(set_1)
+        line = new_line + '|' + set_2_line
+        _write_file(line, path)
+
+    elif result == 2 and (range_obj_next_2 is not None):
+        set_2.append(range_obj_next_1.criteria.number)
+        new_line = _fill_line_from_list(set_2)
+        line = set_1_line + '|' + new_line
+        _write_file(line, path)
+
+    else:
+        _find_winner_in_pair(model, pair)
+
+
 # Заполняем новые варианты
 def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: object):
     new_alternative_1 = []
@@ -207,9 +266,10 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
         [last_line] = deque(file, maxlen=1) or ['']
 
     set_1 = last_line.split('|')[0]
-    set_2 = last_line.split('|')[1]
+    set_2 = last_line.split('|')[1].split('=')[0]
     set_1 = set_1.split(';')
     set_2 = set_2.split(';')
+
     for criterion in criterions:
         already_get_value = False
         for s1 in set_1:
@@ -226,7 +286,7 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
         if already_get_value is False:
             try:
                 value_1 = ValueOfPerfectAlternativePARK.objects.get(criteria=criterion,
-                                                                         perfect_alternative=perfect_alternative)
+                                                                    perfect_alternative=perfect_alternative)
                 value_2 = value_1
             except Exception as e:
                 print(e)
@@ -240,3 +300,23 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
     return new_alternative_1, new_alternative_2
 
 
+def _find_winner_in_pair(model, pair):
+    print('Нашли побелителя')
+
+
+def _checking_comparable(pair, set_1, set_2, result):
+    #TODO Надо сделать
+    pair = PairsOfOptionsPARK.objects.get(id=pair.id)
+
+    return True
+
+
+def _fill_line_from_list(set: list) -> str:
+    line = ''
+    for s in set:
+        if line == '':
+            line = str(s)
+        else:
+            line = line + ';' + str(s)
+
+    return line

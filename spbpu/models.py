@@ -31,7 +31,7 @@ class Model(models.Model):
 class Criterion(models.Model):
     # Модель критерием
 
-    number = models.IntegerField()
+    number = models.IntegerField()   # Порядковый номер критерия
     name = models.CharField(max_length=200)
     direction = models.BooleanField()  # max (True) or min (False)
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)

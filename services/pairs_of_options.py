@@ -375,6 +375,17 @@ def _write_file(line: str, path: str) -> None:
     pair_file.close()
 
 
+def _replace_line_file(new_line: str, old_line: str, path: str):
+    # Замена данных в файле
+    with open(path, 'r') as f:
+        old_data = f.read()
+
+    new_data = old_data.replace(old_line, new_line)
+
+    with open(path, 'w') as f:
+        f.write(new_data)
+
+
 def _count_winner(model: object, pair: object) -> None:
     path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
 
