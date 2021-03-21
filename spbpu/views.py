@@ -11,10 +11,10 @@ from django.http import HttpResponse
 from django.contrib import auth
 from django.contrib.auth.models import User
 
-from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile
+from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile, HistoryAnswerPACOM
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
-from services.park import get_park_question, write_range_data, write_result_of_compare_pacom
+from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 if 'DATABASE_URL' in os.environ:
@@ -284,7 +284,7 @@ def park_search(request, id):
             response = get_park_question(model)
 
             if response['flag_find_winner'] is True:
-                return render(request, 'spbpu/park/result.html', {})
+                return render(request, 'spbpu/park/result.html', {'response': response})
             elif response['flag_range'] is False:
                 return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
             else:
@@ -297,3 +297,21 @@ def park_search(request, id):
         else:
             return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
+
+@login_required(login_url="login")
+def park_result(request, id):
+    model = Model.objects.get(id=id)
+    response = get_winners_from_model(model)
+
+    model_data, model_header = get_model_data(model.id)
+
+    # История ответов
+    history_answers = HistoryAnswerPACOM.objects.filter(id_model=model)
+    answers = []
+    for answer_history in history_answers:
+        answers.append({'question': answer_history.question, 'answer': answer_history.answer,
+                        'pair': answer_history.pair.id_option_1.name + ' и ' + answer_history.pair.id_option_2.name})
+
+    if response['flag_find_winner'] is True:
+        return render(request, 'spbpu/park/result.html', {'response': response, 'model_data': model_data,
+                       'model_header': model_header, 'history': answers, 'model': model})

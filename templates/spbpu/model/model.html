@@ -28,10 +28,10 @@
             <a class="btn btn-outline-secondary" href="{% url 'snod_result' id=model.id %}">Посмотреть результаты ШНУР</a>
         {% endif %}
 
-        {% if model.id_winner_option_park is None %}
+        {% if model.already_find_winner_PACOM is False %}
             <a class="btn btn-outline-secondary" href="{% url 'park_search' id=model.id %}">Найти лучшую альтернативу по ПАРК</a>
         {% else %}
-            <a class="btn btn-outline-secondary" href="{% url 'snod_result' id=model.id %}">Посмотреть результаты ПАРК</a>
+            <a class="btn btn-outline-secondary" href="{% url 'park_result' id=model.id %}">Посмотреть результаты ПАРК</a>
         {% endif %}
 
         </div>

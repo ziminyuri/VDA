@@ -16,6 +16,7 @@ urlpatterns = [
     path('model/snod/<int:id>', views.snod_search, name='snod_search'),
     path('model/snod/result/<int:id>', views.snod_result, name='snod_result'),
     path('model/park/<int:id>', views.park_search, name='park_search'),
+    path('model/park/result/<int:id>', views.park_result, name='park_result'),
 ]
 
 if settings.DEBUG:

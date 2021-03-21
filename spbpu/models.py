@@ -22,10 +22,13 @@ class Model(models.Model):
     name = models.CharField(max_length=255)
     id_winner_option_shnur = models.IntegerField(null=True)  # id победителя по методу ШНУР
     id_winner_option_many = models.IntegerField(null=True)  # id победителя по многокриетриальному методу
-    id_winner_option_park = models.IntegerField(null=True)  # id победителя по методу ПАРК
+    already_find_winner_PACOM = models.BooleanField(default=False)  # id победителя по методу ПАРК
     time_shnur = models.CharField(max_length=255)
     time_answer_shnur = models.CharField(max_length=255)
     time_many = models.CharField(max_length=255)
+
+    time_answer_pacom = models.CharField(max_length=255)
+    number_of_questions_pacom = models.IntegerField(default=0)
 
 
 class Criterion(models.Model):
@@ -135,3 +138,11 @@ class ValueOfPerfectAlternativePARK(models.Model):
     criteria = models.ForeignKey(Criterion, on_delete=models.CASCADE)
     perfect_alternative = models.ForeignKey(PerfectAlternativePARK, on_delete=models.CASCADE)
 
+
+class HistoryAnswerPACOM(models.Model):
+    # Хранятся ответы на вопросы к ЛПР по методу ПАРК
+
+    question = models.TextField(max_length=1000)
+    answer = models.CharField(max_length=255)
+    pair = models.ForeignKey(PairsOfOptionsPARK, on_delete=models.CASCADE, related_name='pair_pacom')
+    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
