@@ -387,11 +387,19 @@ def _fill_line_from_list(set: list) -> str:
 
 def _update_pair_to_not_comparable(pair):
     # Делает пару не сравнимой
+    option_1 = Option.objects.filter(id=pair.id_option_1.id).first()
+    option_2 = Option.objects.filter(id=pair.id_option_2.id).first()
+
+    if option_1.quasi_order_pacom > option_2.quasi_order_pacom:
+        max_quasi_order_pacom = option_1.quasi_order_pacom
+    else:
+        max_quasi_order_pacom = option_1.quasi_order_pacom
 
     Option.objects.filter(id=pair.id_option_1.id).update(
-        quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
+        quasi_order_pacom=max_quasi_order_pacom + 1)
     Option.objects.filter(id=pair.id_option_2.id).update(
-        quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
+        quasi_order_pacom=max_quasi_order_pacom + 1)
+
     PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True)
 
 

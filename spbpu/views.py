@@ -284,7 +284,8 @@ def park_search(request, id):
             response = get_park_question(model)
 
             if response['flag_find_winner'] is True:
-                return render(request, 'spbpu/park/result.html', {'response': response})
+                return redirect('park_result', id=model.id)
+
             elif response['flag_range'] is False:
                 return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
             else:
