@@ -1,0 +1,33 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    <diva class="container mt-5">
+        <div class="row">
+            <form action="{% url 'pacom_settings_create' id=model.id  %}" method="POST">
+                {% csrf_token %}
+                <p>
+                    <label>
+                        <input name="larichev" type="radio" checked />
+                        <span>Вопросы по Ларичеву</span>
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input name="custom_question" type="radio" />
+                        <span>Вопросы с скрытым отображением одинаковых значений криетриев</span>
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input name="auto_mode" type="radio" />
+                        <span>Автоматический режим</span>
+                    </label>
+                </p>
+                <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
+            </form>
+        </div>
+    </diva>
+
+
+
+
+{% endblock %}

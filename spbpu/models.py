@@ -15,22 +15,41 @@ class UserProfile(models.Model):
         return self.username
 
 
+class SettingsPACOM(models.Model):
+    auto_mode = models.BooleanField(default=False)
+    larichev_question = models.BooleanField(default=True)
+
+    def create(cls, **kwargs):
+        if kwargs.get('larichev') == 'on':
+            return cls()
+        elif kwargs.get('custom_question') == 'on':
+            return cls(larichev_question=False)
+        else:
+            return cls(auto_mode=True)
+
+
 class Model(models.Model):
     # Модель ситуации поиска лучшей альтернативы
 
     is_demo = models.BooleanField()
     name = models.CharField(max_length=255)
-    id_winner_option_shnur = models.IntegerField(null=True)  # id победителя по методу ШНУР
     id_winner_option_many = models.IntegerField(null=True)  # id победителя по многокриетриальному методу
-    already_find_winner_PACOM = models.BooleanField(default=False)  # id победителя по методу ПАРК
+
+    # SNOD
+    id_winner_option_shnur = models.IntegerField(null=True)  # id победителя по методу ШНУР
     time_shnur = models.CharField(max_length=255)
     time_answer_shnur = models.CharField(max_length=255)
     time_many = models.CharField(max_length=255)
 
+    # PACOM
+    already_find_winner_PACOM = models.BooleanField(default=False)  # id победителя по методу ПАРК
     time_answer_pacom = models.CharField(max_length=255)
     number_of_questions_pacom = models.IntegerField(default=0)
     number_of_pairs = models.IntegerField(default=0)
     number_of_incomparable = models.IntegerField(default=0)
+    id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
+
+
 
 
 class Criterion(models.Model):

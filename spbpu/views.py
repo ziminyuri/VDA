@@ -11,12 +11,14 @@ from django.http import HttpResponse
 from django.contrib import auth
 from django.contrib.auth.models import User
 
-from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile, HistoryAnswerPACOM
+from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile, SettingsPACOM
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model, \
     get_context_history_answer
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from django.views.generic import View, DetailView, CreateView
+from django.shortcuts import get_object_or_404
 
 
 if 'DATABASE_URL' in os.environ:
@@ -295,12 +297,29 @@ def park_search(request, id):
             else:
                 return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
     else:
+
+        if model.id_settings_pacom is None:
+            return redirect('pacom_settings_create', id=id)
+
         response = get_park_question(model)
         if response['flag_range'] is False:
             return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
 
         else:
             return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
+
+
+class SettingsPACOMCreateView(View):
+    @staticmethod
+    def get(request, id):
+        context = {'model': get_object_or_404(Model, id=id)}
+        return render(request, "spbpu/park/settings.html", context)
+
+    def post(self, request, id, **kwargs):
+        settings = SettingsPACOM.objects.create(**kwargs)
+        Model.objects.filter(id=id).update(id_settings_pacom=settings)
+        return redirect('park_search', id=id)
+
 
 
 @login_required(login_url="login")
