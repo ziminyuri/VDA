@@ -33,7 +33,7 @@
                     {% if model.already_find_winner_PACOM == False %}
                     <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_result' id=model.pk %}">Результат</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_result' pk=model.pk %}">Результат</a>
                     {% endif %}
                 </td>
                 <td><form action="{% url 'models_id' id=model.id  %}" method="POST">

@@ -20,7 +20,6 @@ from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from django.views.generic import View, DetailView, CreateView
 from django.shortcuts import get_object_or_404
 
-
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
 
@@ -179,7 +178,8 @@ def models_view_id(request, id):
                 path_img = MEDIA_ROOT + '/' + str(model.id)
                 shutil.rmtree(path_img)
 
-            except: pass
+            except:
+                pass
 
             model.delete()
             return redirect(models_view)
@@ -195,11 +195,17 @@ def models_view_id(request, id):
         return redirect(models_view)
 
 
+class SnodSearchView(View):
+    @staticmethod
+    def get(request, id):
+        model = Model.objects.get(id=id)
+        message = make_question(model)
+        return render(request, "spbpu/snod/question.html",
+                      {'message': message,
+                       'model': model})
 
-@login_required(login_url="login")
-def snod_search(request, id):
-
-    if request.method == 'POST':
+    @staticmethod
+    def post(request, id):
 
         answer = request.POST["answer"]
         message = write_answer(request, answer)
@@ -214,14 +220,9 @@ def snod_search(request, id):
         else:
             return render(request, "spbpu/snod/result.html",
                           {})
-    else:
-        model = Model.objects.get(id=id)
-        message = make_question(model)
-        return render(request, "spbpu/snod/question.html",
-                      {'message': message,
-                       'model': model})
 
 
+#TODO переписать на класс
 @login_required(login_url="login")
 def snod_result(request, id):
     model = Model.objects.get(id=id)
@@ -242,13 +243,13 @@ def snod_result(request, id):
             absolute_value = absolute_value_in_str(model.id, pair.id)
             if 'DATABASE_URL' in os.environ:
                 img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path':  MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
-                        'absolute_value': absolute_value})
+                            'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
+                            'absolute_value': absolute_value})
 
             else:
                 img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
-                        'absolute_value': absolute_value})
+                            'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
+                            'absolute_value': absolute_value})
 
     model_data, model_header = get_model_data(model.id)
     winners_data, winners_header = data_of_winners(model.id)
@@ -262,12 +263,21 @@ def snod_result(request, id):
                   response)
 
 
-@login_required(login_url="login")
-def park_search(request, id):
-    model = Model.objects.get(id=id)
+class ParkSearchView(View):
+    def get(self, request, id):
+        model = Model.objects.get(id=id)
+        if model.id_settings_pacom is None:
+            return redirect('pacom_settings_create', id=id)
 
-    if request.method == 'POST':
+        response = get_park_question(model)
+        if response['flag_range'] is False:
+            return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
 
+        else:
+            return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
+
+    def post(self, request, id):
+        model = Model.objects.get(id=id)
         try:
             # Флаги после ранжирование
             range = bool(int(request.POST["range"]))
@@ -280,7 +290,7 @@ def park_search(request, id):
 
         if range is True and compare is False:
             # Запись данных после ранжирования
-            response = write_range_data(request, model)   # TODO Проверить что нет ошибок ранжирования
+            response = write_range_data(request, model)  # TODO Проверить что нет ошибок ранжирования
             response = get_park_question(model)
             return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
@@ -296,17 +306,6 @@ def park_search(request, id):
                 return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
             else:
                 return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
-    else:
-
-        if model.id_settings_pacom is None:
-            return redirect('pacom_settings_create', id=id)
-
-        response = get_park_question(model)
-        if response['flag_range'] is False:
-            return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
-
-        else:
-            return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
 
 class SettingsPACOMCreateView(View):
@@ -321,17 +320,14 @@ class SettingsPACOMCreateView(View):
         return redirect('park_search', id=id)
 
 
+class ParkDetailView(DetailView):
+    model = Model
+    template_name = 'spbpu/park/result.html'
 
-@login_required(login_url="login")
-def park_result(request, id):
-    model = Model.objects.get(id=id)
-    response = get_winners_from_model(model)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['response'] = get_winners_from_model(self.kwargs['pk'])
+        context['model_data'], context['model_header'] = get_model_data(self.kwargs['pk'])
+        context['history'] = get_context_history_answer(self.kwargs['pk'])
 
-    model_data, model_header = get_model_data(model.id)
-
-    # История ответов
-    context_history_answer = get_context_history_answer(model)
-
-    if response['flag_find_winner'] is True:
-        return render(request, 'spbpu/park/result.html', {'response': response, 'model_data': model_data,
-                       'model_header': model_header, 'history': context_history_answer, 'model': model})
+        return context
