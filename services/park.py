@@ -36,8 +36,7 @@ def get_park_question(model):
 
                 _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
-                time_begin = datetime.datetime.now()
-                Model.objects.filter(id=model.id).update(time_answer_pacom=str(time_begin))
+                Model.objects.filter(id=model.id).update(time_answer_pacom=str(datetime.datetime.now()))
                 _add_1_to_number_of_question(model)
                 return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
                         'option_1': option_1,
@@ -52,8 +51,7 @@ def get_park_question(model):
                     # Пока есть альтернативы с квазипорядком равным 0
                     for option in options_with_quasi_max_order:
                         pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
-                        _create_perfect_fit(pair,
-                                            model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+                        _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
                     data, option_1, option_2 = _get_range_data(model, pair)
                     _add_1_to_number_of_question(model)
@@ -61,16 +59,7 @@ def get_park_question(model):
                             'option_1': option_1, 'option_2': option_2, 'data': data}
                 else:
                     # Нашли победителей
-                    time_end = datetime.datetime.now()
-                    time_begin = model.time_answer_shnur
-                    time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
-                    delta_time_many = time_end - time_begin
-                    delta_time_many = normalisation_time(delta_time_many)
-
-                    Model.objects.filter(id=model.id).update(
-                        time_answer_pacom=delta_time_many,
-                        already_find_winner_PACOM=True
-                    )
+                    update_model_after_find_winner(model)
                     return get_winners_from_model(model)
 
     if pair.init_file is False:
@@ -194,8 +183,7 @@ def _create_perfect_fit(pair: object, model: object) -> None:
                     ValueOfPerfectAlternativePARK.objects.create(value=value_2.value, criteria=criterion,
                                                                  perfect_alternative=perfect_alternative)
 
-    except Exception as e:
-        print(e)
+    except Exception as e: pass
 
 
 # Создаем историю ответов для пары альтернатив
@@ -332,9 +320,6 @@ def _find_winner_in_pair(pair, id_compensable_option, is_not_comparable=False, o
     if is_not_comparable:
         _update_pair_to_not_comparable(pair)
 
-    path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
-
-    # Cлучай первый: есть компенсируемая альтернатива, а последний
     result = _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_empty)
 
     if result == 1:
@@ -342,19 +327,22 @@ def _find_winner_in_pair(pair, id_compensable_option, is_not_comparable=False, o
             quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_pacom=pair.id_option_2.quasi_order_pacom - 1)
-        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False)
+        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
+                                                             flag_winner_option=1)
     elif result == 2:
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_pacom=pair.id_option_1.quasi_order_pacom - 1)
-        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False)
+        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
+                                                             flag_winner_option=2)
     elif result == 0:
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_pacom=pair.id_option_1.quasi_order_pacom + 1)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_pacom=pair.id_option_2.quasi_order_pacom + 1)
-        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False)
+        PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
+                                                             flag_winner_option=0)
     else:
         _update_pair_to_not_comparable(pair)
 
@@ -400,7 +388,8 @@ def _update_pair_to_not_comparable(pair):
     Option.objects.filter(id=pair.id_option_2.id).update(
         quasi_order_pacom=max_quasi_order_pacom + 1)
 
-    PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True)
+    PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True,
+                                                         flag_winner_option=3)
 
 
 def _get_last_line(path):
@@ -517,3 +506,48 @@ def get_winners_from_model(model):
     options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order,
                                                          id_model=model)
     return {'flag_find_winner': True, 'winner_options': options_with_quasi_max_order}
+
+
+def update_model_after_find_winner(model):
+    time_end = datetime.datetime.now()
+    time_begin = model.time_answer_shnur
+    time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
+    delta_time_many = time_end - time_begin
+    delta_time_many = normalisation_time(delta_time_many)
+    number_of_pairs = len(PairsOfOptionsPARK.objects.filter(id_model=model))
+    number_of_incomparable = len(PairsOfOptionsPARK.objects.filter(id_model=model, flag_winner_option=3))
+
+    Model.objects.filter(id=model.id).update(
+        time_answer_pacom=delta_time_many,
+        already_find_winner_PACOM=True,
+        number_of_pairs=number_of_pairs,
+        number_of_incomparable=number_of_incomparable
+    )
+
+def get_context_history_answer(model) -> list:
+    # Возвращаем контекст истории ответов пользователей
+
+    pairs = PairsOfOptionsPARK.objects.filter(id_model=model)
+    context = []
+
+    for pair in pairs:
+
+        item = {'pair': pair.id_option_1.name + ' ' + pair.id_option_2.name}
+        history_answers = HistoryAnswerPACOM.objects.filter(id_model=model, pair=pair)
+
+        answers = []
+        for answer_history in history_answers:
+            answers.append({'question': answer_history.question, 'answer': answer_history.answer})
+        item['body'] = answers
+
+        if pair.flag_winner_option == 3:
+            item['winner'] = 'Альтернативы не сравнимы'
+        elif pair.flag_winner_option == 2:
+            item['winner'] = 'Пабедитель: ' + pair.id_option_2.name
+        if pair.flag_winner_option == 1:
+            item['winner'] = 'Победитель: ' + pair.id_option_1.name
+        if pair.flag_winner_option == 0:
+            item['winner'] = 'Альтернативы одинаковы'
+        context.append(item)
+
+    return context

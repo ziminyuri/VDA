@@ -14,8 +14,10 @@ from django.contrib.auth.models import User
 from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile, HistoryAnswerPACOM
 from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
-from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model
+from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model, \
+    get_context_history_answer
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -38,9 +40,10 @@ def login_view(request):
     return render(request, "spbpu/auth.html", {"login_error": login_error})
 
 
-def registration_view(request):
+def registration_view(request, *args, **kwargs):
     # Регистрация
     if request.POST:
+        context = kwargs
         email = request.POST.get("username").lower()
         password = request.POST.get("password")
         password_2 = request.POST.get("password_2")
@@ -190,6 +193,7 @@ def models_view_id(request, id):
         return redirect(models_view)
 
 
+
 @login_required(login_url="login")
 def snod_search(request, id):
 
@@ -307,12 +311,8 @@ def park_result(request, id):
     model_data, model_header = get_model_data(model.id)
 
     # История ответов
-    history_answers = HistoryAnswerPACOM.objects.filter(id_model=model)
-    answers = []
-    for answer_history in history_answers:
-        answers.append({'question': answer_history.question, 'answer': answer_history.answer,
-                        'pair': answer_history.pair.id_option_1.name + ' и ' + answer_history.pair.id_option_2.name})
+    context_history_answer = get_context_history_answer(model)
 
     if response['flag_find_winner'] is True:
         return render(request, 'spbpu/park/result.html', {'response': response, 'model_data': model_data,
-                       'model_header': model_header, 'history': answers, 'model': model})
+                       'model_header': model_header, 'history': context_history_answer, 'model': model})

@@ -35,27 +35,30 @@
 
     <div id="test2" class="col s12">
 
-        <h3>История ответов</h3>
+        {% for h in history  %}
+            <h5>История ответов: {{ h.pair }}</h5>
+            <br>
         <table class="table">
             <thead>
             <tr>
                 <th scope="col">№</th>
                 <th scope="col">Вопрос</th>
-                <th scope="col">Пара альтернатив</th>
                 <th scope="col">Ответ</th>
             </tr>
             </thead>
             <tbody>
-            {% for item in history  %}
+            {% for item in h.body  %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.question }}</td>
-                    <td>{{ item.pair }}</td>
                     <td>{{ item.answer }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
+            <br>
+            <h5>{{ h.winner }}</h5>
+    {% endfor %}
 
     </div>
 
@@ -74,6 +77,11 @@
                         </ul>
                         <p>Кол-во вопрос к ЛПР: <b>{{ model.number_of_questions_pacom }}</b></p>
                         <p>Время затраченное на ответы на вопросы ЛПР: <br>{{ model.time_answer_pacom }}</p>
+
+                        <br>
+                        <p>Кол-во пар сравнений: <b>{{ model.number_of_pairs }}</b></p>
+                        <p>Кол-во несравнимых альтернатив: <b>{{ model.number_of_incomparable }}</b></p>
+
 
                     </div>
 

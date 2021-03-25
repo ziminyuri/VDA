@@ -29,6 +29,8 @@ class Model(models.Model):
 
     time_answer_pacom = models.CharField(max_length=255)
     number_of_questions_pacom = models.IntegerField(default=0)
+    number_of_pairs = models.IntegerField(default=0)
+    number_of_incomparable = models.IntegerField(default=0)
 
 
 class Criterion(models.Model):
@@ -105,6 +107,8 @@ class PairsOfOptionsPARK(models.Model):
     init_file = models.BooleanField(default=False)
     compensable_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='park_compensable_option', blank=True,
                                       null=True)
+    flag_winner_option = models.IntegerField(default=-1)    # Победитель option_1 = 1, option_2 = 2, option_1=option_2: 0
+                                                            # Не сравнимы 3
 
     def __str__(self):
         return str(self.id_option_1) + '' + str(self.id_option_2)

@@ -21,19 +21,19 @@
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{  model.name }}</td>
-                <td> <a class="btn btn-outline-primary btn-block btn-sm" href="{% url 'models_id' id=model.id %}">Посмотреть</a></td>
+                <td> <a class="btn btn-outline-primary btn-block btn-sm" href="{% url 'models_id' id=model.pk %}">Посмотреть</a></td>
                 <td>
                     {% if model.id_winner_option_shnur == None %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_search' id=model.id %}"> Найти альтернативу</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_search' id=model.pk%}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_result' id=model.id %}">Результат</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_result' id=model.pk %}">Результат</a>
                     {% endif %}
                 </td>
                 <td>
                     {% if model.already_find_winner_PACOM == False %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.id %}"> Найти альтернативу</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти альтернативу</a>
                     {% else %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_result' id=model.id %}">Результат</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_result' id=model.pk %}">Результат</a>
                     {% endif %}
                 </td>
                 <td><form action="{% url 'models_id' id=model.id  %}" method="POST">
