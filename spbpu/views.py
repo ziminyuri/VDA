@@ -17,7 +17,7 @@ from services.model import create_model, get_model_data
 from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model, \
     get_context_history_answer
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from django.views.generic import View, DetailView, CreateView
+from django.views.generic import View, DetailView
 from django.shortcuts import get_object_or_404
 
 if 'DATABASE_URL' in os.environ:
@@ -83,11 +83,8 @@ def index_view(request):
     return render(request, "spbpu/index.html", {})
 
 
-@login_required(login_url="login")
-def upload_view(request):
-    # Загрузка модели через CSV
-
-    if request.method == 'POST':
+class UploadView(View):
+    def post(self, request):
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         r_int = str(randint(0, 100))
@@ -100,12 +97,12 @@ def upload_view(request):
         create_files(model)
         return redirect('models_id', id=model.id)
 
-    return render(request, "spbpu/upload_model.html", {})
+    def get(self, request):
+        return render(request, "spbpu/upload_model.html", {})
 
 
-@login_required(login_url="login")
-def download_view(request):
-    if request.method == 'POST':
+class DownloadCSVView(View):
+    def post(self, request):
         file_path = 'media/demo/demo.csv'
         data = open(file_path, "rb").read()
         response = HttpResponse(data, content_type='application;')
@@ -115,10 +112,13 @@ def download_view(request):
         return response
 
 
-@login_required(login_url="login")
-def create_model_view(request):
-    if request.method == 'POST':
-        # Данные для заполнения таблицы
+class ModelCreateView(View):
+    def get(self, request):
+        number_for_select = list(range(1, 11))
+        return render(request, "spbpu/model/choice_number.html", {'number_for_select': number_for_select})
+
+    # Данные для заполнения таблицы
+    def post(self, request):
         number_of_criterion = request.POST["number_of_criterion"]
         number_of_alternatives = request.POST["number_of_alternatives"]
         number_of_criterion = int(number_of_criterion)
@@ -132,15 +132,16 @@ def create_model_view(request):
                        'number_of_alternatives': number_of_alternatives,
                        'error': None})
 
-    # Данные для задания нужного кол-ва альтернатив и кол-ва критериев в пользовательской модели
-    number_for_select = list(range(1, 11))
-    return render(request, "spbpu/model/choice_number.html", {'number_for_select': number_for_select})
 
+class ModelListCreateView(View):
+    @staticmethod
+    def get(request):
+        models = Model.objects.all()
+        return render(request, "spbpu/model/models.html", {'models': models})
 
-@login_required(login_url="login")
-def models_view(request):
-    # По GET список всех моделей, по POST создание модели после ввода данных в таблице
-    if request.method == 'POST':
+    @staticmethod
+    # Cоздание модели после ввода данных в таблице
+    def post(request):
         response = create_model(demo_model=False, request=request)
 
         if response is not False:
@@ -157,17 +158,24 @@ def models_view(request):
                            'number_of_alternatives_for_select': number_of_alternatives_for_select,
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
-    elif request.method == 'GET':
-        # Тут надо выводить только модели
-        models = Model.objects.all()
 
-        return render(request, "spbpu/model/models.html", {'models': models})
+class ModelView(View):
+    @staticmethod
+    def get(request, id):
+        try:
+            model = Model.objects.get(id=id)
+            model_data, model_header = get_model_data(model.id)
+            return render(request, "spbpu/model/model.html",
+                          {'model_data': model_data,
+                           'model_header': model_header,
+                           'model': model})
+        except:
+            return redirect(models_view)
 
 
-@login_required(login_url="login")
-def models_view_id(request, id):
-    # Просмотр информации о модели по GET, удаление модели по DELETE
-    if request.method == 'POST':
+    @staticmethod
+    # Delete model
+    def post(request):
         if request.POST["_method"] == 'DELETE':
             model = Model.objects.get(id=id)
 
@@ -183,16 +191,6 @@ def models_view_id(request, id):
 
             model.delete()
             return redirect(models_view)
-
-    try:
-        model = Model.objects.get(id=id)
-        model_data, model_header = get_model_data(model.id)
-        return render(request, "spbpu/model/model.html",
-                      {'model_data': model_data,
-                       'model_header': model_header,
-                       'model': model})
-    except:
-        return redirect(models_view)
 
 
 class SnodSearchView(View):
@@ -300,7 +298,7 @@ class ParkSearchView(View):
             response = get_park_question(model)
 
             if response['flag_find_winner'] is True:
-                return redirect('park_result', id=model.id)
+                return redirect('park_result', pk=model.id)
 
             elif response['flag_range'] is False:
                 return render(request, "spbpu/park/range.html", {'response': response, 'model': model})

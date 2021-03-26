@@ -2,18 +2,18 @@ from spbpu import views
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from spbpu.views import SettingsPACOMCreateView, ParkDetailView
+from spbpu.views import SettingsPACOMCreateView, ParkDetailView, UploadView, DownloadCSVView
 
 urlpatterns = [
     path('', views.index_view, name='index'),
     path('login', views.login_view, name='login'),
     path('registration', views.registration_view, name='registration'),
     path('logout', views.logout_view, name='logout'),
-    path('upload', views.upload_view, name='upload'),
-    path('download', views.download_view, name='download'),
-    path('models', views.models_view, name='models'),
-    path('models/<int:id>', views.models_view_id, name='models_id'),
-    path('model/create', views.create_model_view, name='create_model'),
+    path('upload', UploadView.as_view(), name='upload'),
+    path('download', DownloadCSVView.as_view(), name='download'),
+    path('models', views.ModelListCreateView.as_view(), name='models'),
+    path('models/<int:id>', views.ModelView.as_view(), name='models_id'),
+    path('model/create', views.ModelCreateView.as_view(), name='create_model'),
     path('model/snod/<int:id>', views.SnodSearchView.as_view(), name='snod_search'),
     path('model/snod/result/<int:id>', views.snod_result, name='snod_result'),
 

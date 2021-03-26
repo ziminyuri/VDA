@@ -407,8 +407,8 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
     flag_2_x2 = False
 
     first_line = False
-    flag_1_not_first = False
-    flag_2_not_first = False
+    flag_1_compensable = False
+    flag_2_compensable = False
 
 
     path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
@@ -416,54 +416,43 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
     for line in f.readlines():
         temp_result = int(line.split('|')[1].split('=')[1])
         if temp_result == 1 and flag_1 is False:
-            flag_1 = True
-            flag_2 = False
-            flag_1_not_first = True
 
-        elif temp_result == 1 and flag_1 is True:
-            flag_1_x2 = True
+            if not first_line:
+                flag_2_compensable = True
+                first_line = True
+
+            flag_1 = True
 
         elif temp_result == 2 and flag_2 is False:
+
+            if not first_line:
+                flag_1_compensable = True
+                first_line = True
+
             flag_2 = True
-            flag_1 = False
-            flag_2_not_first = True
 
-        elif temp_result == 2 and flag_2 is True:
-            flag_2_x2 = True
-
-        else:
-            flag_1 = False
-            flag_2 = False
-
-            flag_1_x2 = False
-            flag_2_x2 = False
-
-        first_line = True
-
-
-    if flag_1_x2 and flag_2_x2:
-        return 3 # Не сравнимы
-    elif flag_2_x2 and id_compensable_option == 2 and flag_1_not_first:
-        return 3  # Не сравнимы
-    elif flag_1_x2 and id_compensable_option == 1 and flag_2_not_first:
-        return 3  # Не сравнимы
-    elif flag_1_x2:
+    if temp_result ==1 and flag_1_compensable :
         return 1
-    elif flag_2_x2:
+    elif temp_result == 2 and flag_2_compensable:
         return 2
-    elif flag_1:
-        return 1
-    elif flag_2:
-        return 1
 
-    else:
-        # Остались критерии по которым не проходили
-        if option_1_is_empty:
-            return 1
-        elif option_2_is_empty:
-            return 2
-        else:
-            return 0  # одинаковы
+    elif flag_2_compensable and not flag_2 and flag_1:
+        return 1
+    elif flag_1_compensable and not flag_1 and flag_2:
+        return 2
+
+
+    elif flag_1 and option_1_is_empty and flag_2_compensable:
+        return 3
+    elif flag_2 and option_2_is_empty and flag_1_compensable:
+        return 3
+
+    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and not option_2_is_empty:
+        return 1
+    elif not flag_1_compensable and not flag_2_compensable and not option_1_is_empty and option_2_is_empty:
+        return 2
+    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and option_2_is_empty:
+        return 0
 
 
 def _write_history(pair, model, last_line, answer):
