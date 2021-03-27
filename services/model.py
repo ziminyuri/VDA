@@ -3,10 +3,11 @@ import os
 
 from spbpu.models import Criterion, Model, Option, PairsOfOptions, Value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from services.services import get_userprofile
 
 
+# Создание объекта модели (Поиска лучшей альтернативы для задачи выбора)
 def create_model(demo_model: bool = False, path_csv=None, request=None) -> object:
-    # Создание объекта модели (Поиска лучшей альтернативы для задачи выбора)
     try:
         result = True   # Результат создания и заполнения модели
 
@@ -14,7 +15,8 @@ def create_model(demo_model: bool = False, path_csv=None, request=None) -> objec
             model = Model.objects.create(is_demo=True, name='Демонстрационная')
             result = _filling_model_from_file(model)  # Заполняем модель исходными данными
         else:
-            model = Model.objects.create(is_demo=False, name='Пользовательская')
+            user_profile = get_userprofile(request)
+            model = Model.objects.create(is_demo=False, name='Пользовательская', id_user=user_profile)
             if path_csv:
                 result = _filling_model_from_file(model, path_csv=path_csv)  # Заполняем модель исходными данными
 
@@ -30,8 +32,8 @@ def create_model(demo_model: bool = False, path_csv=None, request=None) -> objec
 
         return model
 
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 
 def _filling_custom_model(model: object, request) -> bool:

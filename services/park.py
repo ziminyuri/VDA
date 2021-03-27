@@ -460,7 +460,7 @@ def _write_history(pair, model, last_line, answer):
     elif answer == 2:
         answer_to_history_model = 'Альтернатива №2 предпочтительнее'
     elif answer == 3:
-        answer_to_history_model = 'Альтернативы несравнимы'
+        answer_to_history_model = 'Альтернативы не сравнимы'
     else:
         answer_to_history_model = 'Альтернатива одинаково предпочтительны'
 
