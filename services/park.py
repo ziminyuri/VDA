@@ -81,7 +81,8 @@ def get_park_question(model):
     new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
     _add_1_to_number_of_question(model)
     return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
-            'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False}
+            'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False, 'name_1': pair.id_option_1.name,
+            'name_2': pair.id_option_2.name}
 
 
 # Записываем данные о ранжировании критериев в паре
@@ -277,6 +278,7 @@ def _fill_file_alternative(model, pair):
 
 # Заполняем новые варианты
 def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: object):
+    larichev_question = pair.id_model.id_settings_pacom.larichev_question
     new_alternative_1 = []
     new_alternative_2 = []
 
@@ -289,6 +291,7 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
     set_1 = set_1.split(';')
     set_2 = set_2.split(';')
 
+    iter = 1
     for criterion in criterions:
         already_get_value = False
         for s1 in set_1:
@@ -302,19 +305,22 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
                 value_2 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_2)
                 already_get_value = True
 
-        if already_get_value is False:
+        if already_get_value is False and larichev_question is True:
             try:
                 value_1 = ValueOfPerfectAlternativePARK.objects.get(criteria=criterion,
                                                                     perfect_alternative=perfect_alternative)
                 value_2 = value_1
+                already_get_value = True
             except Exception as e:
                 print(e)
 
-        value_1 = value_1.value
-        value_2 = value_2.value
+        if already_get_value is True:
+            value_1 = value_1.value
+            value_2 = value_2.value
 
-        new_alternative_1.append(value_1)
-        new_alternative_2.append(value_2)
+            new_alternative_1.append(['K: ' + str(iter), value_1])
+            new_alternative_2.append(['K: ' + str(iter), value_2])
+        iter += 1
 
     return new_alternative_1, new_alternative_2
 
