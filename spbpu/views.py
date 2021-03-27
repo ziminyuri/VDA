@@ -20,9 +20,9 @@ from services.park import (auto_mode_pacom, get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
 from services.settings import settingsPACOMCreate
-from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions,
-                          UserProfile)
+from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from services.services import get_userprofile
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -45,10 +45,9 @@ def login_view(request):
     return render(request, "spbpu/auth.html", {"login_error": login_error})
 
 
+# Регистрация
 def registration_view(request, *args, **kwargs):
-    # Регистрация
     if request.POST:
-        context = kwargs
         email = request.POST.get("username").lower()
         password = request.POST.get("password")
         password_2 = request.POST.get("password_2")
@@ -57,14 +56,10 @@ def registration_view(request, *args, **kwargs):
             error = 'Пароли не совпадают'
             return render(request, "spbpu/registration.html", {'error': error})
 
-        user = UserProfile.objects.filter(username=email)
+        user = User.objects.filter(username=email)
         if not user:
             User.objects.create_user(email, email, password)
-            user = auth.authenticate(username=email, password=password)
-            UserProfile.objects.create(
-                user=user,
-                username=email,
-            )
+            auth.authenticate(username=email, password=password)
             return redirect('login')
         else:
             error = 'Пользователь с таким e-mail существует'
@@ -75,8 +70,8 @@ def registration_view(request, *args, **kwargs):
 
 
 @login_required
+# Выход из системы
 def logout_view(request):
-    # Выход из системы
     django_logout(request)
     return redirect("index")
 
@@ -94,7 +89,7 @@ class UploadView(View):
         r_int = str(randint(0, 100))
         path_csv = request.user.username + '/' + r_int + uploaded_file.name
         fs.save(path_csv, uploaded_file)
-        model = create_model(demo_model=False, path_csv=path_csv)
+        model = create_model(demo_model=False, path_csv=path_csv, request=request)
         if model is False:
             error = 'Возникла ошибка при загрузке файла. Проверьте файл'
             return render(request, "spbpu/upload_model.html", {'error': error})
@@ -140,12 +135,14 @@ class ModelCreateView(View):
 class ModelListCreateView(View):
     @staticmethod
     def get(request):
-        models = Model.objects.all()
+        user = get_userprofile(request)
+        models = Model.objects.filter(id_user=user)
         return render(request, "spbpu/model/models.html", {'models': models})
 
     @staticmethod
     # Cоздание модели после ввода данных в таблице
     def post(request):
+
         response = create_model(demo_model=False, request=request)
 
         if response is not False:

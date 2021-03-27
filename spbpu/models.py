@@ -4,16 +4,6 @@ from django.db import models
 User = get_user_model()
 
 
-class UserProfile(models.Model):
-    # Модель пользователя расширяет стандартную модель пользователя Django
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=30, blank=True)
-
-    def __str__(self):
-        return self.username
-
-
 class SettingsPACOM(models.Model):
     auto_mode = models.BooleanField(default=False)
     larichev_question = models.BooleanField(default=True)
@@ -47,6 +37,8 @@ class Model(models.Model):
     number_of_pairs = models.IntegerField(default=0)
     number_of_incomparable = models.IntegerField(default=0)
     id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
+
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 
