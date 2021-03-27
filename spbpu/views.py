@@ -174,12 +174,11 @@ class ModelView(View):
                            'model_header': model_header,
                            'model': model})
         except:
-            return redirect(models_view)
-
+            return redirect('models')
 
     @staticmethod
     # Delete model
-    def post(request):
+    def post(request, id):
         if request.POST["_method"] == 'DELETE':
             model = Model.objects.get(id=id)
 
@@ -194,7 +193,7 @@ class ModelView(View):
                 pass
 
             model.delete()
-            return redirect(models_view)
+            return redirect('models')
 
 
 class SnodSearchView(View):
