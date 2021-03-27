@@ -1,13 +1,16 @@
 import datetime
+from collections import deque
+
+from django.db.models import Max
 
 from services.normalisation import normalisation_time
-from spbpu.models import PairsOfOptionsPARK, Option, Criterion, Value, PerfectAlternativePARK, \
-    ValueOfPerfectAlternativePARK, RangeValue, Model, HistoryAnswerPACOM
+from services.pairs_of_options import _replace_line_file, _write_file
 from services.range_value import create_range_value
+from services.request import request as request_obj
+from spbpu.models import (Criterion, HistoryAnswerPACOM, Model, Option,
+                          PairsOfOptionsPARK, PerfectAlternativePARK,
+                          RangeValue, Value, ValueOfPerfectAlternativePARK)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from services.pairs_of_options import _write_file, _replace_line_file
-from collections import deque
-from django.db.models import Max
 
 
 def get_park_question(model):
@@ -403,9 +406,6 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
     flag_1 = False
     flag_2 = False
 
-    flag_1_x2 = False   # Дважды встретился ответ
-    flag_2_x2 = False
-
     first_line = False
     flag_1_compensable = False
     flag_2_compensable = False
@@ -440,7 +440,6 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
         return 1
     elif flag_1_compensable and not flag_1 and flag_2:
         return 2
-
 
     elif flag_1 and option_1_is_empty and flag_2_compensable:
         return 3
@@ -532,7 +531,7 @@ def get_context_history_answer(model) -> list:
         if pair.flag_winner_option == 3:
             item['winner'] = 'Альтернативы не сравнимы'
         elif pair.flag_winner_option == 2:
-            item['winner'] = 'Пабедитель: ' + pair.id_option_2.name
+            item['winner'] = 'Победитель: ' + pair.id_option_2.name
         if pair.flag_winner_option == 1:
             item['winner'] = 'Победитель: ' + pair.id_option_1.name
         if pair.flag_winner_option == 0:
@@ -540,3 +539,56 @@ def get_context_history_answer(model) -> list:
         context.append(item)
 
     return context
+
+
+def auto_mode_pacom(input_data, request, model):
+    try:
+        while input_data['flag_find_winner'] == 0:
+            if input_data['flag_range'] is False:
+                data = auto_mode_range(input_data, request)
+                write_range_data(data, model)
+            else:
+                data = auto_mode_compare(input_data)
+                write_result_of_compare_pacom(data, model)
+
+            input_data = get_park_question(model)
+    except Exception as e:
+        print(e)
+
+
+def auto_mode_range(input_data, request):
+    context = {'range': True, 'compare': False}
+    data = input_data['data']
+    range_option_1 = 1
+    range_option_2 = 1
+
+    for d in data:
+        if d['direction'] is True:
+            if d['option_1'] < d['option_2']:
+                key = 'value_' + str(d['criterion_id']) + '_1'
+                context[key] = range_option_1
+                range_option_1 += 1
+            elif d['option_1'] > d['option_2']:
+                key = 'value_' + str(d['criterion_id']) + '_2'
+                context[key] = range_option_1
+                range_option_2 += 1
+        else:
+            if d['option_1'] > d['option_2']:
+                key = 'value_' + str(d['criterion_id']) + '_1'
+                context[key] = range_option_1
+                range_option_1 += 1
+            elif d['option_1'] < d['option_2']:
+                key = 'value_' + str(d['criterion_id']) + '_2'
+                context[key] = range_option_1
+                range_option_2 += 1
+    context['pair'] = input_data['pair']
+    request.POST = context
+    return request
+
+
+def auto_mode_compare(input_data):
+    import random
+    post_context = {'pair': input_data['pair']}
+    answer: int = random.randint(0, 3)
+    post_context['answer'] = answer
+    return request_obj(post_context)

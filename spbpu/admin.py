@@ -1,7 +1,8 @@
 from django.contrib import admin
 
-from .models import Model, Criterion, Option, Value, PairsOfOptions, HistoryAnswer, RangeValue,\
-    ValueOfPerfectAlternativePARK, PairsOfOptionsPARK
+from .models import (Criterion, HistoryAnswer, Model, Option, PairsOfOptions,
+                     PairsOfOptionsPARK, RangeValue, Value,
+                     ValueOfPerfectAlternativePARK)
 
 admin.site.register(Model)
 admin.site.register(Criterion)

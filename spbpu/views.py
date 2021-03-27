@@ -1,24 +1,28 @@
 import os
 from random import randint
 
+from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout as django_logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
-from django.contrib import auth
-from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView, View
 
-from spbpu.models import Option, PairsOfOptions, Model, HistoryAnswer, UserProfile, SettingsPACOM
-from services.pairs_of_options import create_files, make_question, write_answer, absolute_value_in_str, data_of_winners
 from services.model import create_model, get_model_data
-from services.park import get_park_question, write_range_data, write_result_of_compare_pacom, get_winners_from_model, \
-    get_context_history_answer
+from services.pairs_of_options import (absolute_value_in_str, create_files,
+                                       data_of_winners, make_question,
+                                       write_answer)
+from services.park import (auto_mode_pacom, get_context_history_answer,
+                           get_park_question, get_winners_from_model,
+                           write_range_data, write_result_of_compare_pacom)
+from services.settings import settingsPACOMCreate
+from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions,
+                          UserProfile)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from django.views.generic import View, DetailView
-from django.shortcuts import get_object_or_404
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -78,8 +82,8 @@ def logout_view(request):
 
 
 @login_required(login_url="login")
+# Главная страница
 def index_view(request):
-    # Главная страница
     return render(request, "spbpu/index.html", {})
 
 
@@ -268,7 +272,11 @@ class ParkSearchView(View):
             return redirect('pacom_settings_create', id=id)
 
         response = get_park_question(model)
-        if response['flag_range'] is False:
+        if response['flag_range'] is False and model.id_settings_pacom.auto_mode is True:
+            auto_mode_pacom(response, request, model)
+            return redirect('park_result', pk=model.id)
+
+        elif response['flag_range'] is False:
             return render(request, "spbpu/park/range.html", {'response': response, 'model': model})
 
         else:
@@ -290,9 +298,10 @@ class ParkSearchView(View):
             # Запись данных после ранжирования
             response = write_range_data(request, model)  # TODO Проверить что нет ошибок ранжирования
             response = get_park_question(model)
+
             return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
-        elif compare is True:
+        if compare is True:
             # Запись после сравнения критериев
             write_result_of_compare_pacom(request, model)
             response = get_park_question(model)
@@ -310,10 +319,11 @@ class SettingsPACOMCreateView(View):
     @staticmethod
     def get(request, id):
         context = {'model': get_object_or_404(Model, id=id)}
+        context['mode'] = ['Классический', 'Только различные значения критериев', 'Автоматический']
         return render(request, "spbpu/park/settings.html", context)
 
     def post(self, request, id, **kwargs):
-        settings = SettingsPACOM.objects.create(**kwargs)
+        settings = settingsPACOMCreate(request)
         Model.objects.filter(id=id).update(id_settings_pacom=settings)
         return redirect('park_search', id=id)
 
@@ -329,3 +339,5 @@ class ParkDetailView(DetailView):
         context['history'] = get_context_history_answer(self.kwargs['pk'])
 
         return context
+
+

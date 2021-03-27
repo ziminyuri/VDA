@@ -2,52 +2,37 @@
 {% block content %}
     <div class="container">
 
-            <div class="row">
-                <div class="col s12 m6">
-                    <div class="card ">
-                        <form action="{% url 'pacom_settings_create' id=model.id  %}" method="POST">
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card ">
+                    <form action="{% url 'pacom_settings_create' id=model.id  %}" method="POST">
                         <div class="card-content">
                             <span class="card-title">Выберите режим работы системы по методу ПАРК</span>
 
-                        {% csrf_token %}
-                        <p>
-                            <label>
-                                <input name="larichev" type="radio" checked />
-                                <span>Вопросы к ЛПР (классический режим)</span>
-                            </label>
-                        </p>
-                        <p>
-                            <label>
-                                <input name="custom_question" type="radio" />
-                                <span>Вопросы к ЛПР со скрытым отображением одинаковых значений по криетриям</span>
-                            </label>
-                        </p>
-                        <p>
-                            <label>
-                                <input name="auto_mode" type="radio" />
-                                <span>Автоматический режим (ответы генерируются случайным образом)</span>
-                            </label>
-                        </p>
+                            {% csrf_token %}
+                            <div class="input-field col s12">
+
+                                <select class="form-select" id="mode" name="mode">
+                                    {% for m in mode %}
+                                        <option selected value= "{{ m }}">
+                                        {{ m }}
+                                    {% endfor %}
+                                </select>
+
+                                <label>Кол-во критериев</label>
+
+                            </div>
 
 
-                        </div>
-                        <div class="card-action">
-                            <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
-                        </div>
-                        </form>
-                    </div>
+                            <div class="card-action">
+                                <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
+                            </div>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
 
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6"></div>
 
     </div>
 

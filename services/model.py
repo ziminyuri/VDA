@@ -1,6 +1,7 @@
-from spbpu.models import Model, Option, Criterion, Value, PairsOfOptions
-import os
 import csv
+import os
+
+from spbpu.models import Criterion, Model, Option, PairsOfOptions, Value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 

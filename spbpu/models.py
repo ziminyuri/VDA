@@ -1,6 +1,5 @@
-from django.db import models
-
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -19,10 +18,10 @@ class SettingsPACOM(models.Model):
     auto_mode = models.BooleanField(default=False)
     larichev_question = models.BooleanField(default=True)
 
-    def create(cls, **kwargs):
-        if kwargs.get('larichev') == 'on':
+    def create(cls, request):
+        if request.POST['mode'] == 'Классический':
             return cls()
-        elif kwargs.get('custom_question') == 'on':
+        elif request.POST['mode'] == 'Только различные значения критериев':
             return cls(larichev_question=False)
         else:
             return cls(auto_mode=True)

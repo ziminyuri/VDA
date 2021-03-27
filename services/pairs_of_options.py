@@ -1,11 +1,13 @@
+import datetime
 import random
 
-from spbpu.models import Model, Criterion, PairsOfOptions, Value, Option, HistoryAnswer
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-import datetime
+
 from services.normalisation import normalisation_time
+from spbpu.models import (Criterion, HistoryAnswer, Model, Option,
+                          PairsOfOptions, Value)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
