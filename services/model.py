@@ -159,7 +159,7 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
         criterions_name = ['Количество мест для парковки машин', 'Наличие поблизости конкурентов', 'Плотность населения',
                            'Стоимость участка', 'Поток общественного транспорта', 'Видимость магазина с главной улицы',
                            'Инфраструктура']
-        criterions_directions = [1, 0, 1, 0, 1, 1, 1]
+        criterions_directions = [True, False, True, False, True, True, True]
         criterions_quality = [0, 1, 0, 1, 1, 1, 1]
 
         n = len(criterions_name)
