@@ -1,5 +1,6 @@
 import csv
 import os
+import random
 
 from spbpu.models import Criterion, Model, Option, PairsOfOptions, Value
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
@@ -10,12 +11,13 @@ from services.services import get_userprofile
 def create_model(demo_model: bool = False, path_csv=None, request=None) -> object:
     try:
         result = True   # Результат создания и заполнения модели
-
+        user_profile = get_userprofile(request)
         if demo_model:
-            model = Model.objects.create(is_demo=True, name='Демонстрационная')
-            result = _filling_model_from_file(model)  # Заполняем модель исходными данными
+            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=user_profile)
+            number_of_alternatives = int(request.POST['number'])
+            result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
         else:
-            user_profile = get_userprofile(request)
+
             model = Model.objects.create(is_demo=False, name='Пользовательская', id_user=user_profile)
             if path_csv:
                 result = _filling_model_from_file(model, path_csv=path_csv)  # Заполняем модель исходными данными
@@ -144,6 +146,37 @@ def _filling_model_from_file(model: object, path_csv=None) -> bool:
         return False
 
     return True
+
+
+def _filling_demo_model(model: object, number_of_alternatives: int):
+    try:
+        options_obj_list = []
+        for alternative in range(1, number_of_alternatives + 1):
+            option = Option.objects.create(name='Alternative ' + str(alternative), id_model=model, number=alternative)
+            options_obj_list.append(option)
+
+
+        criterions_name = ['Количество мест для парковки машин', 'Наличие поблизости конкурентов', 'Плотность населения',
+                           'Стоимость участка', 'Поток общественного транспорта', 'Видимость магазина с главной улицы',
+                           'Инфраструктура']
+        criterions_directions = [True, False, True, False, True, True, True]
+        criterions_quality = [0, 1, 0, 1, 1, 1, 1]
+
+        n = len(criterions_name)
+        for i in range(n):
+            criterion = Criterion.objects.create(name=criterions_name[i], id_model=model, direction=criterions_directions[i], number=i,
+                                     max=0)
+
+            for alternative in options_obj_list:
+                if criterions_quality[i] == 0:
+                    value = random.randint(1, 7)
+                else:
+                    value = random.randint(100, 4000)
+                Value.objects.create(value=value, id_option=alternative, id_criterion=criterion)
+            Criterion.objects.filter(id=criterion.id).update(max=value)
+
+    except Exception as e:
+        return False
 
 
 def _create_dir(dir_name: str) -> None:

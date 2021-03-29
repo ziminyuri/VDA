@@ -1,0 +1,25 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    <div class="container">
+    <div class="row">
+ <form  action="{% url 'demo_create'  %}" method="post">
+                {% csrf_token %}
+                <h5 class="mb-3 font-weight-normal">Укажите кол-во альтернатив. Значения критериев альтерантив будут
+                    заполнены случайным образом</h5>
+
+                <div class="input-field col s12">
+                    <input type="text" required class="form-control" name="number" placeholder="Кол-во"></td>
+                    <label>Кол-во критериев</label>
+                </div>
+
+                <div class="btn-group mt-3" role="group" aria-label="Basic example">
+                    <a href="{% url 'index' %}" class="btn btn btn-primary mr-2" >Назад</a>
+                    <button class="btn btn btn-primary " type="submit">Далее</button>
+                </div>
+  </form>
+
+    </div>
+    </div>
+
+
+{% endblock %}
