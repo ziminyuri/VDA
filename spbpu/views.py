@@ -28,8 +28,8 @@ if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
 
 
+# Авторизация
 def login_view(request):
-    # Авторизация
     login_error = ""
     if request.POST:
         email = request.POST.get("username").lower()
@@ -81,6 +81,18 @@ def logout_view(request):
 def index_view(request):
     return render(request, "spbpu/index.html", {})
 
+
+class DemoModelCreateView(View):
+    def get(self, request):
+        return render(request, "spbpu/model/demo_choice_number.html", {})
+
+    def post(self, request):
+        response = create_model(demo_model=True, request=request)
+
+        if response is not False:
+            create_files(response)  # В response находится обьект модели
+
+        return redirect('models_id', response.id)
 
 class UploadView(View):
     def post(self, request):

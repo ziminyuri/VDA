@@ -18,6 +18,7 @@ urlpatterns = [
     path('model/create', views.ModelCreateView.as_view(), name='create_model'),
     path('model/snod/<int:id>', views.SnodSearchView.as_view(), name='snod_search'),
     path('model/snod/result/<int:id>', views.snod_result, name='snod_result'),
+    path('model/demo/create', views.DemoModelCreateView.as_view(), name='demo_create'),
 
     path('model/park/<int:id>', views.ParkSearchView.as_view(), name='park_search'),
     path('model/park/result/<int:pk>', ParkDetailView.as_view(), name='park_result'),
