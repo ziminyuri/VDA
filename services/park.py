@@ -154,8 +154,9 @@ def write_result_of_compare_pacom(response, model):
             PairsOfOptionsPARK.objects.filter(id=pair_id).update(compensable_option=pair.id_option_2)
         elif answer == 2:
             PairsOfOptionsPARK.objects.filter(id=pair.id).update(compensable_option=pair.id_option_1)
-        elif answer == 3:
-            _update_pair_to_not_comparable(pair)
+
+    if answer == 3:
+        _update_pair_to_not_comparable(pair)
 
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
     path = path_dir + 'PAIR' + str(pair.id) + '.txt'
@@ -453,7 +454,6 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
     flag_1_compensable = False
     flag_2_compensable = False
 
-
     path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
     f = open(path)
     for line in f.readlines():
@@ -555,8 +555,10 @@ def update_model_after_find_winner(model):
         number_of_incomparable=number_of_incomparable
     )
 
+
+# Возвращаем контекст истории ответов пользователей
 def get_context_history_answer(model) -> list:
-    # Возвращаем контекст истории ответов пользователей
+
 
     pairs = PairsOfOptionsPARK.objects.filter(id_model=model)
     context = []
