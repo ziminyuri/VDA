@@ -23,6 +23,7 @@ from services.settings import settingsPACOMCreate
 from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
+from services.statistics import get_statistics, built_statistics
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -248,18 +249,18 @@ def snod_result(request, id):
 
     pairs = PairsOfOptions.objects.filter(id_model=id)
     img = []
-    if len(pairs) < 10:
-        for pair in pairs:
-            absolute_value = absolute_value_in_str(model.id, pair.id)
-            if 'DATABASE_URL' in os.environ:
-                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                            'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
-                            'absolute_value': absolute_value})
 
-            else:
-                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                            'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
-                            'absolute_value': absolute_value})
+    for pair in pairs:
+        absolute_value = absolute_value_in_str(model.id, pair.id)
+        if 'DATABASE_URL' in os.environ:
+            img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+                        'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
+                        'absolute_value': absolute_value})
+
+        else:
+            img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+                        'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
+                        'absolute_value': absolute_value})
 
     model_data, model_header = get_model_data(model.id)
     winners_data, winners_header = data_of_winners(model.id)
@@ -348,4 +349,10 @@ class ParkDetailView(DetailView):
 
         return context
 
+
+class StatisticsView(View):
+    def get(self, request):
+        x,y = get_statistics(request)
+        path_img = built_statistics(x, y)
+        return render(request, "spbpu/statistics.html", {'path_img': path_img})
 
