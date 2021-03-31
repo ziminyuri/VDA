@@ -2,21 +2,17 @@
 <html lang="en">
 
 <head>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-
-
     <title>Система принятия решений</title>
-
-    <!-- MaterializeCSS core CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
     {% load static %}
-    <!-- Custom styles for this template -->
+
 </head>
 
 <body>
@@ -31,13 +27,44 @@
       </ul>
     </div>
   </nav>
+  <div class="row">
+    <br><br><br>
+</div>
 
   {% block content %}
 
 {% endblock %}
+<div class="row">
+    <br><br><br>
+</div>
+
+  <footer class="page-footer teal darken-4">
+          <div class="container">
+            <div class="row">
+              <div class="col l6 s12">
+                <h5 class="white-text">Система принятия решений</h5>
+                <p class="grey-text text-lighten-4">Система использует методы Вербального анализа принятия решений</p>
+
+              </div>
+                <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">Авторы</h5>
+                 <p class="grey-text text-lighten-4">Зимин Ю.Г. Пархоменко В.А.</p>
+                 <p class="grey-text text-lighten-4">Cанкт-Петербургский политехнический университет Петра Великого</p>
+              </div>
+            </div>
+          </div>
+          <div class="footer-copyright">
+            <div class="container">
+
+                © 2020-2021 Все права защищены
+            </div>
+          </div>
+        </footer>
+
+
   <script src="https://yastatic.net/jquery/3.1.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<script src="{% static 'spbpu/js/tab.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="{% static 'spbpu/js/tab.js' %}"></script>
 <script src="{% static 'spbpu/js/select.js' %}"></script>
 
 

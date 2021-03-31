@@ -2,17 +2,19 @@
 {% block content %}
     <div class="container">
 
-            <!--
-            <div class="col-sm-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Использовать демо модель</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">Посмотреть модель</a>
+    <div class="row">
+                <div class="col s12 m6">
+                    <div class="card teal darken-3">
+                        <div class="card-content white-text">
+                            <span class="card-title">Создать демо модель</span>
+                            <p>Модель будет содержать 7 критериев и пользовательское кол-во альтернатив</p>
+                        </div>
+                        <div class="card-action">
+                            <a href="{% url 'demo_create' %}">Создать</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            -->
 
             <div class="row">
                 <div class="col s12 m6">

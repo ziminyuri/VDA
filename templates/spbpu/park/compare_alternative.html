@@ -4,13 +4,14 @@
         <div class="row">
 
             <div class="col s4 border">
-                <h5 class="center-align">Альтернатива 1</h5>
+                <h5 class="center-align">{{ response.name_1 }}</h5>
                 <table class="table highlight">
                     <tbody>
-                    {% for a in response.alternative_1  %}
+                    {% for alternative in response.alternative_1  %}
                         <tr>
-                            <th scope="row">К: {{ forloop.counter }}</th>
+                        {% for a in alternative  %}
                             <td>{{ a }}</td>
+                            {% endfor %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -20,13 +21,14 @@
 
 
             <div class="col s4">
-                <h5 class="center-align">Альтернатива 2</h5>
+                <h5 class="center-align">{{ response.name_2 }}</h5>
                 <table class="table highlight">
                     <tbody>
-                    {% for a in response.alternative_2  %}
+                    {% for alternative in response.alternative_2  %}
                         <tr>
-                            <th scope="row">К: {{ forloop.counter }}</th>
+                        {% for a in alternative  %}
                             <td>{{ a }}</td>
+                            {% endfor %}
                         </tr>
                     {% endfor %}
                     </tbody>

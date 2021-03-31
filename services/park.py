@@ -14,96 +14,131 @@ from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
 def get_park_question(model):
-    # Пары для сравнения существуют
-    pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
-        filter(already_range=True).first()
+    try:
+        # Пары для сравнения существуют
+        pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
+            filter(already_range=True).first()
+    except:
+        print(5)
 
     if not pair:
-        pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
-            filter(already_range=False).first()
+        try:
+            pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
+                filter(already_range=False).first()
 
-        if pair:
-            data, option_1, option_2 = _get_range_data(model, pair)
-            _add_1_to_number_of_question(model)
-            return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
-                    'option_1': option_1, 'option_2': option_2, 'data': data}
-        else:
-            pair = PairsOfOptionsPARK.objects.filter(id_model=model)
-
-            if not pair:
-                # Впервые пришли к сранению -> Пар сравнения нет
-                # Процесс подготовки данных для ранжирования
-
-                pair = _create_pair(model, FIRST=True)
+            if pair:
                 data, option_1, option_2 = _get_range_data(model, pair)
-
-                _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
-
-                Model.objects.filter(id=model.id).update(time_answer_pacom=str(datetime.datetime.now()))
                 _add_1_to_number_of_question(model)
-                return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
-                        'option_1': option_1,
-                        'option_2': option_2, 'data': data}
+                return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                        'option_1': option_1, 'option_2': option_2, 'data': data}
             else:
-                quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))[
-                    'quasi_order_pacom__max']
-                options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
-                options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
+                pair = PairsOfOptionsPARK.objects.filter(id_model=model)
 
-                if options_with_quasi_0:
-                    # Пока есть альтернативы с квазипорядком равным 0
-                    for option in options_with_quasi_max_order:
-                        pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
-                        _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+                if not pair:
+                    # Впервые пришли к сранению -> Пар сравнения нет
+                    # Процесс подготовки данных для ранжирования
 
+                    pair = _create_pair(model, FIRST=True)
                     data, option_1, option_2 = _get_range_data(model, pair)
+
+                    _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
+
+                    Model.objects.filter(id=model.id).update(time_answer_pacom=str(datetime.datetime.now()))
                     _add_1_to_number_of_question(model)
-                    return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
-                            'option_1': option_1, 'option_2': option_2, 'data': data}
+                    return {'flag_find_winner': 0, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                            'option_1': option_1,
+                            'option_2': option_2, 'data': data}
                 else:
-                    # Нашли победителей
-                    update_model_after_find_winner(model)
-                    return get_winners_from_model(model)
+                    quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_pacom'))[
+                        'quasi_order_pacom__max']
+                    options_with_quasi_max_order = Option.objects.filter(quasi_order_pacom=quasi_max_order, id_model=model)
+                    options_with_quasi_0 = Option.objects.filter(quasi_order_pacom=0, id_model=model).first()
 
-    if pair.init_file is False:
-        # Подготавливаем данные для первого сравнения
-        _init_file_for_PARK(model, pair)
-    else:
-        # Данные в файл для второго сравнения
-        winner_find = _fill_file_alternative(model, pair)
-        if winner_find:
-            response = get_park_question(model)
-            return response
+                    if options_with_quasi_0:
+                        # Пока есть альтернативы с квазипорядком равным 0
+                        for option in options_with_quasi_max_order:
+                            pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
+                            _create_perfect_fit(pair, model)  # Создаем идеальный вариант в паре (лучшие значения по критериям)
 
-    perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
-    criterions = Criterion.objects.filter(id_model=model.id)
+                        data, option_1, option_2 = _get_range_data(model, pair)
+                        _add_1_to_number_of_question(model)
+                        return {'flag_find_winner': False, 'flag_range': False, 'flag_compare': False, 'pair': pair.id,
+                                'option_1': option_1, 'option_2': option_2, 'data': data}
+                    else:
+                        # Нашли победителей
+                        update_model_after_find_winner(model)
+                        return get_winners_from_model(model)
+        except:
+            print(6)
 
-    new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
-    _add_1_to_number_of_question(model)
-    return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
-            'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False}
+    try:
+        if pair.init_file is False:
+            try:
+                # Подготавливаем данные для первого сравнения
+                _init_file_for_PARK(model, pair)
+            except:
+                print(10)
+
+        else:
+            try:
+                # Данные в файл для второго сравнения
+                winner_find = _fill_file_alternative(model, pair)
+                if winner_find:
+                    response = get_park_question(model)
+                    return response
+            except:
+                print(11)
+    except:
+        print(7)
+
+    try:
+        perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
+        criterions = Criterion.objects.filter(id_model=model.id)
+
+        new_alternative_1, new_alternative_2 = _fill_new_alternative(criterions, perfect_alternative, pair)
+        _add_1_to_number_of_question(model)
+        return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
+                'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False, 'name_1': pair.id_option_1.name,
+                'name_2': pair.id_option_2.name}
+    except:
+        print(8)
 
 
 # Записываем данные о ранжировании критериев в паре
 def write_range_data(response, model):
-    criterions = Criterion.objects.filter(id_model=model.id)
-    pair_id = int(response.POST["pair"])
-    pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
+    try:
+        criterions = Criterion.objects.filter(id_model=model.id)
+        pair_id = int(response.POST["pair"])
+        pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
 
-    for criterion in criterions:
-        try:
-            value_name = 'value_' + str(criterion.id) + '_1'
-            value = int(response.POST[value_name])
-            create_range_value(pair, pair.id_option_1, criterion, value)
-        except:
+        range_value_1 = False
+        range_value_2 = False
+
+        for criterion in criterions:
             try:
-                value_name = 'value_' + str(criterion.id) + '_2'
+                value_name = 'value_' + str(criterion.id) + '_1'
                 value = int(response.POST[value_name])
-                create_range_value(pair, pair.id_option_2, criterion, value)
+                create_range_value(pair, pair.id_option_1, criterion, value)
+                range_value_1 = True
             except:
-                pass
+                try:
+                    value_name = 'value_' + str(criterion.id) + '_2'
+                    value = int(response.POST[value_name])
+                    create_range_value(pair, pair.id_option_2, criterion, value)
+                    range_value_2 = True
+                except:
+                    pass
 
-    PairsOfOptionsPARK.objects.filter(id=pair_id).update(already_range=True)
+        if not range_value_1 and not range_value_2:
+            _find_winner_in_pair(pair, None, result=0)
+        elif not range_value_1:
+            _find_winner_in_pair(pair, None, result=1)
+        elif not range_value_2:
+            _find_winner_in_pair(pair, None, result=2)
+
+        PairsOfOptionsPARK.objects.filter(id=pair_id).update(already_range=True)
+    except Exception as e:
+        print(e)
 
 
 # Записываем результаты сравнения парной компенсации
@@ -119,8 +154,9 @@ def write_result_of_compare_pacom(response, model):
             PairsOfOptionsPARK.objects.filter(id=pair_id).update(compensable_option=pair.id_option_2)
         elif answer == 2:
             PairsOfOptionsPARK.objects.filter(id=pair.id).update(compensable_option=pair.id_option_1)
-        elif answer == 3:
-            _update_pair_to_not_comparable(pair)
+
+    if answer == 3:
+        _update_pair_to_not_comparable(pair)
 
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id) + '/pacom/'
     path = path_dir + 'PAIR' + str(pair.id) + '.txt'
@@ -192,13 +228,15 @@ def _create_perfect_fit(pair: object, model: object) -> None:
 # Создаем историю ответов для пары альтернатив
 def _init_file_for_PARK(model: object, pair: object) -> None:
     import os
+    try:
+        range_1 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_1).filter(value=1).first()
+        range_2 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_2).filter(value=1).first()
 
-    range_1 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_1).filter(value=1).first()
-    range_2 = RangeValue.objects.filter(pair=pair).filter(option=pair.id_option_2).filter(value=1).first()
+        value_1 = Value.objects.filter(id_option=pair.id_option_1).filter(id_criterion=range_1.criteria).first()
+        value_2 = Value.objects.filter(id_option=pair.id_option_2).filter(id_criterion=range_2.criteria).first()
 
-    value_1 = Value.objects.filter(id_option=pair.id_option_1).filter(id_criterion=range_1.criteria).first()
-    value_2 = Value.objects.filter(id_option=pair.id_option_2).filter(id_criterion=range_2.criteria).first()
-
+    except Exception as e:
+        print(e)
     path_dir = MEDIA_ROOT + '/files/models/' + str(model.id)
     try:
         os.mkdir(path_dir)
@@ -277,6 +315,7 @@ def _fill_file_alternative(model, pair):
 
 # Заполняем новые варианты
 def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: object):
+    larichev_question = pair.id_model.id_settings_pacom.larichev_question
     new_alternative_1 = []
     new_alternative_2 = []
 
@@ -289,6 +328,7 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
     set_1 = set_1.split(';')
     set_2 = set_2.split(';')
 
+    iter = 1
     for criterion in criterions:
         already_get_value = False
         for s1 in set_1:
@@ -302,28 +342,32 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
                 value_2 = Value.objects.get(id_criterion=criterion, id_option=pair.id_option_2)
                 already_get_value = True
 
-        if already_get_value is False:
+        if already_get_value is False and larichev_question is True:
             try:
                 value_1 = ValueOfPerfectAlternativePARK.objects.get(criteria=criterion,
                                                                     perfect_alternative=perfect_alternative)
                 value_2 = value_1
+                already_get_value = True
             except Exception as e:
                 print(e)
 
-        value_1 = value_1.value
-        value_2 = value_2.value
+        if already_get_value is True:
+            value_1 = value_1.value
+            value_2 = value_2.value
 
-        new_alternative_1.append(value_1)
-        new_alternative_2.append(value_2)
+            new_alternative_1.append(['K: ' + str(iter), value_1])
+            new_alternative_2.append(['K: ' + str(iter), value_2])
+        iter += 1
 
     return new_alternative_1, new_alternative_2
 
 
-def _find_winner_in_pair(pair, id_compensable_option, is_not_comparable=False, option_2_is_empty=False, option_1_is_empty=True):
+def _find_winner_in_pair(pair, id_compensable_option, result=None, is_not_comparable=False, option_2_is_empty=True, option_1_is_empty=True):
     if is_not_comparable:
         _update_pair_to_not_comparable(pair)
 
-    result = _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_empty)
+    if result is None:
+        result = _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_empty)
 
     if result == 1:
         Option.objects.filter(id=pair.id_option_1.id).update(
@@ -409,7 +453,6 @@ def _is_comparable(pair, id_compensable_option, option_1_is_empty, option_2_is_e
     first_line = False
     flag_1_compensable = False
     flag_2_compensable = False
-
 
     path = MEDIA_ROOT + '/files/models/' + str(pair.id_model.id) + '/pacom/PAIR' + str(pair.id) + '.txt'
     f = open(path)
@@ -512,8 +555,10 @@ def update_model_after_find_winner(model):
         number_of_incomparable=number_of_incomparable
     )
 
+
+# Возвращаем контекст истории ответов пользователей
 def get_context_history_answer(model) -> list:
-    # Возвращаем контекст истории ответов пользователей
+
 
     pairs = PairsOfOptionsPARK.objects.filter(id_model=model)
     context = []
@@ -545,45 +590,58 @@ def auto_mode_pacom(input_data, request, model):
     try:
         while input_data['flag_find_winner'] == 0:
             if input_data['flag_range'] is False:
-                data = auto_mode_range(input_data, request)
-                write_range_data(data, model)
-            else:
-                data = auto_mode_compare(input_data)
-                write_result_of_compare_pacom(data, model)
+                try:
+                    data = auto_mode_range(input_data, request)
+                    write_range_data(data, model)
+                except Exception as e:
+                    print(1)
 
-            input_data = get_park_question(model)
+            else:
+                try:
+                    data = auto_mode_compare(input_data)
+                    write_result_of_compare_pacom(data, model)
+                except Exception as e:
+                    print(2)
+            try:
+                input_data = get_park_question(model)
+            except Exception as e:
+                print(3)
     except Exception as e:
-        print(e)
+        print(4)
 
 
 def auto_mode_range(input_data, request):
-    context = {'range': True, 'compare': False}
-    data = input_data['data']
-    range_option_1 = 1
-    range_option_2 = 1
+    try:
+        context = {'range': True, 'compare': False}
+        data = input_data['data']
+        range_option_1 = 1
+        range_option_2 = 1
 
-    for d in data:
-        if d['direction'] is True:
-            if d['option_1'] < d['option_2']:
-                key = 'value_' + str(d['criterion_id']) + '_1'
-                context[key] = range_option_1
-                range_option_1 += 1
-            elif d['option_1'] > d['option_2']:
-                key = 'value_' + str(d['criterion_id']) + '_2'
-                context[key] = range_option_1
-                range_option_2 += 1
-        else:
-            if d['option_1'] > d['option_2']:
-                key = 'value_' + str(d['criterion_id']) + '_1'
-                context[key] = range_option_1
-                range_option_1 += 1
-            elif d['option_1'] < d['option_2']:
-                key = 'value_' + str(d['criterion_id']) + '_2'
-                context[key] = range_option_1
-                range_option_2 += 1
-    context['pair'] = input_data['pair']
-    request.POST = context
-    return request
+        for d in data:
+            if d['direction'] is True:
+                if d['option_1'] < d['option_2']:
+                    key = 'value_' + str(d['criterion_id']) + '_1'
+                    context[key] = range_option_1
+                    range_option_1 += 1
+                elif d['option_1'] > d['option_2']:
+                    key = 'value_' + str(d['criterion_id']) + '_2'
+                    context[key] = range_option_2
+                    range_option_2 += 1
+            else:
+                if d['option_1'] > d['option_2']:
+                    key = 'value_' + str(d['criterion_id']) + '_1'
+                    context[key] = range_option_1
+                    range_option_1 += 1
+                elif d['option_1'] < d['option_2']:
+                    key = 'value_' + str(d['criterion_id']) + '_2'
+                    context[key] = range_option_2
+                    range_option_2 += 1
+        context['pair'] = input_data['pair']
+        request.POST = context
+        return request
+
+    except Exception as e:
+        print(e)
 
 
 def auto_mode_compare(input_data):
