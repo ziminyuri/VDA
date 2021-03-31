@@ -175,6 +175,17 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
                 Value.objects.create(value=value, id_option=alternative, id_criterion=criterion)
             Criterion.objects.filter(id=criterion.id).update(max=value)
 
+
+        n = len(options_obj_list)
+        k = 1
+        for i in range(n):
+            for j in range(k, n):
+                if i != j:
+                    PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
+                                                  id_model=model)
+
+            k += 1
+
     except Exception as e:
         return False
 

@@ -22,7 +22,9 @@ urlpatterns = [
 
     path('model/park/<int:id>', views.ParkSearchView.as_view(), name='park_search'),
     path('model/park/result/<int:pk>', ParkDetailView.as_view(), name='park_result'),
-    path('model/park/<int:id>/settings', SettingsPACOMCreateView.as_view(), name='pacom_settings_create')
+    path('model/park/<int:id>/settings', SettingsPACOMCreateView.as_view(), name='pacom_settings_create'),
+
+    path('statistics', views.StatisticsView.as_view(), name='statistics')
 ]
 
 if settings.DEBUG:
