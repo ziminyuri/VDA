@@ -55,7 +55,24 @@ def get_statistics(request):
 # Строим столбчатую диаграмму
 def built_statistics(x, y):
     import random
+    fig, ax = plt.subplots(figsize=(5, 5))
+
+    max_x = max(x)
+    max_y = max(y)
+
+    if max_x > max_y:
+        _max = max_x
+    else:
+        _max = max_y
+
+    ax.set_xlim([0, _max])
+    ax.set_ylim([0, _max])
+
+    plt.xlabel('Кол-во пар для сравнения')
+    plt.ylabel('Кол-во не сравнимых пар')
+
     plt.plot(x, y)
+
     path_url = 'http://127.0.0.1:8000/media/files/statisctics/'
     path = MEDIA_ROOT + '/files/statisctics/'
     r = random.randint(0, 1000000)
