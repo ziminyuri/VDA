@@ -147,3 +147,27 @@ class HistoryAnswerPACOM(models.Model):
     answer = models.CharField(max_length=255)
     pair = models.ForeignKey(PairsOfOptionsPARK, on_delete=models.CASCADE, related_name='pair_pacom')
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+
+
+# Пары вариантов и результаты их сравнения по оригинальному методу ШНУР
+class PairsOfOptionsTrueSNOD(models.Model):
+    id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_1_true_snod')
+    id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_2_true_snod')
+    winner_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='winner_option_true_snod', blank=True,
+                                      null=True)
+
+    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+    already_find_winner = models.BooleanField(default=False)
+    is_not_comparable = models.BooleanField(default=False)
+    flag_winner_option = models.IntegerField(default=-1)
+
+    def __str__(self):
+        return str(self.id_option_1) + '' + str(self.id_option_2)
+
+
+# Хранятся ответы на вопросы к ЛПР по ориганльному методу ШНУР
+class HistoryAnswerTrueSNOD(models.Model):
+    question = models.TextField(max_length=1000)
+    answer = models.CharField(max_length=255)
+    pair = models.ForeignKey(PairsOfOptionsTrueSNOD, on_delete=models.CASCADE, related_name='pair_true_snod')
+    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
