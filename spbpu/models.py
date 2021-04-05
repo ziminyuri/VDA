@@ -30,7 +30,7 @@ class Model(models.Model):
     time_many = models.CharField(max_length=255)
 
     # PACOM
-    already_find_winner_PACOM = models.BooleanField(default=False)  # id победителя по методу ПАРК
+    already_find_winner_PACOM = models.BooleanField(default=False)
     time_answer_pacom = models.CharField(max_length=255)
     number_of_questions_pacom = models.IntegerField(default=0)
     number_of_pairs = models.IntegerField(default=0)
@@ -38,7 +38,7 @@ class Model(models.Model):
     id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
 
     # True SNOD
-    already_find_winner_SNOD = models.BooleanField(default=False)  # id победителя по методу ПАРК
+    already_find_winner_SNOD = models.BooleanField(default=False)
     time_answer_snod = models.CharField(max_length=255)
     number_of_questions_snod = models.IntegerField(default=0)
     number_of_pairs_snod = models.IntegerField(default=0)

@@ -1,4 +1,6 @@
 # Реализация классического метода ШНУР
+import datetime
+from services.normalisation import normalisation_time
 from django.db.models import Max
 
 from spbpu.models import PairsOfOptionsTrueSNOD, Criterion, Option, Model, Value, HistoryAnswerTrueSNOD
@@ -25,6 +27,8 @@ def get_original_snod_question(model):
         pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model)
         if not pair:
             pair = _create_pair(model, FIRST=True)
+            Model.objects.filter(id=model.id).update(time_answer_snod=str(datetime.datetime.now()))
+            _add_1_to_number_of_question(model)
             return get_first_question(model, pair)
         else:
             quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_original_snod'))[
@@ -49,7 +53,6 @@ def get_original_snod_question(model):
 def write_original_snod_answer(response, answer, auto=False):
     answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response,
                                                                                                          answer, auto)
-
     _write_answer_to_history_original_snod(question, answer, option_1, option_2, model_id)
 
     model = Model.objects.get(id=model_id)
@@ -63,7 +66,6 @@ def write_original_snod_answer(response, answer, auto=False):
     name_2 = ''
 
     path = get_path(model, pair, original_snod=True)
-
 
     if answer == 1:
         # Важнее преимущество по критерию а1
@@ -264,6 +266,7 @@ def write_original_snod_answer(response, answer, auto=False):
                 name_1 = criteria_1.name
 
     if flag_new_pair is False:
+        _add_1_to_number_of_question(model)
         question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
                    + name_2 + '" ?'
         Message = {'question': question, 'option_1': option_1, 'option_2': option_2,
@@ -275,7 +278,7 @@ def write_original_snod_answer(response, answer, auto=False):
 
 # Добавление +1 к кол-ву вопросов
 def _add_1_to_number_of_question(model):
-    Model.objects.filter(id=model.id).update(number_of_questions_pacom=model.number_of_questions_snod + 1)
+    Model.objects.filter(id=model.id).update(number_of_questions_snod=model.number_of_questions_snod + 1)
 
 
 def _write_answer_to_history_original_snod(question, answer, option_1, option_2, model_id):
@@ -350,6 +353,9 @@ def _find_winner(model: object, pair: object) -> None:
         result = 2
     elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and option_2_is_empty:
         result = 0
+    else:
+        _update_pair_to_not_comparable(pair)
+        return
 
     if pair.id_option_1.quasi_order_original_snod > pair.id_option_2.quasi_order_original_snod:
         max_quasi_order_original_snod = pair.id_option_1.quasi_order_original_snod
@@ -384,8 +390,7 @@ def _find_winner(model: object, pair: object) -> None:
             quasi_order_original_snod=max_quasi_order_original_snod + 1)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=0)
-    else:
-        _update_pair_to_not_comparable(pair)
+
 
 
 def _create_pair(model, FIRST=False, option_1=None, option_2=None):
@@ -406,8 +411,19 @@ def _create_pair(model, FIRST=False, option_1=None, option_2=None):
 
 
 def update_model_after_find_winner(model):
+    time_end = datetime.datetime.now()
+    time_begin = model.time_answer_shnur
+    time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
+    delta_time_many = time_end - time_begin
+    delta_time_many = normalisation_time(delta_time_many)
+    number_of_pairs = len(PairsOfOptionsTrueSNOD.objects.filter(id_model=model))
+    number_of_incomparable = len(PairsOfOptionsTrueSNOD.objects.filter(id_model=model, flag_winner_option=3))
+
     Model.objects.filter(id=model.id).update(
-        already_find_winner_SNOD=True
+        time_answer_snod=delta_time_many,
+        already_find_winner_SNOD=True,
+        number_of_pairs_snod=number_of_pairs,
+        number_of_incomparable_snod=number_of_incomparable
     )
 
 def _update_pair_to_not_comparable(pair):

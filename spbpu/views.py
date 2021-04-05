@@ -384,7 +384,7 @@ class OriginalSnodSearchView(View):
                           {'message': message,
                            'model': model, 'original_snod': 1})
         else:
-            return redirect('snod_original_result', pk=id)
+            return redirect('snod_original_result', id=id)
 
 
 class OriginalSnodDetailView(View):
@@ -392,5 +392,6 @@ class OriginalSnodDetailView(View):
         context = {'response': get_winners_from_model_original_snod(id)}
         context['model_data'], context['model_header'] = get_model_data(id)
         context['history'] = get_context_history_answer_original_snod(id)
+        context['model'] = Model.objects.get(id=id)
         return render(request, "spbpu/snod/original_snod_result.html", {'context': context})
 
