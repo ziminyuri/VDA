@@ -10,6 +10,7 @@
             <th scope="col">Модель</th>
             <th scope="col">Исходные данные</th>
             <th scope="col">Метод ШНУР</th>
+            <th scope="col">Модифицированный метод ШНУР</th>
             <th scope="col">Метод ПАРК</th>
             <th scope="col">Удалить</th>
         </tr>
@@ -22,16 +23,24 @@
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{  model.name }}</td>
                 <td> <a class="btn btn-outline-primary btn-block btn-sm" href="{% url 'models_id' id=model.pk %}">Посмотреть</a></td>
+            <td>
+                    {% if model.already_find_winner_SNOD == False %}
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_original_search' id=model.id%}"> Найти</a>
+                    {% else %}
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_original_result' id=model.id %}">Результат</a>
+                    {% endif %}
+                </td>
+
                 <td>
                     {% if model.id_winner_option_shnur == None %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_search' id=model.pk%}"> Найти альтернативу</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_search' id=model.pk%}"> Найти</a>
                     {% else %}
                     <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_result' id=model.pk %}">Результат</a>
                     {% endif %}
                 </td>
                 <td>
                     {% if model.already_find_winner_PACOM == False %}
-                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти альтернативу</a>
+                    <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти</a>
                     {% else %}
                     <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_result' pk=model.pk %}">Результат</a>
                     {% endif %}

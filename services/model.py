@@ -192,11 +192,13 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
 
 def _create_dir(dir_name: str) -> None:
     path1 = MEDIA_ROOT + '/files/models/' + dir_name
-    path2 = MEDIA_ROOT + '/' + dir_name
+    path2 = MEDIA_ROOT + '/files/models/' + dir_name + '/original_snod'
+    path3 = MEDIA_ROOT + '/' + dir_name
 
     try:
         os.mkdir(path1)
         os.mkdir(path2)
+        os.mkdir(path3)
     except OSError:
         print("Создать директорию %s не удалось" % path2)
 

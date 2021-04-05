@@ -37,6 +37,13 @@ class Model(models.Model):
     number_of_incomparable = models.IntegerField(default=0)
     id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
 
+    # True SNOD
+    already_find_winner_SNOD = models.BooleanField(default=False)  # id победителя по методу ПАРК
+    time_answer_snod = models.CharField(max_length=255)
+    number_of_questions_snod = models.IntegerField(default=0)
+    number_of_pairs_snod = models.IntegerField(default=0)
+    number_of_incomparable_snod = models.IntegerField(default=0)
+
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
@@ -58,6 +65,7 @@ class Option(models.Model):
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
     number = models.IntegerField()
     quasi_order_pacom = models.IntegerField(default=0)
+    quasi_order_original_snod = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -160,6 +168,7 @@ class PairsOfOptionsTrueSNOD(models.Model):
     already_find_winner = models.BooleanField(default=False)
     is_not_comparable = models.BooleanField(default=False)
     flag_winner_option = models.IntegerField(default=-1)
+    flag_not_compared = models.BooleanField(default=True)   # Данные не сравнивались ни разу
 
     def __str__(self):
         return str(self.id_option_1) + '' + str(self.id_option_2)

@@ -5,7 +5,7 @@ from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as django_logout
-from django.contrib.auth.decorators import login_required
+
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
@@ -19,6 +19,10 @@ from services.pairs_of_options import (absolute_value_in_str, create_files,
 from services.park import (auto_mode_pacom, get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
+
+
+from services.snod_original import get_original_snod_question, write_original_snod_answer, \
+    get_winners_from_model_original_snod, get_context_history_answer_original_snod
 from services.settings import settingsPACOMCreate
 from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
@@ -30,9 +34,12 @@ if 'DATABASE_URL' in os.environ:
 
 
 # Авторизация
-def login_view(request):
-    login_error = ""
-    if request.POST:
+class LoginView(View):
+    def get(self, request):
+
+        return render(request, "spbpu/auth.html", {"login_error": ''})
+
+    def post(self, request):
         email = request.POST.get("username").lower()
         password = request.POST.get("password")
         user = authenticate(request, username=email, password=password)
@@ -42,13 +49,15 @@ def login_view(request):
 
         else:
             login_error = "Неверный логин или пароль! Повторите попытку."
-
-    return render(request, "spbpu/auth.html", {"login_error": login_error})
+            return render(request, "spbpu/auth.html", {"login_error": login_error})
 
 
 # Регистрация
-def registration_view(request, *args, **kwargs):
-    if request.POST:
+class RegistrationView(View):
+    def get(self, request):
+        return render(request, "spbpu/registration.html", {'error': None})
+
+    def post(self, request):
         email = request.POST.get("username").lower()
         password = request.POST.get("password")
         password_2 = request.POST.get("password_2")
@@ -66,21 +75,17 @@ def registration_view(request, *args, **kwargs):
             error = 'Пользователь с таким e-mail существует'
             return render(request, "spbpu/registration.html", {'error': error})
 
-    else:
-        return render(request, "spbpu/registration.html", {'error': None})
 
-
-@login_required
 # Выход из системы
-def logout_view(request):
-    django_logout(request)
-    return redirect("index")
+class LogoutView(View):
+    def get(self, request):
+        django_logout(request)
+        return redirect("index")
 
 
-@login_required(login_url="login")
-# Главная страница
-def index_view(request):
-    return render(request, "spbpu/index.html", {})
+class IndexView(View):
+    def get(self, request):
+        return render(request, "spbpu/index.html", {})
 
 
 class DemoModelCreateView(View):
@@ -213,7 +218,7 @@ class SnodSearchView(View):
         message = make_question(model)
         return render(request, "spbpu/snod/question.html",
                       {'message': message,
-                       'model': model})
+                       'model': model, 'origianl_snod': 0})
 
     @staticmethod
     def post(request, id):
@@ -227,51 +232,50 @@ class SnodSearchView(View):
             model = Model.objects.get(id=id)
             return render(request, "spbpu/snod/question.html",
                           {'message': message,
-                           'model': model})
+                           'model': model, 'origianl_snod': 0})
         else:
             return render(request, "spbpu/snod/result.html",
                           {})
 
 
-#TODO переписать на класс
-@login_required(login_url="login")
-def snod_result(request, id):
-    model = Model.objects.get(id=id)
-    option_shnur = Option.objects.get(id=model.id_winner_option_shnur)
-    option_many = Option.objects.get(id=model.id_winner_option_many)
+class SnodDetailView(View):
+    def get(self, request, id):
+        model = Model.objects.get(id=id)
+        option_shnur = Option.objects.get(id=model.id_winner_option_shnur)
+        option_many = Option.objects.get(id=model.id_winner_option_many)
 
-    # История ответов
-    history_answers = HistoryAnswer.objects.filter(id_model=model)
-    answers = []
-    for answer_history in history_answers:
-        answers.append({'question': answer_history.question, 'answer': answer_history.answer,
-                        'pair': answer_history.pair.id_option_1.name + ' и ' + answer_history.pair.id_option_2.name})
+        # История ответов
+        history_answers = HistoryAnswer.objects.filter(id_model=model)
+        answers = []
+        for answer_history in history_answers:
+            answers.append({'question': answer_history.question, 'answer': answer_history.answer,
+                            'pair': answer_history.pair.id_option_1.name + ' и ' + answer_history.pair.id_option_2.name})
 
-    pairs = PairsOfOptions.objects.filter(id_model=id)
-    img = []
+        pairs = PairsOfOptions.objects.filter(id_model=id)
+        img = []
 
-    for pair in pairs:
-        absolute_value = absolute_value_in_str(model.id, pair.id)
-        if 'DATABASE_URL' in os.environ:
-            img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
-                        'absolute_value': absolute_value})
+        for pair in pairs:
+            absolute_value = absolute_value_in_str(model.id, pair.id)
+            if 'DATABASE_URL' in os.environ:
+                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+                            'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
+                            'absolute_value': absolute_value})
 
-        else:
-            img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                        'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
-                        'absolute_value': absolute_value})
+            else:
+                img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
+                            'path': 'http://127.0.0.1:8000/media/' + str(model.id) + '/' + str(pair.id) + '.png',
+                            'absolute_value': absolute_value})
 
-    model_data, model_header = get_model_data(model.id)
-    winners_data, winners_header = data_of_winners(model.id)
+        model_data, model_header = get_model_data(model.id)
+        winners_data, winners_header = data_of_winners(model.id)
 
-    response = {'option_shnur': option_shnur.name, 'option_many': option_many.name, 'history': answers, 'img': img,
-                'time_shnur_elapsed': model.time_shnur, 'time_answer_elapsed': model.time_answer_shnur,
-                'time_many_elapsed': model.time_many, 'model_data': model_data, 'model_header': model_header,
-                'winners_data': winners_data, 'winners_header': winners_header}
+        response = {'option_shnur': option_shnur.name, 'option_many': option_many.name, 'history': answers, 'img': img,
+                    'time_shnur_elapsed': model.time_shnur, 'time_answer_elapsed': model.time_answer_shnur,
+                    'time_many_elapsed': model.time_many, 'model_data': model_data, 'model_header': model_header,
+                    'winners_data': winners_data, 'winners_header': winners_header}
 
-    return render(request, "spbpu/snod/result.html",
-                  response)
+        return render(request, "spbpu/snod/result.html",
+                      response)
 
 
 class ParkSearchView(View):
@@ -355,4 +359,38 @@ class StatisticsView(View):
         x,y = get_statistics(request)
         path_img = built_statistics(x, y)
         return render(request, "spbpu/statistics.html", {'path_img': path_img})
+
+
+class OriginalSnodSearchView(View):
+    @staticmethod
+    def get(request, id):
+        model = Model.objects.get(id=id)
+        message = get_original_snod_question(model)
+        return render(request, "spbpu/snod/question.html",
+                      {'message': message,
+                       'model': model, 'original_snod': 1})
+
+    @staticmethod
+    def post(request, id):
+
+        answer = request.POST["answer"]
+        message = write_original_snod_answer(request, answer)
+
+        # Проверяем, что нашли лучшую альтернативу в модели
+        flag_find_winner = message['flag_find_winner']
+        if flag_find_winner == 0:
+            model = Model.objects.get(id=id)
+            return render(request, "spbpu/snod/question.html",
+                          {'message': message,
+                           'model': model, 'original_snod': 1})
+        else:
+            return redirect('snod_original_result', pk=id)
+
+
+class OriginalSnodDetailView(View):
+    def get(self, request, id):
+        context = {'response': get_winners_from_model_original_snod(id)}
+        context['model_data'], context['model_header'] = get_model_data(id)
+        context['history'] = get_context_history_answer_original_snod(id)
+        return render(request, "spbpu/snod/original_snod_result.html", {'context': context})
 

@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from services.normalisation import normalisation_time
 from spbpu.models import (Criterion, HistoryAnswer, Model, Option,
-                          PairsOfOptions, Value)
+                          PairsOfOptions, Value, PairsOfOptionsTrueSNOD)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
@@ -16,38 +16,12 @@ def create_files(model: object):
     pairs = PairsOfOptions.objects.filter(id_model=model)
     time_begin = datetime.datetime.now()
 
-    for i in pairs:
-        rows = []
-        option_1 = i.id_option_1
-        option_2 = i.id_option_2
-        criterions = Criterion.objects.filter(id_model=model)
-
-        for j in criterions:
-            a1 = Value.objects.get(id_option=option_1, id_criterion=j)
-            a2 = Value.objects.get(id_option=option_2, id_criterion=j)
-
-            a12 = (a1.value + a2.value) / 2
-
-            # is max
-            if j.direction is True:
-                a1 = a1.value / a12
-                a2 = a2.value / a12
-
-            # is min
-            else:
-                a1 = 2 - (a1.value / a12)
-                a2 = 2 - (a2.value / a12)
-
-            d = a1 - a2 # Разность
-
-            col = [j.number, d]
-            rows.append(col)
-
+    for pair in pairs:
+        rows = make_snd(model, pair)
         rows = _sort(rows)  # Сортируем штобы привести к шкале и нормализуем под проценты
-
-        _init_file(rows, str(i.id), str(model.id))
-        _find_winner_many_qriterion(rows, i)  # ищем победителя
-        _create_image_for_pair(rows, str(model.id), str(i.id))
+        _init_file(rows, pair, model)
+        _find_winner_many_qriterion(rows, pair)  # ищем победителя
+        _create_image_for_pair(rows, model, pair)
 
     time_end = datetime.datetime.now()
 
@@ -81,46 +55,11 @@ def make_question(model):
 
     else:
         for pair in pairs:
-            print('')
-            option_1 = pair.id_option_1
-            option_2 = pair.id_option_2
-
-            data, delimeter_line, n = _read_file(model, pair)
-
-            if delimeter_line + 1 == n:
-                # Данные не разу не сравнивались
-                line_first = data[0]
-                line_end = data[delimeter_line - 1]
-
-                if line_first[1] != line_end[1]:
-                    criteria_number = int(line_first[0])
-                    criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
-                    name_1 = criteria_1.name
-
-                    criteria_number = int(line_end[0])
-                    criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
-                    name_2 = criteria_2.name
-
-                    question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
-                               + name_2 + '" ?'
-                    Message = {'question': question, 'option_1': option_1.id, 'option_2': option_2.id,
-                               'option_1_line': str(0), 'option_2_line': str(delimeter_line - 1), 'model': model.id,
-                            'flag_find_winner': 0}
-
-                    return Message
+            return get_first_question(model, pair)
 
 
-def write_answer(response, answer, auto=False) -> dict:
-    if auto is False:
-        answer: int = int(answer)
-    else:
-        answer: int = random.randint(0,2)
-    option_1: int = int(response.POST["option_1"])
-    option_2: int = int(response.POST["option_2"])
-    option_1_line: str = response.POST["option_1_line"]
-    option_2_line: str = response.POST["option_2_line"]
-    model_id: int = int(response.POST["model"])
-    question: str = response.POST["question"]
+def write_answer(response, answer, auto=False, original_snod=False) -> dict:
+    answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response, answer, auto)
 
     _write_answer_to_history(question, answer, option_1, option_2, model_id)
 
@@ -134,7 +73,7 @@ def write_answer(response, answer, auto=False) -> dict:
     name_1 = ''
     name_2 = ''
 
-    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+    path = get_path(model, pair, original_snod=original_snod)
 
     if answer == 1:
         # Важнее преимущество по критерию а1
@@ -344,8 +283,11 @@ def write_answer(response, answer, auto=False) -> dict:
     return Message
 
 
-def _read_file(model, pair):
-    path = MEDIA_ROOT+ '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+def _read_file(model, pair, original_snod=False):
+    if original_snod:
+        path = MEDIA_ROOT+ '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
+    else:
+        path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
     data = []
 
     with open(path) as f:
@@ -526,8 +468,8 @@ def _precent(value, max) -> float:
     return value / (max / 100)
 
 
-def _init_file(data: list, filename: str, modelname: str) -> None:
-    path = MEDIA_ROOT + '/files/models/' + modelname + '/' + filename + '.txt'
+def _init_file(data: list, pair: str, model: str, original_SNOD: bool = False) -> None:
+    path = get_path(model, pair, original_snod=original_SNOD)
     pair_file = open(path, 'w')
 
     for row in data:
@@ -539,7 +481,7 @@ def _init_file(data: list, filename: str, modelname: str) -> None:
     pair_file.close()
 
 
-def _create_image_for_pair(rows, model, pair):
+def _create_image_for_pair(rows, model, pair, original_shod=False):
     length = len(rows)
     if length > 10:
         return
@@ -589,7 +531,7 @@ def _create_image_for_pair(rows, model, pair):
         na = cv2.arrowedLine(na, (distance, h_begin), (distance, h_end), (0, 0, 0), 4)
         distance += interval
 
-    path = MEDIA_ROOT + '/' + model + '/' + pair + '.png'
+    path = MEDIA_ROOT + '/' + str(model.id) + '/' + str(pair.id) + '.png'
     Image.fromarray(na).save(path)
 
     # Делаем подписи
@@ -610,8 +552,11 @@ def _create_image_for_pair(rows, model, pair):
         else:
             idraw.text((distance, int(h_scale / 2 - 50)), text, font=font, fill='#000000')
         distance += interval
+    if original_shod:
+        p = PairsOfOptionsTrueSNOD.objects.get(id=pair.id)
+    else:
+        p = PairsOfOptions.objects.get(id=pair.id)
 
-    p = PairsOfOptions.objects.get(id=int(pair))
     text = p.id_option_1.name
     length = len(text) * 9
     idraw.text((w-15-length, h-40), text, font=font, fill='#000000')
@@ -628,8 +573,8 @@ def _create_image_for_pair(rows, model, pair):
     img.save(path)
 
 
-def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: list, answer: int):
-    # Оптимизация, чтобы не спрашивать у пользователя повторяющиеся вопросы
+# Оптимизация, чтобы не спрашивать у пользователя повторяющиеся вопросы
+def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: list, answer: int, snod_original=False):
 
     options_1 = option_1_line.split(';')
     options_2 = option_2_line.split(';')
@@ -657,7 +602,11 @@ def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: 
         line += str(option) + ';'
     line += '|=' + str(answer) + '\n'
 
-    path = MEDIA_ROOT + '/files/models/' + str(model_id) + '.txt'
+    if not snod_original:
+        path = MEDIA_ROOT + '/files/models/' + str(model_id) + '.txt'
+    else:
+        path = MEDIA_ROOT + '/files/models/pacom' + str(model_id) + '.txt'
+
     _write_file(line, path)
 
 
@@ -693,3 +642,82 @@ def data_of_winners(model_id):
         data.append(row)
 
     return data, header
+
+
+# Получение ШНР
+def make_snd(id_model, pair):
+    criterions = Criterion.objects.filter(id_model=id_model)
+    rows = []
+
+    for criterion in criterions:
+
+        a1 = Value.objects.get(id_option=pair.id_option_1, id_criterion=criterion)
+        a2 = Value.objects.get(id_option=pair.id_option_2, id_criterion=criterion)
+
+        a12 = (a1.value + a2.value) / 2
+
+        # is max
+        if criterion.direction is True:
+            a1 = a1.value / a12
+            a2 = a2.value / a12
+
+        # is min
+        else:
+            a1 = 2 - (a1.value / a12)
+            a2 = 2 - (a2.value / a12)
+
+        d = a1 - a2  # Разность
+
+        col = [criterion.number, d]
+        rows.append(col)
+
+    return rows
+
+
+def get_first_question(model, pair) -> dict:
+    data, delimeter_line, n = _read_file(model, pair, original_snod=True)
+
+    if delimeter_line + 1 == n:
+        # Данные не разу не сравнивались
+        line_first = data[0]
+        line_end = data[delimeter_line - 1]
+
+        if line_first[1] != line_end[1]:
+            criteria_number = int(line_first[0])
+            criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
+            name_1 = criteria_1.name
+
+            criteria_number = int(line_end[0])
+            criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
+            name_2 = criteria_2.name
+
+            question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
+                       + name_2 + '" ?'
+            Message = {'question': question, 'option_1': pair.id_option_1.id, 'option_2': pair.id_option_2.id,
+                       'option_1_line': str(0), 'option_2_line': str(delimeter_line - 1), 'model': model.id,
+                       'flag_find_winner': 0}
+
+            return Message
+
+
+def get_path(model, pair, original_snod=False):
+    if original_snod:
+        return MEDIA_ROOT + '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
+
+    else:
+        return MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+
+
+def get_data_from_request(response, answer, auto):
+    if auto is False:
+        answer: int = int(answer)
+    else:
+        answer: int = random.randint(0,2)
+    option_1: int = int(response.POST["option_1"])
+    option_2: int = int(response.POST["option_2"])
+    option_1_line: str = response.POST["option_1_line"]
+    option_2_line: str = response.POST["option_2_line"]
+    model_id: int = int(response.POST["model"])
+    question: str = response.POST["question"]
+
+    return answer, option_1, option_2, option_1_line, option_2_line, model_id, question
