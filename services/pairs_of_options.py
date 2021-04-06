@@ -674,8 +674,8 @@ def make_snd(id_model, pair):
     return rows
 
 
-def get_first_question(model, pair) -> dict:
-    data, delimeter_line, n = _read_file(model, pair, original_snod=True)
+def get_first_question(model, pair, original_snod: bool = False) -> dict:
+    data, delimeter_line, n = _read_file(model, pair,original_snod=original_snod)
 
     if delimeter_line + 1 == n:
         # Данные не разу не сравнивались

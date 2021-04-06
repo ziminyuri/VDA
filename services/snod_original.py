@@ -21,7 +21,7 @@ def get_original_snod_question(model):
 
         # Есть пара без найденого победителя, получаем вопрос
         if pair:
-            return get_first_question(model, pair)
+            return get_first_question(model, pair, original_snod=True)
 
     else:
         pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model)
@@ -29,7 +29,7 @@ def get_original_snod_question(model):
             pair = _create_pair(model, FIRST=True)
             Model.objects.filter(id=model.id).update(time_answer_snod=str(datetime.datetime.now()))
             _add_1_to_number_of_question(model)
-            return get_first_question(model, pair)
+            return get_first_question(model, pair, original_snod=True)
         else:
             quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_original_snod'))[
                 'quasi_order_original_snod__max']
@@ -42,7 +42,7 @@ def get_original_snod_question(model):
                     pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
 
                 _add_1_to_number_of_question(model)
-                return get_first_question(model, pair)
+                return get_first_question(model, pair, original_snod=True)
 
             else:
                 # Нашли победителей
@@ -371,7 +371,7 @@ def _find_winner(model: object, pair: object) -> None:
     if result == 1:
 
         Option.objects.filter(id=pair.id_option_1.id).update(
-            quasi_order_original_snod=pair.id_option_1.max_quasi_order_original_snod + 1)
+            quasi_order_original_snod= max_quasi_order_original_snod + 1)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_original_snod=lose)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
