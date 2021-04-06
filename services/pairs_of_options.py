@@ -610,10 +610,14 @@ def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: 
     _write_file(line, path)
 
 
-def absolute_value_in_str(model_id, pair_id):
+def absolute_value_in_str(model_id, pair_id, original_snod = False):
     model = Model.objects.get(id=model_id)
-    pair = PairsOfOptions.objects.get(id=pair_id)
-    data = _read_file(model, pair)
+    if original_snod:
+        pair = PairsOfOptionsTrueSNOD.objects.get(id=pair_id)
+    else:
+        pair = PairsOfOptions.objects.get(id=pair_id)
+
+    data = _read_file(model, pair, original_snod=original_snod)
     data = _sort(data[0], by_number_criterion=True)
 
     criterions = Criterion.objects.filter(id_model=model)

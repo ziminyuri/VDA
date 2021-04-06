@@ -4,8 +4,9 @@ from services.normalisation import normalisation_time
 from django.db.models import Max
 
 from spbpu.models import PairsOfOptionsTrueSNOD, Criterion, Option, Model, Value, HistoryAnswerTrueSNOD
-from services.pairs_of_options import _sort, _init_file, _create_image_for_pair, make_snd, get_first_question, _read_file,\
-    _write_answer_model, get_data_from_request, get_path, _write_file
+from services.pairs_of_options import _sort, _init_file, _create_image_for_pair, make_snd, get_first_question, \
+    _read_file, \
+    _write_answer_model, get_data_from_request, get_path, _write_file, absolute_value_in_str
 
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
@@ -17,7 +18,7 @@ def get_original_snod_question(model):
     # Пары для сравнения существуют
     if pair:
 
-        pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model, already_find_winner=False, flag_not_compared=True)
+        pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model, already_find_winner=False, flag_not_compared=True).first()
 
         # Есть пара без найденого победителя, получаем вопрос
         if pair:
@@ -412,7 +413,7 @@ def _create_pair(model, FIRST=False, option_1=None, option_2=None):
 
 def update_model_after_find_winner(model):
     time_end = datetime.datetime.now()
-    time_begin = model.time_answer_shnur
+    time_begin = model.time_answer_snod
     time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
     delta_time_many = time_end - time_begin
     delta_time_many = normalisation_time(delta_time_many)
@@ -476,6 +477,11 @@ def get_context_history_answer_original_snod(model) -> list:
             item['winner'] = 'Победитель: ' + pair.id_option_1.name
         if pair.flag_winner_option == 0:
             item['winner'] = 'Альтернативы одинаковы'
+
+        item['img'] = 'http://127.0.0.1:8000/media/' + str(model) + '/' + str(pair.id) + '.png'
+
+        absolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
+        item['absolute_value'] = absolute_value
         context.append(item)
 
     return context
