@@ -26,6 +26,7 @@ urlpatterns = [
 
     path('model/origianl_snod/<int:id>', views.OriginalSnodSearchView.as_view(), name='snod_original_search'),
     path('model/origianl_snod/result/<int:id>', views.OriginalSnodDetailView.as_view(), name='snod_original_result'),
+    path('model/origianl_snod/<int:id>/settings', views.SettingsOriginalSnodCreateView.as_view(), name='snod_original_settings_create'),
 
     path('statistics', views.StatisticsView.as_view(), name='statistics')
 ]

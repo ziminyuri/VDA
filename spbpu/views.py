@@ -1,4 +1,5 @@
 import os
+import random
 from random import randint
 
 from django.contrib import auth
@@ -23,11 +24,12 @@ from services.park import (auto_mode_pacom, get_context_history_answer,
 
 from services.snod_original import get_original_snod_question, write_original_snod_answer, \
     get_winners_from_model_original_snod, get_context_history_answer_original_snod
-from services.settings import settingsPACOMCreate
+from services.settings import settingsPACOMCreate, settingsOrigianlSnodCreate
 from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
 from services.statistics import get_statistics, built_statistics
+from goto import with_goto
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -80,7 +82,7 @@ class RegistrationView(View):
 class LogoutView(View):
     def get(self, request):
         django_logout(request)
-        return redirect("index")
+        return redirect("login")
 
 
 class IndexView(View):
@@ -361,30 +363,61 @@ class StatisticsView(View):
         return render(request, "spbpu/statistics.html", {'path_img': path_img})
 
 
-class OriginalSnodSearchView(View):
+class SettingsOriginalSnodCreateView(View):
     @staticmethod
+
     def get(request, id):
+        context = {'model': get_object_or_404(Model, id=id)}
+        context['mode'] = ['Классический', 'Автоматический']
+        return render(request, "spbpu/snod/settings_original_snod.html", context)
+
+    def post(self, request, id, **kwargs):
+        settings = settingsOrigianlSnodCreate(request)
+        Model.objects.filter(id=id).update(id_settings_original_snod=settings)
+        return redirect('snod_original_search', id=id)
+
+
+class OriginalSnodSearchView(View):
+    def get(self, request, id):
         model = Model.objects.get(id=id)
+
+        if model.id_settings_original_snod is None:
+            return redirect('snod_original_settings_create', id=id)
+
+        if model.id_settings_original_snod.auto_mode is True:
+            return self.post(request, id)
+
         message = get_original_snod_question(model)
         return render(request, "spbpu/snod/question.html",
                       {'message': message,
                        'model': model, 'original_snod': 1})
 
-    @staticmethod
-    def post(request, id):
+    def post(self, request, id):
+        model = Model.objects.get(id=id)
 
-        answer = request.POST["answer"]
-        message = write_original_snod_answer(request, answer)
+        flag_find_winner = 0
+        message = get_original_snod_question(model)
+
+        while (flag_find_winner == 0 and model.id_settings_original_snod.auto_mode is True):
+            answer: int = random.randint(0, 3)
+            message = write_original_snod_answer(request, answer, auto=True,
+                                       message=message)
+            flag_find_winner = message['flag_find_winner']
+
+        if model.id_settings_original_snod.auto_mode is False:
+            answer = request.POST["answer"]
+            message = write_original_snod_answer(request, answer, auto=False)
 
         # Проверяем, что нашли лучшую альтернативу в модели
         flag_find_winner = message['flag_find_winner']
-        if flag_find_winner == 0:
-            model = Model.objects.get(id=id)
+
+        if flag_find_winner == 1:
+            return redirect('snod_original_result', id=id)
+
+        else:
             return render(request, "spbpu/snod/question.html",
                           {'message': message,
                            'model': model, 'original_snod': 1})
-        else:
-            return redirect('snod_original_result', id=id)
 
 
 class OriginalSnodDetailView(View):

@@ -1,0 +1,44 @@
+{% extends "spbpu/base.html" %}
+{% block content %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card ">
+                    <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
+                        <div class="card-content">
+                            <span class="card-title">Выберите режим работы системы по методу ШНУР</span>
+
+                            {% csrf_token %}
+                            <div class="input-field col s12">
+
+                                <select class="form-select" id="mode" name="mode">
+                                    {% for m in mode %}
+                                        <option selected value= "{{ m }}">
+                                        {{ m }}
+                                    {% endfor %}
+                                </select>
+
+                                <label>Кол-во критериев</label>
+
+                            </div>
+                        <br>
+
+
+                            <div class="card-action">
+                                <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+
+
+{% endblock %}

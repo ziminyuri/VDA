@@ -17,6 +17,16 @@ class SettingsPACOM(models.Model):
             return cls(auto_mode=True)
 
 
+class SettingsOrigianlSNOD(models.Model):
+    auto_mode = models.BooleanField(default=False)
+
+    def create(cls, request):
+        if request.POST['mode'] == 'Классический':
+            return cls()
+        else:
+            return cls(auto_mode=True)
+
+
 # Модель ситуации поиска лучшей альтернативы
 class Model(models.Model):
     is_demo = models.BooleanField()
@@ -43,6 +53,7 @@ class Model(models.Model):
     number_of_questions_snod = models.IntegerField(default=0)
     number_of_pairs_snod = models.IntegerField(default=0)
     number_of_incomparable_snod = models.IntegerField(default=0)
+    id_settings_original_snod = models.OneToOneField(SettingsOrigianlSNOD, null=True, on_delete=models.CASCADE)
 
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
 

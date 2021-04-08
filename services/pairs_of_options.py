@@ -543,7 +543,7 @@ def _create_image_for_pair(rows, model, pair, original_shod=False):
     distance = 30
     distance += interval * 2
     for row in rows:
-        text = str(row[0])
+        text = str((row[0])+1)
         if float(row[1]) > 0:
             idraw.text((distance, int(h_scale / 2 + 50)), text, font=font, fill='#000000')
         elif float(row[1]) == 0:
@@ -624,7 +624,7 @@ def absolute_value_in_str(model_id, pair_id, original_snod = False):
     result = []
     n = len(criterions)
     for i in range(n):
-        line = str(data[i][0]) + ' - ' + criterions[i].name + ' = ' + str(data[i][1]) + str('\n')
+        line = str(int(data[i][0]) + 1) + ' - ' + criterions[i].name + ' = ' + str(data[i][1]) + str('\n')
         result.append(line)
     return result
 
@@ -712,11 +712,8 @@ def get_path(model, pair, original_snod=False):
         return MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
 
 
-def get_data_from_request(response, answer, auto):
-    if auto is False:
-        answer: int = int(answer)
-    else:
-        answer: int = random.randint(0,2)
+def get_data_from_request(response, answer):
+    answer: int = int(answer)
     option_1: int = int(response.POST["option_1"])
     option_2: int = int(response.POST["option_2"])
     option_1_line: str = response.POST["option_1_line"]

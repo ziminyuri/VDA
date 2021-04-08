@@ -1,4 +1,4 @@
-from spbpu.models import SettingsPACOM
+from spbpu.models import SettingsPACOM, SettingsOrigianlSNOD
 
 
 def settingsPACOMCreate(request):
@@ -9,3 +9,10 @@ def settingsPACOMCreate(request):
         return SettingsPACOM.objects.create(larichev_question=False)
     else:
         return SettingsPACOM.objects.create(auto_mode=True)
+
+
+def settingsOrigianlSnodCreate(request):
+    if request.POST['mode'] == 'Классический':
+        return SettingsOrigianlSNOD.objects.create()
+    else:
+        return SettingsOrigianlSNOD.objects.create(auto_mode=True)

@@ -3,10 +3,9 @@ import datetime
 from services.normalisation import normalisation_time
 from django.db.models import Max
 
-from spbpu.models import PairsOfOptionsTrueSNOD, Criterion, Option, Model, Value, HistoryAnswerTrueSNOD
+from spbpu.models import PairsOfOptionsTrueSNOD, Criterion, Option, Model, HistoryAnswerTrueSNOD
 from services.pairs_of_options import _sort, _init_file, _create_image_for_pair, make_snd, get_first_question, \
-    _read_file, \
-    _write_answer_model, get_data_from_request, get_path, _write_file, absolute_value_in_str
+    _read_file, _write_answer_model, get_data_from_request, get_path, _write_file, absolute_value_in_str
 
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
@@ -51,9 +50,12 @@ def get_original_snod_question(model):
                 return {'flag_find_winner': 1}
 
 
-def write_original_snod_answer(response, answer, auto=False):
-    answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response,
-                                                                                                         answer, auto)
+def write_original_snod_answer(response, answer, auto=False, message=None):
+    if auto is False:
+        answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response,
+                                                                                                         answer)
+    else:
+        answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_meaage(answer, message)
     _write_answer_to_history_original_snod(question, answer, option_1, option_2, model_id)
 
     model = Model.objects.get(id=model_id)
@@ -481,7 +483,20 @@ def get_context_history_answer_original_snod(model) -> list:
         item['img'] = 'http://127.0.0.1:8000/media/' + str(model) + '/' + str(pair.id) + '.png'
 
         absolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
+        dateabsolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
         item['absolute_value'] = absolute_value
         context.append(item)
 
     return context
+
+
+def get_data_from_meaage(answer, message):
+    answer: int = int(answer)
+    option_1: int = int(message["option_1"])
+    option_2: int = int(message["option_2"])
+    option_1_line: str = message["option_1_line"]
+    option_2_line: str = message["option_2_line"]
+    model_id: int = int(message["model"])
+    question: str = message["question"]
+
+    return answer, option_1, option_2, option_1_line, option_2_line, model_id, question
