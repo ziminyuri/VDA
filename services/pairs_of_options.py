@@ -559,8 +559,8 @@ def _create_image_for_pair(rows, model, pair, original_shod=False):
 
     text = p.id_option_1.name
     length = len(text) * 9
-    idraw.text((w-15-length, h-40), text, font=font, fill='#000000')
-    idraw.text((15, h-40), p.id_option_2.name, font=font, fill='#000000')
+    idraw.text((w-15-length, h-40), p.id_option_2.name, font=font, fill='#000000')
+    idraw.text((15, h-40),text , font=font, fill='#000000')
 
     idraw.text((w-45, h/2), 'Ox', font=font, fill='#000000')
     idraw.text((60, 15), 'Oy', font=font, fill='#000000')

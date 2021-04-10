@@ -28,8 +28,7 @@ from services.settings import settingsPACOMCreate, settingsOrigianlSnodCreate
 from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
-from services.statistics import get_statistics, built_statistics
-from goto import with_goto
+from services.statistics import get_statistics, built_statistics, get_statistics_original_snod,  get_table_context
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -358,9 +357,18 @@ class ParkDetailView(DetailView):
 
 class StatisticsView(View):
     def get(self, request):
-        x,y = get_statistics(request)
-        path_img = built_statistics(x, y)
-        return render(request, "spbpu/statistics.html", {'path_img': path_img})
+        x_pacom,y_pacom = get_statistics(request)
+        path_img = built_statistics(x_pacom, y_pacom)
+        context_table_pacom = get_table_context(x_pacom, y_pacom)
+
+        x_snod, y_snod = get_statistics_original_snod(request)
+        path_img_snod = built_statistics(x_snod, y_snod)
+        context_table_snod = get_table_context(x_snod, y_snod)
+
+        return render(request, "spbpu/statistics.html", {'path_img': path_img,
+                                                         'path_img_snod': path_img_snod,
+                                                         'context_table_pacom': context_table_pacom,
+                                                         'context_table_snod': context_table_snod})
 
 
 class SettingsOriginalSnodCreateView(View):
@@ -399,7 +407,7 @@ class OriginalSnodSearchView(View):
         message = get_original_snod_question(model)
 
         while (flag_find_winner == 0 and model.id_settings_original_snod.auto_mode is True):
-            answer: int = random.randint(0, 3)
+            answer: int = random.randint(0, 2)
             message = write_original_snod_answer(request, answer, auto=True,
                                        message=message)
             flag_find_winner = message['flag_find_winner']

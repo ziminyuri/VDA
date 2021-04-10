@@ -79,3 +79,44 @@ def built_statistics(x, y):
     png_path = path + str(r) + '.png'
     plt.savefig(png_path)
     return path_url + str(r) + '.png'
+
+
+def get_statistics_original_snod(request):
+    user_profile = get_userprofile(request)
+    models = Model.objects.filter(id_user=user_profile)
+
+    statistics_items = []
+    for model in models:
+        flag_find = False
+        for item in statistics_items:
+            if model.number_of_pairs_snod  == item.get_number_of_pairs():
+                number_of_incomparable = item.get_number_of_incomparable()
+                new_number = (number_of_incomparable + model.number_of_incomparable_snod) / 2
+                item.set_number_of_incomparable(new_number)
+                flag_find = True
+
+        if not flag_find:
+            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod)
+            statistics_items.append(item)
+
+    statistics_items.sort(key=lambda k: k.get_number_of_pairs())
+
+    x = []
+    y = []
+
+    for item in statistics_items:
+        x.append(item.get_number_of_pairs())
+        y.append(item.get_number_of_incomparable())
+
+    return x, y
+
+
+def get_table_context(x, y):
+    object = []
+    for i in range(len(x)):
+        row = []
+        row.append(y[i])
+        row.append(x[i])
+        object.append(row)
+
+    return object

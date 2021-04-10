@@ -69,8 +69,9 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
     name_2 = ''
 
     path = get_path(model, pair, original_snod=True)
-
+    Message = None
     if answer == 1:
+
         # Важнее преимущество по критерию а1
 
         # Строка состоит из одного критерия или из нескольких, если из одного то -1
@@ -91,8 +92,7 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
 
             value_line_end = float(line_end[1])
 
-            if line_begin[0] != line_end[0] and value_line_end != 0.0:
-
+            if (float(line_begin[1]) > 0 or (float(line_end[1])) < 0):
                 criteria_number = int(line_begin[0])
                 criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                 name_1 = criteria_1.name
@@ -106,6 +106,7 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                         first_line = False
                     else:
                         name_2 += ' и ' + criteria_2.name
+
 
             elif value_line_end == 0.0:
                 # Если значение с одного края стали равны нулю, а с другого не дошли до центра или до 0
@@ -154,8 +155,8 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                 criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                 name_1 = criteria_1.name
 
-
     elif answer == 0:
+
         line = option_1_line + "|" + option_2_line + "|=0\n"
         _write_file(line, path)
 
@@ -170,13 +171,20 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
         option_2_line = str(new_line_2 - 1)
         option_1_line = str(new_line_1 + 1)
 
-        if line_begin[0] == line_end[0] or new_line_1 + 1 == new_line_2:
+        if (float(line_end[1]) >= 0) or (float(line_begin[1]) <=0):
             # Сошлись к центру  ---0---^
-            _find_winner(model, pair)
+
+            if (float(line_end[1]) < 0) or (float(line_begin[1]) <=0):
+                _find_winner(model, pair, empty_option_1 = True)
+            elif (float(line_end[1]) >= 0) or (float(line_begin[1]) >0):
+                _find_winner(model, pair, empty_option_2 = True)
+            else:
+                _find_winner(model, pair)
             Message = get_original_snod_question(model)
             flag_new_pair = True
 
-        elif line_begin[0] != line_end[0] or new_line_1 + 1 != new_line_2:
+        # elif line_begin[0] != line_end[0] or new_line_1 + 1 != new_line_2:
+        else:
             criteria_number = int(line_end[0])
             criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
             name_2 = criteria_2.name
@@ -186,10 +194,12 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
             name_1 = criteria_1.name
 
     else:
+
         # Строка состоит из одного критерия или из нескольких, если из одного то -1
         find_delimeter = option_2_line.find(';')
 
         if find_delimeter == -1:
+
             line = option_1_line + "|" + option_2_line + "|=2\n"
             _write_file(line, path)
 
@@ -204,7 +214,8 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
             option_1_line += ';' + str(new_line_1 + 1)
 
             value_line_begin = float(line_begin[1])
-            if line_begin[0] != line_end[0] and value_line_begin != 0.0:
+
+            if (float(line_begin[1]) > 0 and (float(line_end[1])) < 0) and new_line_1 != new_line_2:
                 first_line = True
                 for row in list_1:
                     criteria_number = data[int(row[0])][0]
@@ -268,7 +279,14 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                 criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                 name_1 = criteria_1.name
 
+    if name_1 == '' or name_2 == '':
+        _find_winner(model, pair)
+        Message = get_original_snod_question(model)
+        flag_new_pair = True
+
     if flag_new_pair is False:
+
+
         _add_1_to_number_of_question(model)
         question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
                    + name_2 + '" ?'
@@ -276,7 +294,12 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                    'option_1_line': option_1_line, 'option_2_line': option_2_line, 'model': model.id,
                    'flag_find_winner': 0}
 
+    if Message is None:
+        print('')
+        Message = get_original_snod_question(model)
+
     return Message
+
 
 
 # Добавление +1 к кол-ву вопросов
@@ -297,7 +320,7 @@ def _write_answer_to_history_original_snod(question, answer, option_1, option_2,
         HistoryAnswerTrueSNOD.objects.create(question=question, answer='Одинаково важны', pair=pair, id_model=model)
 
 
-def _find_winner(model: object, pair: object) -> None:
+def _find_winner(model: object, pair: object, empty_option_1 = False, empty_option_2 = False) -> None:
     path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
 
     with open(path) as f:
@@ -311,8 +334,9 @@ def _find_winner(model: object, pair: object) -> None:
     first_line = False
     flag_1_compensable = False
     flag_2_compensable = False
-    option_1_is_empty = True
-    option_2_is_empty = True
+
+    winner_1 = False
+    winner_2 = False
 
     for i in range(n):
         if lines[i].find('|=') != -1:
@@ -320,7 +344,7 @@ def _find_winner(model: object, pair: object) -> None:
             if temp_result == 1 and flag_1 is False:
 
                 if not first_line:
-                    flag_2_compensable = True
+                    flag_1_compensable = True
                     first_line = True
 
                 flag_1 = True
@@ -329,36 +353,38 @@ def _find_winner(model: object, pair: object) -> None:
             elif temp_result == 2 and flag_2 is False:
 
                 if not first_line:
-                    flag_1_compensable = True
+                    flag_2_compensable = True
                     first_line = True
 
                 flag_2 = True
                 option_2_is_empty = False
 
-    if temp_result == 1 and flag_1_compensable:
-        result = 1
-    elif temp_result == 2 and flag_2_compensable:
-        result = 2
+            elif temp_result == 0 and flag_1 is False and flag_2 is True:
+                winner_2 = True
+            elif temp_result == 0 and flag_2 is False and flag_1 is True:
+                winner_1 = True
 
-    elif flag_2_compensable and not flag_2 and flag_1:
-        result = 1
-    elif flag_1_compensable and not flag_1 and flag_2:
-        result = 2
+    if temp_result == 1:
+        winner_1 = True
+    if temp_result ==2:
+        winner_2 = True
 
-    elif flag_1 and option_1_is_empty and flag_2_compensable:
-        result = 3
-    elif flag_2 and option_2_is_empty and flag_1_compensable:
+    if winner_1 and winner_2:
         result = 3
 
-    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and not option_2_is_empty:
+    elif flag_1_compensable and not flag_2 and flag_1:
         result = 1
-    elif not flag_1_compensable and not flag_2_compensable and not option_1_is_empty and option_2_is_empty:
+    elif flag_2_compensable and not flag_1 and flag_2:
         result = 2
-    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and option_2_is_empty:
-        result = 0
+
+    elif not flag_1_compensable and not flag_2_compensable and empty_option_1  and not empty_option_2 :
+        result = 1
+    elif not flag_1_compensable and not flag_2_compensable and not empty_option_1  and empty_option_2:
+        result = 2
+
     else:
-        _update_pair_to_not_comparable(pair)
-        return
+        result = 0
+
 
     if pair.id_option_1.quasi_order_original_snod > pair.id_option_2.quasi_order_original_snod:
         max_quasi_order_original_snod = pair.id_option_1.quasi_order_original_snod
@@ -393,6 +419,13 @@ def _find_winner(model: object, pair: object) -> None:
             quasi_order_original_snod=max_quasi_order_original_snod + 1)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=0)
+    else:
+        Option.objects.filter(id=pair.id_option_1.id).update(
+            quasi_order_original_snod=max_quasi_order_original_snod + 1)
+        Option.objects.filter(id=pair.id_option_2.id).update(
+            quasi_order_original_snod=max_quasi_order_original_snod + 1)
+        PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True,
+                                                                 flag_winner_option=3)
 
 
 
@@ -435,9 +468,9 @@ def _update_pair_to_not_comparable(pair):
     option_2 = Option.objects.filter(id=pair.id_option_2.id).first()
 
     if option_1.quasi_order_pacom > option_2.quasi_order_pacom:
-        max_quasi_order_original_snod = option_1.quasi_order_pacom
-    else:
         max_quasi_order_original_snod = option_1.quasi_order_original_snod
+    else:
+        max_quasi_order_original_snod = option_2.quasi_order_original_snod
 
     Option.objects.filter(id=pair.id_option_1.id).update(
         quasi_order_original_snod=max_quasi_order_original_snod + 1)

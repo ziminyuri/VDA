@@ -3,7 +3,51 @@
     <div class="container">
 
         <div class="row">
+            <h5>Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ПАРК</h5>
+
 <img src="{{path_img}}" class="rounded float-start">
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Кол-во не сравнимых пар</th>
+                <th scope="col">Кол-во пар альтернатив</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in context_table_pacom %}
+                <tr>
+                 {% for i in item %}
+                    <td>{{ i }}</td>
+                     {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    <br><br>
+     <div class="row">
+            <h5>Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ШНУР</h5>
+
+<img src="{{path_img_snod}}" class="rounded float-start">
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Кол-во не сравнимых пар</th>
+                <th scope="col">Кол-во пар альтернатив</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in context_table_snod %}
+                <tr>
+                 {% for i in item %}
+                    <td>{{ i }}</td>
+                     {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
         </div>
     </div>
 {% endblock %}
