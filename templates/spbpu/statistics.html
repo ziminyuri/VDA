@@ -1,6 +1,8 @@
 {% extends "spbpu/base.html" %}
 {% block content %}
     <div class="container">
+    {% if error == False %}
+
 
         <div class="row">
             <h5>Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ПАРК</h5>
@@ -12,6 +14,7 @@
             <tr>
                 <th scope="col">Кол-во не сравнимых пар</th>
                 <th scope="col">Кол-во пар альтернатив</th>
+                 <th scope="col">Кол-во альтернатив</th>
             </tr>
             </thead>
             <tbody>
@@ -36,6 +39,7 @@
             <tr>
                 <th scope="col">Кол-во не сравнимых пар</th>
                 <th scope="col">Кол-во пар альтернатив</th>
+                <th scope="col">Кол-во альтернатив</th>
             </tr>
             </thead>
             <tbody>
@@ -49,5 +53,13 @@
             </tbody>
         </table>
         </div>
-    </div>
+
+    {% else %}
+         <div class="row p5 ">
+            <blockquote class="">Нет результатов для вывода статистик. Сначала получите результат в моделяз!</blockquote>
+        </div>
+
+    {% endif %}
+
+</div>
 {% endblock %}

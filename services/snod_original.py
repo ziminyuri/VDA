@@ -11,7 +11,7 @@ from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
 # Получение вопроса
-def get_original_snod_question(model):
+def  get_original_snod_question(model):
 
     pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model).filter(already_find_winner=False).first()
     # Пары для сравнения существуют
@@ -92,20 +92,11 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
 
             value_line_end = float(line_end[1])
 
-            if (float(line_begin[1]) > 0 or (float(line_end[1])) < 0):
-                criteria_number = int(line_begin[0])
-                criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
-                name_1 = criteria_1.name
-
-                first_line = True
-                for row in list_2:
-                    criteria_number = data[int(row[0])][0]
-                    criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
-                    if first_line is True:
-                        name_2 = criteria_2.name
-                        first_line = False
-                    else:
-                        name_2 += ' и ' + criteria_2.name
+            if (float(line_begin[1]) <= 0 or (float(line_end[1])) >= 0):
+                # Сошлись к центру  ---0---^
+                _find_winner(model, pair)
+                Message = get_original_snod_question(model)
+                flag_new_pair = True
 
 
             elif value_line_end == 0.0:
@@ -126,10 +117,31 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                 flag_new_pair = True
 
             else:
-                # Сошлись к центру  ---0---^
-                _find_winner(model, pair)
-                Message = get_original_snod_question(model)
-                flag_new_pair = True
+                criteria_number = int(line_begin[0])
+                criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
+                name_1 = criteria_1.name
+
+                first_line = True
+
+                for row in list_2:
+                    # TODO ЗДЕСЬ ОШИБКА
+                    if row == '-1':
+                        _find_winner(model, pair)
+                        Message = get_original_snod_question(model)
+                        flag_new_pair = True
+                    else:
+                        try:
+                            criteria_number = data[int(row[0])][0]
+                            # criteria_number = int(data[row[0]][0])
+                        except Exception as e:
+                            print('')
+                        criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
+                        if first_line is True:
+                            name_2 = criteria_2.name
+                            first_line = False
+                        else:
+                            name_2 += ' и ' + criteria_2.name
+
 
         else:
             line = option_1_line + "|" + option_2_line + "|=0\n"
@@ -278,13 +290,18 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                 criteria_number = int(line_begin[0])
                 criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                 name_1 = criteria_1.name
+    try:
+        if Message['flag_find_winner'] == 1:
+            return Message
+    except:
+        pass
 
     if name_1 == '' or name_2 == '':
         _find_winner(model, pair)
         Message = get_original_snod_question(model)
         flag_new_pair = True
 
-    if flag_new_pair is False:
+    elif flag_new_pair is False:
 
 
         _add_1_to_number_of_question(model)
@@ -294,7 +311,7 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                    'option_1_line': option_1_line, 'option_2_line': option_2_line, 'model': model.id,
                    'flag_find_winner': 0}
 
-    if Message is None:
+    elif Message is None:
         print('')
         Message = get_original_snod_question(model)
 
@@ -508,9 +525,9 @@ def get_context_history_answer_original_snod(model) -> list:
             item['winner'] = 'Альтернативы не сравнимы'
         elif pair.flag_winner_option == 2:
             item['winner'] = 'Победитель: ' + pair.id_option_2.name
-        if pair.flag_winner_option == 1:
+        elif pair.flag_winner_option == 1:
             item['winner'] = 'Победитель: ' + pair.id_option_1.name
-        if pair.flag_winner_option == 0:
+        elif pair.flag_winner_option == 0:
             item['winner'] = 'Альтернативы одинаковы'
 
         item['img'] = 'http://127.0.0.1:8000/media/' + str(model) + '/' + str(pair.id) + '.png'

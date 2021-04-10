@@ -29,6 +29,7 @@ from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
 from services.statistics import get_statistics, built_statistics, get_statistics_original_snod,  get_table_context
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 if 'DATABASE_URL' in os.environ:
     path_img = 'glacial-everglades-54891.herokuapp.com'
@@ -84,12 +85,16 @@ class LogoutView(View):
         return redirect("login")
 
 
-class IndexView(View):
+class IndexView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request):
         return render(request, "spbpu/index.html", {})
 
 
-class DemoModelCreateView(View):
+class DemoModelCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request):
         return render(request, "spbpu/model/demo_choice_number.html", {})
 
@@ -101,7 +106,10 @@ class DemoModelCreateView(View):
 
         return redirect('models_id', response.id)
 
-class UploadView(View):
+
+class UploadView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def post(self, request):
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
@@ -119,7 +127,9 @@ class UploadView(View):
         return render(request, "spbpu/upload_model.html", {})
 
 
-class DownloadCSVView(View):
+class DownloadCSVView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def post(self, request):
         file_path = 'media/demo/demo.csv'
         data = open(file_path, "rb").read()
@@ -130,7 +140,9 @@ class DownloadCSVView(View):
         return response
 
 
-class ModelCreateView(View):
+class ModelCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request):
         number_for_select = list(range(1, 11))
         return render(request, "spbpu/model/choice_number.html", {'number_for_select': number_for_select})
@@ -151,7 +163,9 @@ class ModelCreateView(View):
                        'error': None})
 
 
-class ModelListCreateView(View):
+class ModelListCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     @staticmethod
     def get(request):
         user = get_userprofile(request)
@@ -179,7 +193,9 @@ class ModelListCreateView(View):
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
 
-class ModelView(View):
+class ModelView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     @staticmethod
     def get(request, id):
         try:
@@ -212,7 +228,9 @@ class ModelView(View):
             return redirect('models')
 
 
-class SnodSearchView(View):
+class SnodSearchView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     @staticmethod
     def get(request, id):
         model = Model.objects.get(id=id)
@@ -239,7 +257,9 @@ class SnodSearchView(View):
                           {})
 
 
-class SnodDetailView(View):
+class SnodDetailView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request, id):
         model = Model.objects.get(id=id)
         option_shnur = Option.objects.get(id=model.id_winner_option_shnur)
@@ -279,7 +299,9 @@ class SnodDetailView(View):
                       response)
 
 
-class ParkSearchView(View):
+class ParkSearchView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request, id):
         model = Model.objects.get(id=id)
         if model.id_settings_pacom is None:
@@ -329,7 +351,9 @@ class ParkSearchView(View):
                 return render(request, 'spbpu/park/compare_alternative.html', {'response': response, 'model': model})
 
 
-class SettingsPACOMCreateView(View):
+class SettingsPACOMCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     @staticmethod
     def get(request, id):
         context = {'model': get_object_or_404(Model, id=id)}
@@ -342,7 +366,9 @@ class SettingsPACOMCreateView(View):
         return redirect('park_search', id=id)
 
 
-class ParkDetailView(DetailView):
+class ParkDetailView(LoginRequiredMixin, DetailView):
+    login_url = 'login'
+
     model = Model
     template_name = 'spbpu/park/result.html'
 
@@ -355,25 +381,37 @@ class ParkDetailView(DetailView):
         return context
 
 
-class StatisticsView(View):
-    def get(self, request):
-        x_pacom,y_pacom = get_statistics(request)
-        path_img = built_statistics(x_pacom, y_pacom)
-        context_table_pacom = get_table_context(x_pacom, y_pacom)
+class StatisticsView(LoginRequiredMixin, View):
+    login_url = 'login'
 
-        x_snod, y_snod = get_statistics_original_snod(request)
-        path_img_snod = built_statistics(x_snod, y_snod)
-        context_table_snod = get_table_context(x_snod, y_snod)
+    def get(self, request):
+        try:
+            x_pacom,y_pacom, number_of_alternatives = get_statistics(request)
+            path_img = built_statistics(x_pacom, y_pacom)
+            context_table_pacom = get_table_context(x_pacom, y_pacom, number_of_alternatives)
+
+            x_snod, y_snod, number_of_alternatives = get_statistics_original_snod(request)
+            path_img_snod = built_statistics(x_snod, y_snod)
+            context_table_snod = get_table_context(x_snod, y_snod, number_of_alternatives)
+            error = False
+        except Exception as e:
+            path_img = None
+            path_img_snod = None
+            context_table_snod = None
+            context_table_pacom = None
+            error = True
 
         return render(request, "spbpu/statistics.html", {'path_img': path_img,
                                                          'path_img_snod': path_img_snod,
                                                          'context_table_pacom': context_table_pacom,
-                                                         'context_table_snod': context_table_snod})
+                                                         'context_table_snod': context_table_snod,
+                                                         'error': error})
 
 
-class SettingsOriginalSnodCreateView(View):
+class SettingsOriginalSnodCreateView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     @staticmethod
-
     def get(request, id):
         context = {'model': get_object_or_404(Model, id=id)}
         context['mode'] = ['Классический', 'Автоматический']
@@ -385,7 +423,9 @@ class SettingsOriginalSnodCreateView(View):
         return redirect('snod_original_search', id=id)
 
 
-class OriginalSnodSearchView(View):
+class OriginalSnodSearchView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request, id):
         model = Model.objects.get(id=id)
 
@@ -428,7 +468,9 @@ class OriginalSnodSearchView(View):
                            'model': model, 'original_snod': 1})
 
 
-class OriginalSnodDetailView(View):
+class OriginalSnodDetailView(LoginRequiredMixin, View):
+    login_url = 'login'
+
     def get(self, request, id):
         context = {'response': get_winners_from_model_original_snod(id)}
         context['model_data'], context['model_header'] = get_model_data(id)
