@@ -20,6 +20,7 @@ from services.pairs_of_options import (absolute_value_in_str, create_files,
 from services.park import (auto_mode_pacom, get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
+from services.history import checking_already_has_answer
 
 
 from services.snod_original import get_original_snod_question, write_original_snod_answer, \
@@ -451,6 +452,13 @@ class OriginalSnodSearchView(LoginRequiredMixin, View):
             message = write_original_snod_answer(request, answer, auto=True,
                                        message=message)
             flag_find_winner = message['flag_find_winner']
+            if flag_find_winner != 1:
+
+                message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+                while flag_checking == True:
+                    flag_find_winner = message['flag_find_winner']
+                    if flag_find_winner != 1:
+                        message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
 
         if model.id_settings_original_snod.auto_mode is False:
             answer = request.POST["answer"]
@@ -459,10 +467,18 @@ class OriginalSnodSearchView(LoginRequiredMixin, View):
         # Проверяем, что нашли лучшую альтернативу в модели
         flag_find_winner = message['flag_find_winner']
 
+
+
         if flag_find_winner == 1:
             return redirect('snod_original_result', id=id)
 
         else:
+            message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+            while flag_checking == True:
+                flag_find_winner = message['flag_find_winner']
+                if flag_find_winner != 1:
+                    message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+
             return render(request, "spbpu/snod/question.html",
                           {'message': message,
                            'model': model, 'original_snod': 1})

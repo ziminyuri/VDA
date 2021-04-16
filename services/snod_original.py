@@ -318,7 +318,6 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
     return Message
 
 
-
 # Добавление +1 к кол-ву вопросов
 def _add_1_to_number_of_question(model):
     Model.objects.filter(id=model.id).update(number_of_questions_snod=model.number_of_questions_snod + 1)

@@ -53,6 +53,7 @@ class Model(models.Model):
     number_of_questions_snod = models.IntegerField(default=0)
     number_of_pairs_snod = models.IntegerField(default=0)
     number_of_incomparable_snod = models.IntegerField(default=0)
+    number_repeated_questions_snod = models.PositiveIntegerField(default=0)   # Кол-во вопросов которые повторились
     id_settings_original_snod = models.OneToOneField(SettingsOrigianlSNOD, null=True, on_delete=models.CASCADE)
 
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
