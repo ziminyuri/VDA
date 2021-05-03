@@ -134,7 +134,7 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                             criteria_number = data[int(row[0])][0]
                             # criteria_number = int(data[row[0]][0])
                         except Exception as e:
-                            print('')
+                            pass
                         criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                         if first_line is True:
                             name_2 = criteria_2.name
@@ -312,7 +312,6 @@ def write_original_snod_answer(response, answer, auto=False, message=None):
                    'flag_find_winner': 0}
 
     elif Message is None:
-        print('')
         Message = get_original_snod_question(model)
 
     return Message

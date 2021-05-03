@@ -35,7 +35,7 @@ def create_model(demo_model: bool = False, path_csv=None, request=None) -> objec
         return model
 
     except Exception as e:
-        print(e)
+        pass
 
 
 def _filling_custom_model(model: object, request) -> bool:

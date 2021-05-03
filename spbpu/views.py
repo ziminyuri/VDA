@@ -21,6 +21,7 @@ from services.park import (auto_mode_pacom, get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
 from services.history import checking_already_has_answer
+from services.graph import get_graph_pacom, get_graph_snod
 
 
 from services.snod_original import get_original_snod_question, write_original_snod_answer, \
@@ -29,7 +30,8 @@ from services.settings import settingsPACOMCreate, settingsOrigianlSnodCreate
 from spbpu.models import (HistoryAnswer, Model, Option, PairsOfOptions)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
-from services.statistics import get_statistics, built_statistics, get_statistics_original_snod,  get_table_context
+from services.statistics import get_statistics, built_statistics, get_statistics_original_snod,  get_table_context, \
+    built_statistics_number_question
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 if 'DATABASE_URL' in os.environ:
@@ -379,6 +381,12 @@ class ParkDetailView(LoginRequiredMixin, DetailView):
         context['model_data'], context['model_header'] = get_model_data(self.kwargs['pk'])
         context['history'] = get_context_history_answer(self.kwargs['pk'])
 
+        if 'DATABASE_URL' in os.environ:
+            context['graph'] = get_graph_pacom(self.kwargs['pk'])
+
+        else:
+            context['graph'] = 'http://127.0.0.1:8000/media' + get_graph_pacom(self.kwargs['pk'])
+
         return context
 
 
@@ -395,16 +403,26 @@ class StatisticsView(LoginRequiredMixin, View):
             path_img_snod = built_statistics(x_snod, y_snod)
             context_table_snod = get_table_context(x_snod, y_snod, number_of_alternatives)
             error = False
+
+            number_of_alternatives, number_of_question, number_of_repeted_question, path_img_snod_number_question, path_img_snod_number_of_repeted_question = built_statistics_number_question(request)
+            context_table_snod_number_of_question = get_table_context(number_of_repeted_question,number_of_question, number_of_alternatives)
+
         except Exception as e:
             path_img = None
             path_img_snod = None
             context_table_snod = None
             context_table_pacom = None
             error = True
+            path_img_snod_number_question = None
+            path_img_snod_number_of_repeted_question = None
+            context_table_snod_number_of_question = None
 
         return render(request, "spbpu/statistics.html", {'path_img': path_img,
                                                          'path_img_snod': path_img_snod,
+                                                         'path_img_snod_number_question': path_img_snod_number_question,
+                                                         'path_img_snod_number_of_repeted_question': path_img_snod_number_of_repeted_question,
                                                          'context_table_pacom': context_table_pacom,
+                                                         'context_table_snod_number_of_question': context_table_snod_number_of_question,
                                                          'context_table_snod': context_table_snod,
                                                          'error': error})
 
@@ -492,5 +510,10 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
         context['model_data'], context['model_header'] = get_model_data(id)
         context['history'] = get_context_history_answer_original_snod(id)
         context['model'] = Model.objects.get(id=id)
+        if 'DATABASE_URL' in os.environ:
+            context['graph'] = get_graph_snod(id)
+
+        else:
+            context['graph'] = 'http://127.0.0.1:8000/media' + get_graph_snod(id)
         return render(request, "spbpu/snod/original_snod_result.html", {'context': context})
 
