@@ -17,6 +17,8 @@ class SettingsPACOM(models.Model):
             return cls(auto_mode=True)
 
 
+
+
 class SettingsOrigianlSNOD(models.Model):
     auto_mode = models.BooleanField(default=False)
 

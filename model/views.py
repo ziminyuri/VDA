@@ -93,7 +93,7 @@ class DemoModelCreateView(LoginRequiredMixin, View):
         if response is not False:
             create_files(response)  # В response находится обьект модели
 
-        return redirect('model:models_id', response.id)
+        return redirect('models_id', response.id)
 
 
 class UploadView(LoginRequiredMixin, View):

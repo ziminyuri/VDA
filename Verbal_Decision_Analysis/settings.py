@@ -16,7 +16,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'spbpu.apps.SpbpuConfig',
     'model.apps.ModelConfig',
     'pacom.apps.PacomConfig',
     'snod.apps.SnodConfig'
@@ -92,6 +91,7 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
