@@ -1,6 +1,6 @@
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.snod_original import write_original_snod_answer
-from spbpu.models import Model
+from model.models import Model
 
 
 def checking_already_has_answer(request, data, snod_original=False):

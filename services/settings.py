@@ -1,4 +1,4 @@
-from spbpu.models import SettingsPACOM, SettingsOrigianlSNOD
+from model.models import SettingsPACOM, SettingsOrigianlSNOD
 
 
 def settingsPACOMCreate(request):

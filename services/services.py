@@ -1,5 +1,4 @@
 import hashlib
-from spbpu.models import User
 
 
 # Функция получения хеша

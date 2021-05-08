@@ -1,4 +1,4 @@
-from spbpu.models import RangeValue
+from pacom.models import RangeValue
 
 
 def create_range_value(pair: object, option: object, criteria: object, value: int) -> None:

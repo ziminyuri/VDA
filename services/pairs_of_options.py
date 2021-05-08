@@ -6,8 +6,8 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from services.normalisation import normalisation_time
-from spbpu.models import (Criterion, HistoryAnswer, Model, Option,
-                          PairsOfOptions, Value, PairsOfOptionsTrueSNOD)
+from model.models import Criterion, Model, Option, Value
+from snod.models import PairsOfOptions, PairsOfOptionsTrueSNOD, HistoryAnswer
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 

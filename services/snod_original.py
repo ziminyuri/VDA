@@ -3,7 +3,8 @@ import datetime
 from services.normalisation import normalisation_time
 from django.db.models import Max
 
-from spbpu.models import PairsOfOptionsTrueSNOD, Criterion, Option, Model, HistoryAnswerTrueSNOD
+from snod.models import PairsOfOptionsTrueSNOD, HistoryAnswerTrueSNOD
+from model.models import Criterion, Option, Model
 from services.pairs_of_options import _sort, _init_file, _create_image_for_pair, make_snd, get_first_question, \
     _read_file, _write_answer_model, get_data_from_request, get_path, _write_file, absolute_value_in_str
 

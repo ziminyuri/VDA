@@ -1,4 +1,4 @@
-{% extends "spbpu/base.html" %}
+{% extends "spbpu/../base.html" %}
 {% block content %}
 
     <div class="container">
@@ -8,6 +8,27 @@
                 {{ error }}
             </div>
         {% endif %}
+
+        <div class="row">
+
+                <div class="card teal darken-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">Инструкция</span>
+                        <p>Укажите наименовния критериев, оценки альтернатив по каждому критерию, а также желательное направление изменения оценки</p>
+                        <p>Если критерий качественный(например оценки по критерию "плохая", "средняя", "хорошая"
+                            и т.п.), а не количественное(например – 100, 500, 0.1), то их необходимо шкалировать:</p>
+                        <ul>
+                            <li>1 - плохая(низкая, мало)</li>
+                            <li>3 - средняя</li>
+                            <li>5 – хорошая(высокая, много)</li>
+                            <li>7 - очень хорошая(высокая, много)</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+        </div>
+
 
         <form  action="{% url 'models'  %}" method="post">
             {% csrf_token %}

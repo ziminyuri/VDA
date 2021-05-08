@@ -20,9 +20,9 @@ urlpatterns = [
     path('model/snod/result/<int:id>', views.SnodDetailView.as_view(), name='snod_result'),
     path('model/demo/create', views.DemoModelCreateView.as_view(), name='demo_create'),
 
-    path('model/park/<int:id>', views.ParkSearchView.as_view(), name='park_search'),
-    path('model/park/result/<int:pk>', ParkDetailView.as_view(), name='park_result'),
-    path('model/park/<int:id>/settings', SettingsPACOMCreateView.as_view(), name='pacom_settings_create'),
+    path('model/pacom/<int:id>', views.ParkSearchView.as_view(), name='park_search'),
+    path('model/pacom/result/<int:pk>', ParkDetailView.as_view(), name='park_result'),
+    path('model/pacom/<int:id>/settings', SettingsPACOMCreateView.as_view(), name='pacom_settings_create'),
 
     path('model/origianl_snod/<int:id>', views.OriginalSnodSearchView.as_view(), name='snod_original_search'),
     path('model/origianl_snod/result/<int:id>', views.OriginalSnodDetailView.as_view(), name='snod_original_result'),

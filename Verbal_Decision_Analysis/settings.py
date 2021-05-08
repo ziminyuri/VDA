@@ -17,6 +17,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'spbpu.apps.SpbpuConfig',
+    'model.apps.ModelConfig',
+    'pacom.apps.PacomConfig',
+    'snod.apps.SnodConfig'
 ]
 
 MIDDLEWARE = [

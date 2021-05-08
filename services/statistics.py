@@ -1,6 +1,6 @@
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT, MEDIA_URL
 from services.services import get_userprofile
-from spbpu.models import Model, Option
+from model.models import Model, Option
 import matplotlib.pyplot as plt
 
 

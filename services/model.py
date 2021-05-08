@@ -2,7 +2,8 @@ import csv
 import os
 import random
 
-from spbpu.models import Criterion, Model, Option, PairsOfOptions, Value
+from model.models import Criterion, Model, Option, Value
+from snod.models import PairsOfOptions
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from services.services import get_userprofile
 

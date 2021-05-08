@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card teal darken-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">Создать демо модель</span>
+                        <p>Модель будет содержать 7 критериев и пользовательское кол-во альтернатив</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'demo_create' %}">Создать</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card teal darken-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">Создайте свою модель для выбора лучшей альтернативы</span>
+                        <p>Загрузите файл в формате CSV или создайте через интерфейс системы</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{% url 'upload' %}">Загрузить</a>
+                        <a href="{% url 'create_model' %}">Создать</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
