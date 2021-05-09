@@ -12,7 +12,7 @@
                             {% csrf_token %}
                             <div class="input-field col s12">
 
-                                <select>
+                                <select name="mode">
                                     {% for m in mode %}
                                         <option selected value= "{{ m }}">
                                         {{ m }}

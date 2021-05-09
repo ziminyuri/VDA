@@ -17,8 +17,7 @@ def get_park_question(model):
         # Пары для сравнения существуют
         pair = PairsOfOptionsPARK.objects.filter(id_model=model).filter(already_find_winner=False). \
             filter(already_range=True).first()
-    except:
-        print(5)
+    except: pass
 
     if not pair:
         try:
@@ -67,8 +66,7 @@ def get_park_question(model):
                         # Нашли победителей
                         update_model_after_find_winner(model)
                         return get_winners_from_model(model)
-        except:
-            print(6)
+        except: pass
 
     try:
         if pair.init_file is False:
@@ -85,10 +83,8 @@ def get_park_question(model):
                 if winner_find:
                     response = get_park_question(model)
                     return response
-            except:
-                print(11)
-    except:
-        print(7)
+            except: pass
+    except: pass
 
     try:
         perfect_alternative = PerfectAlternativePARK.objects.get(pair=pair)
@@ -99,8 +95,7 @@ def get_park_question(model):
         return {'flag_range': True, 'alternative_1': new_alternative_1, 'alternative_2': new_alternative_2,
                 'criterions': criterions, 'pair': pair.id, 'flag_find_winner': False, 'name_1': pair.id_option_1.name,
                 'name_2': pair.id_option_2.name}
-    except:
-        print(8)
+    except: pass
 
 
 # Записываем данные о ранжировании критериев в паре

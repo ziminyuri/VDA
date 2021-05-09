@@ -17,8 +17,6 @@ class SettingsPACOM(models.Model):
             return cls(auto_mode=True)
 
 
-
-
 class SettingsOrigianlSNOD(models.Model):
     auto_mode = models.BooleanField(default=False)
 
@@ -79,8 +77,8 @@ class Option(models.Model):
     name = models.CharField(max_length=200)
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
     number = models.IntegerField()
-    quasi_order_pacom = models.IntegerField(default=0)
-    quasi_order_original_snod = models.IntegerField(default=0)
+    quasi_order_pacom = models.IntegerField(default=-1)
+    quasi_order_original_snod = models.IntegerField(default=-1)
 
     def __str__(self):
         return self.name

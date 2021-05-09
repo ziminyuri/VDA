@@ -12,6 +12,7 @@ def settingsPACOMCreate(request):
 
 
 def settingsOrigianlSnodCreate(request):
+    t = request.POST['mode']
     if request.POST['mode'] == 'Классический':
         return SettingsOrigianlSNOD.objects.create()
     else:

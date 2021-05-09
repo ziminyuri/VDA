@@ -16,9 +16,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'model.apps.ModelConfig',
     'pacom.apps.PacomConfig',
-    'snod.apps.SnodConfig'
+    'snod.apps.SnodConfig',
+    
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -30,6 +33,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'Verbal_Decision_Analysis.urls'
@@ -55,9 +59,27 @@ WSGI_APPLICATION = 'Verbal_Decision_Analysis.wsgi.application'
 
 
 DATABASES = {
+
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #   'NAME': BASE_DIR / 'db.sqlite3',
+    #}
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'verbal',
+        'USER': 'verbal',
+        'PASSWORD': '1',
+    }
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
 }
 
@@ -102,3 +124,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if 'DATABASE_URL' in os.environ:
     import dj_database_url
     DATABASES = {'default': dj_database_url.config()}
+
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
