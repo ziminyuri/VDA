@@ -20,7 +20,6 @@ from services.statistics import (built_statistics,
                                  get_statistics, get_statistics_original_snod,
                                  get_table_context)
 from snod.views import CacheMixin
-from Verbal_Decision_Analysis.celery import app
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 from .models import Model
@@ -169,11 +168,12 @@ class ModelListCreateView(LoginRequiredMixin, View):
     def post(request):
         """ Cоздание модели после ввода данных в таблице """
 
-        response = create_model(demo_model=False, request=request)
+        user_profile = get_userprofile(request)
+        model = create_model(user_profile.id, demo_model=False, request=request)
 
-        if response is not False:
-            create_files(response)  # В response находится обьект модели
-            return redirect('models_id', id=response.id)
+        if model is not False:
+            create_files(model)
+            return redirect('models_id', id=model.id)
 
         else:
             number_of_criterion = request.POST["number_of_criterion"]
