@@ -1,7 +1,7 @@
 from graphviz import Digraph
 
-from pacom.models import PairsOfOptionsPARK
 from model.models import Option
+from pacom.models import PairsOfOptionsPARK
 from snod.models import PairsOfOptionsTrueSNOD
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 

@@ -1,24 +1,29 @@
-from django.shortcuts import redirect, render
+import os
 from random import randint
 
 from django.contrib import auth
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as django_logout
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.views.generic import View
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 from services.model import create_model, get_model_data
 from services.pairs_of_options import create_files
-import os
 from services.services import get_userprofile
-from .models import Model
+from services.statistics import (built_statistics,
+                                 built_statistics_number_question,
+                                 get_statistics, get_statistics_original_snod,
+                                 get_table_context)
+from snod.views import CacheMixin
+from Verbal_Decision_Analysis.celery import app
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from services.statistics import get_statistics, built_statistics, get_statistics_original_snod, get_table_context, \
-    built_statistics_number_question
+
+from .models import Model
 
 
 class LoginView(View):
@@ -74,7 +79,7 @@ class LogoutView(View):
         return redirect("login")
 
 
-class IndexView(LoginRequiredMixin, View):
+class IndexView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     def get(self, request):
@@ -88,12 +93,10 @@ class DemoModelCreateView(LoginRequiredMixin, View):
         return render(request, "model/demo_choice_number.html", {})
 
     def post(self, request):
-        response = create_model(demo_model=True, request=request)
-
-        if response is not False:
-            create_files(response)  # В response находится обьект модели
-
-        return redirect('models_id', response.id)
+        user_profile = get_userprofile(request)
+        number_of_alternatives = int(request.POST['number'])
+        create_model.delay(user_profile.id, demo_model=True, number_of_alternatives=number_of_alternatives)
+        return redirect('models')
 
 
 class UploadView(LoginRequiredMixin, View):
@@ -159,7 +162,7 @@ class ModelListCreateView(LoginRequiredMixin, View):
     @staticmethod
     def get(request):
         user = get_userprofile(request)
-        models = Model.objects.filter(id_user=user)
+        models = Model.objects.filter(id_user=user).order_by('id')
         return render(request, "model/models.html", {'models': models})
 
     @staticmethod
@@ -183,7 +186,7 @@ class ModelListCreateView(LoginRequiredMixin, View):
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
 
-class ModelView(LoginRequiredMixin, View):
+class ModelView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     @staticmethod
@@ -218,7 +221,7 @@ class ModelView(LoginRequiredMixin, View):
             return redirect('models')
 
 
-class StatisticsView(LoginRequiredMixin, View):
+class StatisticsView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     def get(self, request):
@@ -255,3 +258,5 @@ class StatisticsView(LoginRequiredMixin, View):
                                                    'context_table_snod_number_of_question': context_table_snod_number_of_question,
                                                    'context_table_snod': context_table_snod,
                                                    'error': error})
+
+

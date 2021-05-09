@@ -1,5 +1,6 @@
 from django.db import models
-from model.models import Option, Model, Criterion
+
+from model.models import Criterion, Model, Option
 
 
 class PairsOfOptionsPARK(models.Model):

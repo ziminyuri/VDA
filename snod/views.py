@@ -1,21 +1,35 @@
-from django.shortcuts import render, get_object_or_404, redirect
+import os
+import random
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
+from django.views.generic import View
+
 from model.models import Model, Option
 from services.graph import get_graph_snod
 from services.history import checking_already_has_answer
 from services.model import get_model_data
-from services.pairs_of_options import (absolute_value_in_str,
-                                       data_of_winners, make_question,
-                                       write_answer)
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View
-
+from services.pairs_of_options import (absolute_value_in_str, data_of_winners,
+                                       make_question, write_answer)
 from services.settings import settingsOrigianlSnodCreate
-from .models import HistoryAnswer, PairsOfOptions
-from services.snod_original import get_original_snod_question, write_original_snod_answer, \
-    get_winners_from_model_original_snod, get_context_history_answer_original_snod
+from services.snod_original import (get_context_history_answer_original_snod,
+                                    get_original_snod_question,
+                                    get_winners_from_model_original_snod,
+                                    write_original_snod_answer)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-import os
-import random
+
+from .models import HistoryAnswer, PairsOfOptions
+
+
+class CacheMixin(object):
+    cache_timeout = 60
+
+    def get_cache_timeout(self):
+        return self.cache_timeout
+
+    def dispatch(self, *args, **kwargs):
+        return cache_page(self.get_cache_timeout())(super(CacheMixin, self).dispatch)(*args, **kwargs)
 
 
 class SnodSearchView(LoginRequiredMixin, View):
@@ -89,7 +103,7 @@ class SnodDetailView(LoginRequiredMixin, View):
                       response)
 
 
-class SettingsOriginalSnodCreateView(LoginRequiredMixin, View):
+class SettingsOriginalSnodCreateView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     @staticmethod
@@ -103,7 +117,7 @@ class SettingsOriginalSnodCreateView(LoginRequiredMixin, View):
         return redirect('snod_original_search', id=id)
 
 
-class OriginalSnodSearchView(LoginRequiredMixin, View):
+class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     def get(self, request, id):
@@ -161,7 +175,7 @@ class OriginalSnodSearchView(LoginRequiredMixin, View):
                            'model': model, 'original_snod': 1})
 
 
-class OriginalSnodDetailView(LoginRequiredMixin, View):
+class OriginalSnodDetailView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     def get(self, request, id):

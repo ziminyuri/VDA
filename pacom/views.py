@@ -1,15 +1,16 @@
-from django.shortcuts import redirect, render, get_object_or_404
+import os
 
-from django.views.generic import View, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView, View
+
 from model.models import Model
+from services.graph import get_graph_pacom
 from services.model import get_model_data
 from services.park import (auto_mode_pacom, get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
 from services.settings import settingsPACOMCreate
-from services.graph import get_graph_pacom
-import os
 
 
 class ParkSearchView(LoginRequiredMixin, View):

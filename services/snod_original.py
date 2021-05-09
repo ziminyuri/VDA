@@ -1,13 +1,16 @@
 # Реализация классического метода ШНУР
 import datetime
-from services.normalisation import normalisation_time
+
 from django.db.models import Max
 
-from snod.models import PairsOfOptionsTrueSNOD, HistoryAnswerTrueSNOD
-from model.models import Criterion, Option, Model
-from services.pairs_of_options import _sort, _init_file, _create_image_for_pair, make_snd, get_first_question, \
-    _read_file, _write_answer_model, get_data_from_request, get_path, _write_file, absolute_value_in_str
-
+from model.models import Criterion, Model, Option
+from services.normalisation import normalisation_time
+from services.pairs_of_options import (_create_image_for_pair, _init_file,
+                                       _read_file, _sort, _write_answer_model,
+                                       _write_file, absolute_value_in_str,
+                                       get_data_from_request,
+                                       get_first_question, get_path, make_snd)
+from snod.models import HistoryAnswerTrueSNOD, PairsOfOptionsTrueSNOD
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 

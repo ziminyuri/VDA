@@ -1,7 +1,9 @@
 from django.test import SimpleTestCase
 from django.urls import resolve, reverse
-from snod.views import SnodSearchView, SnodDetailView, \
-    SettingsOriginalSnodCreateView, OriginalSnodDetailView, OriginalSnodSearchView
+
+from snod.views import (OriginalSnodDetailView, OriginalSnodSearchView,
+                        SettingsOriginalSnodCreateView, SnodDetailView,
+                        SnodSearchView)
 
 
 class TestUrls(SimpleTestCase):

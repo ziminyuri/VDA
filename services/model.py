@@ -3,28 +3,33 @@ import os
 import random
 
 from model.models import Criterion, Model, Option, Value
+from services.pairs_of_options import create_files
+from services.services import get_userprofile
 from snod.models import PairsOfOptions
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from services.services import get_userprofile
+from celery import shared_task
+from Verbal_Decision_Analysis.celery import app
+from model.models import User
 
 
-# Создание объекта модели (Поиска лучшей альтернативы для задачи выбора)
-def create_model(demo_model: bool = False, path_csv=None, request=None) -> object:
+@app.task(serializer='json')
+def create_model(user_id, demo_model: bool = False, path_csv=None, request=None, number_of_alternatives=None) -> object:
+    """ Создание объекта модели (Поиска лучшей альтернативы для задачи выбора) """
+
     try:
         result = True   # Результат создания и заполнения модели
-        user_profile = get_userprofile(request)
+
         if demo_model:
-            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=user_profile)
-            number_of_alternatives = int(request.POST['number'])
+            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id))
             result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
         else:
 
-            model = Model.objects.create(is_demo=False, name='Пользовательская', id_user=user_profile)
+            model = Model.objects.create(is_demo=False, name='Пользовательская', id_user=User.objects.get(id=user_id))
             if path_csv:
                 result = _filling_model_from_file(model, path_csv=path_csv)  # Заполняем модель исходными данными
 
             elif request:
-                # Данные модели из интерфейса система
+                """Данные модели из интерфейса система"""
                 result = _filling_custom_model(model, request)
 
         if result is False:
@@ -32,7 +37,8 @@ def create_model(demo_model: bool = False, path_csv=None, request=None) -> objec
             return False
 
         _create_dir(str(model.id))
-
+        create_files(model)
+        Model.objects.filter(id=model.id).update(is_done=True)
         return model
 
     except Exception as e:
@@ -156,7 +162,6 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
             option = Option.objects.create(name='Alternative ' + str(alternative), id_model=model, number=alternative)
             options_obj_list.append(option)
 
-
         criterions_name = ['Количество мест для парковки машин', 'Наличие поблизости конкурентов', 'Плотность населения',
                            'Стоимость участка', 'Поток общественного транспорта', 'Видимость магазина с главной улицы',
                            'Инфраструктура']
@@ -176,7 +181,6 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
                 Value.objects.create(value=value, id_option=alternative, id_criterion=criterion)
             Criterion.objects.filter(id=criterion.id).update(max=value)
 
-
         n = len(options_obj_list)
         k = 1
         for i in range(n):
@@ -184,7 +188,6 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
                 if i != j:
                     PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
                                                   id_model=model)
-
             k += 1
 
     except Exception as e:

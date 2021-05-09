@@ -1,4 +1,4 @@
-from model.models import SettingsPACOM, SettingsOrigianlSNOD
+from model.models import SettingsOrigianlSNOD, SettingsPACOM
 
 
 def settingsPACOMCreate(request):

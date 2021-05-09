@@ -1,7 +1,10 @@
 from django.test import SimpleTestCase
 from django.urls import resolve, reverse
-from model.views import IndexView, LoginView, RegistrationView, LogoutView, UploadView, DownloadCSVView,\
-    ModelListCreateView, ModelView, ModelCreateView, DemoModelCreateView, StatisticsView
+
+from model.views import (DemoModelCreateView, DownloadCSVView, IndexView,
+                         LoginView, LogoutView, ModelCreateView,
+                         ModelListCreateView, ModelView, RegistrationView,
+                         StatisticsView, UploadView)
 
 
 class TestUrls(SimpleTestCase):

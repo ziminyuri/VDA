@@ -1,7 +1,8 @@
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT, MEDIA_URL
-from services.services import get_userprofile
-from model.models import Model, Option
 import matplotlib.pyplot as plt
+
+from model.models import Model, Option
+from services.services import get_userprofile
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT, MEDIA_URL
 
 
 class StatisticsItem:

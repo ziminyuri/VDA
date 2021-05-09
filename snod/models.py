@@ -1,6 +1,6 @@
 from django.db import models
-from model.models import Option, Model
 
+from model.models import Model, Option
 
 
 class PairsOfOptions(models.Model):
