@@ -54,9 +54,9 @@ def  get_original_snod_question(model):
                 return {'flag_find_winner': 1}
 
 
-def write_original_snod_answer(response, answer, auto=False, message=None):
+def write_original_snod_answer(answer, auto=False, message=None, request=None):
     if auto is False:
-        answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response,
+        answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(request,
                                                                                                          answer)
     else:
         answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_meaage(answer, message)
@@ -532,7 +532,6 @@ def get_context_history_answer_original_snod(model) -> list:
         item['img'] = 'http://127.0.0.1:8000/media/' + str(model) + '/' + str(pair.id) + '.png'
 
         absolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
-        dateabsolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
         item['absolute_value'] = absolute_value
         context.append(item)
 

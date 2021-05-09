@@ -1,5 +1,4 @@
 import os
-import random
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
@@ -20,6 +19,7 @@ from services.snod_original import (get_context_history_answer_original_snod,
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 from .models import HistoryAnswer, PairsOfOptions
+from .services.search import snod_search_auto
 
 
 class CacheMixin(object):
@@ -140,22 +140,13 @@ class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
         flag_find_winner = 0
         message = get_original_snod_question(model)
 
-        while flag_find_winner == 0 and model.id_settings_original_snod.auto_mode is True:
-            answer: int = random.randint(0, 2)
-            message = write_original_snod_answer(request, answer, auto=True,
-                                       message=message)
-            flag_find_winner = message['flag_find_winner']
-            if flag_find_winner != 1:
-
-                message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
-                while flag_checking:
-                    flag_find_winner = message['flag_find_winner']
-                    if flag_find_winner != 1:
-                        message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+        if flag_find_winner == 0 and model.id_settings_original_snod.auto_mode is True:
+            Model.objects.filter(id=id).update(is_searching_snod=True)
+            snod_search_auto.delay(message)
+            return redirect('models')
 
         if model.id_settings_original_snod.auto_mode is False:
-            answer = request.POST["answer"]
-            message = write_original_snod_answer(request, answer, auto=False)
+            message = write_original_snod_answer(request, request.POST["answer"], auto=False)
 
         """Проверяем, что нашли лучшую альтернативу в модели"""
         flag_find_winner = message['flag_find_winner']

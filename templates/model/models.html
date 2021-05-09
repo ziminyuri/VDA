@@ -25,23 +25,29 @@
                         <td>
                             {% if model.is_done == True %}
                                 <a class="btn btn-outline-primary btn-block btn-sm" href="{% url 'models_id' id=model.pk %}">Посмотреть</a>
+                            {% elif model.id_delete == True %}
+                                <a class="btn btn-outline-primary btn-block btn-sm disabled" href="{% url 'models_id' id=model.pk %}">Посмотреть</a>
+                                <p class="center">Данные удаляются</p>
                             {% else %}
                                 <a class="btn btn-outline-primary btn-block btn-sm disabled" href="{% url 'models_id' id=model.pk %}">Посмотреть</a>
                                 <p class="center">Данные в обработке</p>
                             {% endif %}
                         </td>
                         <td>
-                            {% if model.is_done == False  %}
+                            {% if model.is_done == False  or model.id_delete == True%}
                                 <a class="btn btn-outline-secondary btn-block btn-sm disabled" href="{% url 'snod_original_search' id=model.id%}"> Найти</a>
+                            {% elif model.is_searching_snod == True and model.already_find_winner_SNOD == False%}
+                                <a class="btn btn-outline-secondary btn-block btn-sm disabled" href="{% url 'snod_original_result' id=model.id %}">Результат</a>
                             {% elif model.already_find_winner_SNOD == False %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_original_search' id=model.id%}"> Найти</a>
+
                             {% else %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_original_result' id=model.id %}">Результат</a>
                             {% endif %}
                         </td>
 
                         <td>
-                            {% if model.is_done == False  %}
+                            {% if model.is_done == False  or model.is_delete == True%}
                                 <a class="btn btn-outline-secondary btn-block btn-sm disabled" href="{% url 'snod_search' id=model.pk%}"> Найти</a>
                             {% elif model.id_winner_option_shnur == None %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'snod_search' id=model.pk%}"> Найти</a>
@@ -50,7 +56,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if model.is_done == False  %}
+                            {% if model.is_done == False or model.id_delete == True %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm disabled" href="{% url 'park_search' id=model.pk %}">Найти</a>
                             {% elif model.already_find_winner_PACOM == False %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти</a>
@@ -61,7 +67,7 @@
                         <td><form action="{% url 'models_id' id=model.id  %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" required class="form-control" name="_method" value = "DELETE">
-                            {% if model.is_done == False  %}
+                            {% if model.is_done == False  or model.is_delete == True%}
                                 <input type="submit" class="btn btn-outline-danger btn-sm btn-block disabled" value="Удалить" >
                             {% else %}
                                 <input type="submit" class="btn btn-outline-danger btn-sm btn-block" value="Удалить" >

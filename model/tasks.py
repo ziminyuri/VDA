@@ -1,16 +1,22 @@
-from celery import shared_task
+from Verbal_Decision_Analysis.celery import app
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from .models import Model
 
 
-@shared_task
-def add(x, y):
-    return x + y
+@app.task(serializer='json')
+def delete_model(id):
+    """Удаление модели"""
 
+    model = Model.objects.get(id=id)
 
-@shared_task
-def mul(x, y):
-    return x * y
+    try:
+        import shutil
+        path_files = MEDIA_ROOT + '/files/models/' + str(model.id)
+        shutil.rmtree(path_files)
+        path_img = MEDIA_ROOT + '/' + str(model.id)
+        shutil.rmtree(path_img)
 
+    except:
+        pass
 
-@shared_task
-def xsum(numbers):
-    return sum(numbers)
+    model.delete()

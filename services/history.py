@@ -3,7 +3,7 @@ from services.snod_original import write_original_snod_answer
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
-def checking_already_has_answer(request, data, snod_original=False):
+def checking_already_has_answer(data, snod_original=False, request=None):
 
     options_1 = data['option_1_line'].split(';')
     options_2 = data['option_2_line'].split(';')
@@ -43,8 +43,12 @@ def checking_already_has_answer(request, data, snod_original=False):
             else: answer = -1
 
         if answer != -1:
-            message = write_original_snod_answer(request, answer, auto=True,
-                                                 message=data)
+            if request is None:
+                message = write_original_snod_answer(answer, auto=True,
+                                                     message=data)
+            else:
+                message = write_original_snod_answer(answer, auto=True,
+                                                     message=data, request=request)
             model = Model.objects.get(id=int(model_id))
             Model.objects.filter(id=model.id).update(number_repeated_questions_snod=
                                                      model.number_repeated_questions_snod+1)

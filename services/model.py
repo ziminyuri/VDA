@@ -7,7 +7,6 @@ from services.pairs_of_options import create_files
 from services.services import get_userprofile
 from snod.models import PairsOfOptions
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from celery import shared_task
 from Verbal_Decision_Analysis.celery import app
 from model.models import User
 

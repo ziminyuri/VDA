@@ -33,6 +33,9 @@ class Model(models.Model):
     name = models.CharField(max_length=255)
     id_winner_option_many = models.IntegerField(null=True)  # id победителя по многокриетриальному методу
     is_done = models.BooleanField(default=False)
+    is_delete = models.BooleanField(default=False)
+    is_searching_snod = models.BooleanField(default=False)
+    is_searching_pacom = models.BooleanField(default=False)
 
     """ SNOD """
     id_winner_option_shnur = models.IntegerField(null=True)  # id победителя по методу ШНУР

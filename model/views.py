@@ -20,7 +20,7 @@ from services.statistics import (built_statistics,
                                  get_statistics, get_statistics_original_snod,
                                  get_table_context)
 from snod.views import CacheMixin
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from .tasks import delete_model
 
 from .models import Model
 
@@ -107,7 +107,8 @@ class UploadView(LoginRequiredMixin, View):
         r_int = str(randint(0, 100))
         path_csv = request.user.username + '/' + r_int + uploaded_file.name
         fs.save(path_csv, uploaded_file)
-        model = create_model(demo_model=False, path_csv=path_csv, request=request)
+        user_profile = get_userprofile(request)
+        model = create_model(user_profile.id, demo_model=False, path_csv=path_csv)
         if model is False:
             error = 'Возникла ошибка при загрузке файла. Проверьте файл'
             return render(request, "upload_model.html", {'error': error})
@@ -205,19 +206,8 @@ class ModelView(LoginRequiredMixin, CacheMixin, View):
     def post(request, id):
         """ Delete model """
         if request.POST["_method"] == 'DELETE':
-            model = Model.objects.get(id=id)
-
-            try:
-                import shutil
-                path_files = MEDIA_ROOT + '/files/models/' + str(model.id)
-                shutil.rmtree(path_files)
-                path_img = MEDIA_ROOT + '/' + str(model.id)
-                shutil.rmtree(path_img)
-
-            except:
-                pass
-
-            model.delete()
+            Model.objects.filter(id=id).update(is_delete=True)
+            delete_model.delay(id)
             return redirect('models')
 
 
