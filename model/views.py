@@ -41,7 +41,7 @@ class LoginView(View):
             return redirect("index")
 
         else:
-            login_error = "Неверный логин или пароль! Повторите попытку."
+            login_error = f'Неверный логин или пароль! Повторите попытку.'
             return render(request, "auth.html", {"login_error": login_error})
 
 
@@ -105,7 +105,7 @@ class UploadView(LoginRequiredMixin, View):
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         r_int = str(randint(0, 100))
-        path_csv = request.user.username + '/' + r_int + uploaded_file.name
+        path_csv = f'{request.user.username}/{r_int}{uploaded_file.name}'
         fs.save(path_csv, uploaded_file)
         user_profile = get_userprofile(request)
         model = create_model(user_profile.id, demo_model=False, path_csv=path_csv)
@@ -162,7 +162,10 @@ class ModelListCreateView(LoginRequiredMixin, View):
     @staticmethod
     def get(request):
         user = get_userprofile(request)
-        models = Model.objects.filter(id_user=user).order_by('id')
+        models = Model.objects.filter(id_user=user).only('name', 'is_done', 'is_delete', 'is_done', 'is_searching_snod',
+                                                         'already_find_winner_SNOD', 'id_winner_option_shnur',
+                                                         'is_searching_pacom', 'already_find_winner_PACOM', 'id').\
+            order_by('id')
         return render(request, "model/models.html", {'models': models})
 
     @staticmethod

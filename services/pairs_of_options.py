@@ -1,5 +1,4 @@
 import datetime
-import random
 
 import cv2
 import numpy as np
@@ -159,7 +158,6 @@ def write_answer(response, answer, auto=False, original_snod=False) -> dict:
                 criteria_1 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
                 name_1 = criteria_1.name
 
-
     elif answer == 0:
         line = option_1_line + "|" + option_2_line + "|=0\n"
         _write_file(line, path)
@@ -274,8 +272,7 @@ def write_answer(response, answer, auto=False, original_snod=False) -> dict:
                 name_1 = criteria_1.name
 
     if flag_new_pair is False:
-        question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
-                   + name_2 + '" ?'
+        question = f'Преимущество по критерию: "{name_1}" важнее чем преимущество по критерию: "{name_2}" ?'
         Message = {'question': question, 'option_1': option_1, 'option_2': option_2,
                    'option_1_line': option_1_line, 'option_2_line': option_2_line, 'model': model.id,
                    'flag_find_winner': 0}
@@ -285,9 +282,9 @@ def write_answer(response, answer, auto=False, original_snod=False) -> dict:
 
 def _read_file(model, pair, original_snod=False):
     if original_snod:
-        path = MEDIA_ROOT+ '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/{str(model.id)}/original_snod/{str(pair.id)}.txt'
     else:
-        path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/{str(model.id)}/{str(pair.id)}.txt'
     data = []
 
     with open(path) as f:
@@ -498,7 +495,6 @@ def _create_image_for_pair(rows, model, pair, original_shod=False):
 
     min_value = str(round(rows[-1][1], 2))
 
-
     h_scale = h - 80  # ДЛя графиков чтобы оставить место подписи
 
     for row in rows:
@@ -517,27 +513,23 @@ def _create_image_for_pair(rows, model, pair, original_shod=False):
     na = cv2.arrowedLine(na, (3, h_begin), (w - 5, h_begin), (0, 0, 0), 4)
     na = cv2.arrowedLine(na, (distance, h-50), (distance, 5), (0, 0, 0), 4)
 
-    # Риски на Oy
-    # h_end = int(h_scale / 2 - (rows[0][1]))
-    # na = cv2.line(na, (15, h_end), (45, h_end), (0, 0, 0), 4)
     h_end = int(h_scale / 2 - (rows[-1][1]))
     na = cv2.line(na, (15, h_end), (45, h_end), (0, 0, 0), 4)
 
     distance += interval * 2
     for row in rows:
-        # Draw arrowed line, from 10,20 to w-40,h-60 in black with thickness 8 pixels
 
         h_end = int(h_scale/2 - (row[1]))
         na = cv2.arrowedLine(na, (distance, h_begin), (distance, h_end), (0, 0, 0), 4)
         distance += interval
 
-    path = MEDIA_ROOT + '/' + str(model.id) + '/' + str(pair.id) + '.png'
+    path = f'{MEDIA_ROOT}/{str(model.id)}/{str(pair.id)}.png'
     Image.fromarray(na).save(path)
 
     # Делаем подписи
     img = Image.open(path)
     idraw = ImageDraw.Draw(img)
-    path_font = MEDIA_ROOT +'/fonts/9041.ttf'
+    path_font = f'{MEDIA_ROOT}/fonts/9041.ttf'
     font = ImageFont.truetype(path_font, size=18)
 
     distance = 30
@@ -560,7 +552,7 @@ def _create_image_for_pair(rows, model, pair, original_shod=False):
     text = p.id_option_1.name
     length = len(text) * 9
     idraw.text((w-15-length, h-40), p.id_option_2.name, font=font, fill='#000000')
-    idraw.text((15, h-40),text , font=font, fill='#000000')
+    idraw.text((15, h-40), text, font=font, fill='#000000')
 
     idraw.text((w-45, h/2), 'Ox', font=font, fill='#000000')
     idraw.text((60, 15), 'Oy', font=font, fill='#000000')
@@ -595,22 +587,22 @@ def _write_answer_model(option_1_line: str, option_2_line: str, model_id, data: 
 
     line = ''
     for option in option_list_1:
-        line += str(option) + ';'
+        line += f'{str(option)};'
     line += '|'
 
     for option in option_list_2:
-        line += str(option) + ';'
-    line += '|=' + str(answer) + '\n'
+        line += f'{str(option)};'
+    line += f'|={str(answer)}\n'
 
     if not snod_original:
-        path = MEDIA_ROOT + '/files/models/' + str(model_id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/{str(model_id)}.txt'
     else:
-        path = MEDIA_ROOT + '/files/models/pacom' + str(model_id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/pacom{str(model_id)}.txt'
 
     _write_file(line, path)
 
 
-def absolute_value_in_str(model_id, pair_id, original_snod = False):
+def absolute_value_in_str(model_id, pair_id, original_snod=False):
     model = Model.objects.get(id=model_id)
     if original_snod:
         pair = PairsOfOptionsTrueSNOD.objects.get(id=pair_id)
@@ -624,7 +616,7 @@ def absolute_value_in_str(model_id, pair_id, original_snod = False):
     result = []
     n = len(criterions)
     for i in range(n):
-        line = str(int(data[i][0]) + 1) + ' - ' + criterions[i].name + ' = ' + str(data[i][1]) + str('\n')
+        line = f'{str(int(data[i][0]) + 1)} - {criterions[i].name} = {str(data[i][1])}\n'
         result.append(line)
     return result
 
@@ -694,9 +686,8 @@ def get_first_question(model, pair, original_snod: bool = False) -> dict:
             criteria_number = int(line_end[0])
             criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
             name_2 = criteria_2.name
+            question = f'Преимущество по критерию: "{name_1}" важнее чем преимущество по критерию: "{name_2}" ?'
 
-            question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
-                       + name_2 + '" ?'
             Message = {'question': question, 'option_1': pair.id_option_1.id, 'option_2': pair.id_option_2.id,
                        'option_1_line': str(0), 'option_2_line': str(delimeter_line - 1), 'model': model.id,
                        'flag_find_winner': 0}
@@ -706,10 +697,10 @@ def get_first_question(model, pair, original_snod: bool = False) -> dict:
 
 def get_path(model, pair, original_snod=False):
     if original_snod:
-        return MEDIA_ROOT + '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
+        return f'{MEDIA_ROOT}/files/models/{str(model.id)}/original_snod/{str(pair.id)}.txt'
 
     else:
-        return MEDIA_ROOT + '/files/models/' + str(model.id) + '/' + str(pair.id) + '.txt'
+        return f'{MEDIA_ROOT}/files/models/{str(model.id)}/{str(pair.id)}.txt'
 
 
 def get_data_from_request(response, answer):

@@ -12,10 +12,11 @@ from services.pairs_of_options import (_create_image_for_pair, _init_file,
                                        get_first_question, get_path, make_snd)
 from snod.models import HistoryAnswerTrueSNOD, PairsOfOptionsTrueSNOD
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from snod.tasks import get_graph_snod
 
 
-# Получение вопроса
-def  get_original_snod_question(model):
+def get_original_snod_question(model):
+    """Получение вопроса"""
 
     pair = PairsOfOptionsTrueSNOD.objects.filter(id_model=model).filter(already_find_winner=False).first()
     # Пары для сравнения существуют
@@ -81,14 +82,14 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
         # Строка состоит из одного критерия или из нескольких, если из одного то -1
         find_delimeter = option_1_line.find(';')
         if find_delimeter == -1:
-            line = option_1_line + "|" + option_2_line + "|=1\n"
+            line = f'{option_1_line}|{option_2_line}|=1\n'
             _write_file(line, path)
 
             list_2 = option_2_line.split(';')  # Разделили строку по разделителю
             new_line_2 = int(list_2[-1])  # Взяли номер строки самой близкой к центру из списка который сравнивали ранее
             line_end = data[new_line_2 - 1]  # Строку которую мы добавляем
             list_2.append(str(new_line_2 - 1))
-            option_2_line += ';' + str(new_line_2 - 1)
+            option_2_line += f';{str(new_line_2 - 1)}'
 
             list_1 = option_1_line.split(';')
             new_line_1 = int(list_1[-1])
@@ -108,7 +109,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                 while (i != 0):
                     line_end = data[new_line_2 - i]
                     if float(line_end[1]) != 0.0:
-                        line = option_1_line + "|" + str(new_line_2 - i) + "|=2\n"
+                        line = f'{option_1_line}|{str(new_line_2 - i)}|=2\n'
                         _write_file(line, path)
                         i += 1
 
@@ -143,11 +144,10 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                             name_2 = criteria_2.name
                             first_line = False
                         else:
-                            name_2 += ' и ' + criteria_2.name
-
+                            name_2 += f' и {criteria_2.name}'
 
         else:
-            line = option_1_line + "|" + option_2_line + "|=0\n"
+            line = f'{option_1_line}|{option_2_line}|=0\n'
             _write_file(line, path)
 
             list_2 = option_2_line.split(';')  # Разделили строку по разделителю
@@ -172,7 +172,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
 
     elif answer == 0:
 
-        line = option_1_line + "|" + option_2_line + "|=0\n"
+        line = f'{option_1_line}|{option_2_line}|=0\n'
         _write_file(line, path)
 
         list_2 = option_2_line.split(';')  # Разделили строку по разделителю
@@ -190,9 +190,9 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
             # Сошлись к центру  ---0---^
 
             if (float(line_end[1]) < 0) or (float(line_begin[1]) <=0):
-                _find_winner(model, pair, empty_option_1 = True)
+                _find_winner(model, pair, empty_option_1=True)
             elif (float(line_end[1]) >= 0) or (float(line_begin[1]) >0):
-                _find_winner(model, pair, empty_option_2 = True)
+                _find_winner(model, pair, empty_option_2=True)
             else:
                 _find_winner(model, pair)
             Message = get_original_snod_question(model)
@@ -215,7 +215,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
 
         if find_delimeter == -1:
 
-            line = option_1_line + "|" + option_2_line + "|=2\n"
+            line = f'{option_1_line}|{option_2_line}|=2\n'
             _write_file(line, path)
 
             list_2 = option_2_line.split(';')  # Разделили строку по разделителю
@@ -226,7 +226,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
             new_line_1 = int(list_1[-1])
             line_begin = data[new_line_1 + 1]
             list_1.append(str(new_line_1 + 1))
-            option_1_line += ';' + str(new_line_1 + 1)
+            option_1_line += f';{str(new_line_1 + 1)}'
 
             value_line_begin = float(line_begin[1])
 
@@ -239,7 +239,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                         name_1 = criteria_1.name
                         first_line = False
                     else:
-                        name_1 += ' и ' + criteria_1.name
+                        name_1 += f' и {criteria_1.name}'
 
                 criteria_number = int(line_end[0])
                 criteria_2 = Criterion.objects.filter(id_model=model).get(number=criteria_number)
@@ -252,7 +252,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                 while (i != 0):
                     line_end = data[new_line_2 - i]
                     if float(line_end[1]) != 0.0:
-                        line = option_1_line + "|" + str(new_line_2 - i) + "|=2\n"
+                        line = f'{option_1_line}|{str(new_line_2 - i)}|=2\n'
                         _write_file(line, path)
 
                         i += 1
@@ -271,7 +271,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                 flag_new_pair = True
 
         else:
-            line = option_1_line + "|" + option_2_line + "|=0\n"
+            line = f'{option_1_line}|{option_2_line}|=0\n'
             _write_file(line, path)
 
             list_2 = option_2_line.split(';')  # Разделили строку по разделителю
@@ -295,6 +295,10 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
                 name_1 = criteria_1.name
     try:
         if Message['flag_find_winner'] == 1:
+            quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_original_snod'))[
+                'quasi_order_original_snod__max']
+            Model.objects.filter(id=model_id).update(quasi_max_order_snod=quasi_max_order)
+            get_graph_snod.delay(model_id)
             return Message
     except:
         pass
@@ -302,14 +306,11 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
     if name_1 == '' or name_2 == '':
         _find_winner(model, pair)
         Message = get_original_snod_question(model)
-        flag_new_pair = True
 
     elif flag_new_pair is False:
 
-
         _add_1_to_number_of_question(model)
-        question = 'Преимущество по критерию: "' + name_1 + '" важнее чем преимущество по критерию: "' \
-                   + name_2 + '" ?'
+        question = f'Преимущество по критерию: "{name_1}" важнее чем преимущество по критерию: "{ name_2}" ?'
         Message = {'question': question, 'option_1': option_1, 'option_2': option_2,
                    'option_1_line': option_1_line, 'option_2_line': option_2_line, 'model': model.id,
                    'flag_find_winner': 0}
@@ -320,8 +321,9 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
     return Message
 
 
-# Добавление +1 к кол-ву вопросов
 def _add_1_to_number_of_question(model):
+    """ Добавление +1 к кол-ву вопросов """
+
     Model.objects.filter(id=model.id).update(number_of_questions_snod=model.number_of_questions_snod + 1)
 
 
@@ -339,8 +341,7 @@ def _write_answer_to_history_original_snod(question, answer, option_1, option_2,
 
 
 def _find_winner(model: object, pair: object, empty_option_1 = False, empty_option_2 = False) -> None:
-    path = MEDIA_ROOT + '/files/models/' + str(model.id) + '/original_snod/' + str(pair.id) + '.txt'
-
+    path = f'{MEDIA_ROOT}/files/models/{str(model.id)}/original_snod/{str(pair.id)}.txt'
     with open(path) as f:
         lines = f.readlines()
 
@@ -442,8 +443,6 @@ def _find_winner(model: object, pair: object, empty_option_1 = False, empty_opti
                                                                      flag_winner_option=3)
 
 
-
-
 def _create_pair(model, FIRST=False, option_1=None, option_2=None):
     if FIRST:
         options = Option.objects.filter(id_model=model)
@@ -480,6 +479,7 @@ def update_model_after_find_winner(model):
 
 def _update_pair_to_not_comparable(pair):
     """ Делает пару не сравнимой """
+
     option_1 = Option.objects.filter(id=pair.id_option_1.id).first()
     option_2 = Option.objects.filter(id=pair.id_option_2.id).first()
 
@@ -497,22 +497,22 @@ def _update_pair_to_not_comparable(pair):
                                                          flag_winner_option=3)
 
 
-def get_winners_from_model_original_snod(model):
-    quasi_max_order = Option.objects.filter(id_model=model).aggregate(Max('quasi_order_original_snod'))[
-        'quasi_order_original_snod__max']
-    options_with_quasi_max_order = Option.objects.filter(quasi_order_original_snod=quasi_max_order,
-                                                         id_model=model)
+def get_winners_from_model_original_snod(model_id):
+    model = Model.objects.get(id=model_id)
+    options_with_quasi_max_order = Option.objects.filter(quasi_order_original_snod=model.quasi_max_order_snod,
+                                                         id_model=model_id)
     return {'flag_find_winner': 1, 'winner_options': options_with_quasi_max_order}
 
 
-# Возвращаем контекст истории ответов пользователей
 def get_context_history_answer_original_snod(model) -> list:
-    pairs = PairsOfOptionsTrueSNOD.objects.filter(id_model=model)
+    """ Возвращаем контекст истории ответов пользователей """
+
+    pairs = PairsOfOptionsTrueSNOD.objects.select_related('id_option_1', 'id_option_2').filter(id_model=model)
     context = []
 
     for pair in pairs:
 
-        item = {'pair': pair.id_option_1.name + ' ' + pair.id_option_2.name}
+        item = {'pair': f'{pair.id_option_1.name} {pair.id_option_2.name}'}
         history_answers = HistoryAnswerTrueSNOD.objects.filter(id_model=model, pair=pair)
 
         answers = []
@@ -523,13 +523,13 @@ def get_context_history_answer_original_snod(model) -> list:
         if pair.flag_winner_option == 3:
             item['winner'] = 'Альтернативы не сравнимы'
         elif pair.flag_winner_option == 2:
-            item['winner'] = 'Победитель: ' + pair.id_option_2.name
+            item['winner'] = f'Победитель: {pair.id_option_2.name}'
         elif pair.flag_winner_option == 1:
-            item['winner'] = 'Победитель: ' + pair.id_option_1.name
+            item['winner'] = f'Победитель: {pair.id_option_1.name}'
         elif pair.flag_winner_option == 0:
             item['winner'] = 'Альтернативы одинаковы'
 
-        item['img'] = 'http://127.0.0.1:8000/media/' + str(model) + '/' + str(pair.id) + '.png'
+        item['img'] = f'http://127.0.0.1:8000/media/{str(model)}/{str(pair.id)}.png'
 
         absolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
         item['absolute_value'] = absolute_value

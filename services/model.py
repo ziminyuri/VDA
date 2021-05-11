@@ -4,7 +4,6 @@ import random
 
 from model.models import Criterion, Model, Option, Value
 from services.pairs_of_options import create_files
-from services.services import get_userprofile
 from snod.models import PairsOfOptions
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 from Verbal_Decision_Analysis.celery import app
@@ -19,7 +18,7 @@ def create_model(user_id, demo_model: bool = False, path_csv=None, request=None,
         result = True   # Результат создания и заполнения модели
 
         if demo_model:
-            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id))
+            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id)).only('id')
             result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
         else:
 
@@ -51,27 +50,27 @@ def _filling_custom_model(model: object, request) -> bool:
 
         options_obj_list = []
         for alternatives in range(1, number_of_alternatives + 1):
-            name = request.POST["alternative_" + str(alternatives)]
+            name = request.POST[f'alternative_{str(alternatives)}']
             option = Option.objects.create(name=name, id_model=model, number=alternatives)
             options_obj_list.append(option)
 
         for criterion in range(1, number_of_criterion+1):
-            name = request.POST["criteria_"+str(criterion)]
-            direction = int(request.POST["direction_"+str(criterion)])
+            name = request.POST[f'criteria_{str(criterion)}']
+            direction = int(request.POST[f'direction_{str(criterion)}'])
             if direction == 1:
                 direction = True
             else:
                 direction = False
 
-            max = float (request.POST["value_" + str(criterion)+ "_1"])
+            max = float(request.POST[f'value_{str(criterion)}_1'])
             for alternatives in range(1, number_of_alternatives + 1):
-                if max < float(request.POST["value_" + str(criterion) + "_" + str(alternatives)]):
-                    max = float(request.POST["value_" + str(criterion) + "_" + str(alternatives)])
+                if max < float(request.POST[f'value_{str(criterion)}_{str(alternatives)}']):
+                    max = float(request.POST[f'value_{str(criterion)}_{str(alternatives)}'])
             c = Criterion.objects.create(name=name, id_model=model, direction=direction, max=max,
                                                  number=criterion)
 
             for alternatives in range(1, number_of_alternatives + 1):
-                value = float(request.POST["value_" + str(criterion) + "_" + str(alternatives)])
+                value = float(request.POST[f'value_{str(criterion)}_{str(alternatives)}'])
                 Value.objects.create(value=value, id_option=options_obj_list[alternatives-1], id_criterion=c)
 
         n = len(options_obj_list)
@@ -93,16 +92,16 @@ def _filling_model_from_file(model: object, path_csv=None) -> bool:
     options_obj_list = []
     try:
         if path_csv:
-            path_csv = MEDIA_ROOT + "/" + path_csv
+            path_csv = f'{MEDIA_ROOT}/{path_csv}'
         else:
             # Если пути файла нет, то файл демо модели
-            path_csv = MEDIA_ROOT + "/demo/demo.csv"
+            path_csv = f'{MEDIA_ROOT}/demo/demo.csv'
 
         with open(path_csv, encoding='utf-8') as r_file:
             file_reader = csv.reader(r_file, delimiter=",")
 
             # Обрабатыаем 1ю строку с шапкой, где названия критериев
-            count = False #
+            count = False
 
             criterion_number = 1
             option_number = 1
@@ -158,7 +157,7 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
     try:
         options_obj_list = []
         for alternative in range(1, number_of_alternatives + 1):
-            option = Option.objects.create(name='Alternative ' + str(alternative), id_model=model, number=alternative)
+            option = Option.objects.create(name=f'Alternative { str(alternative)}', id_model=model, number=alternative)
             options_obj_list.append(option)
 
         criterions_name = ['Количество мест для парковки машин', 'Наличие поблизости конкурентов', 'Плотность населения',
@@ -194,9 +193,9 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
 
 
 def _create_dir(dir_name: str) -> None:
-    path1 = MEDIA_ROOT + '/files/models/' + dir_name
-    path2 = MEDIA_ROOT + '/files/models/' + dir_name + '/original_snod'
-    path3 = MEDIA_ROOT + '/' + dir_name
+    path1 = f'{MEDIA_ROOT}/files/models/{dir_name}'
+    path2 = f'{MEDIA_ROOT}/files/models/{dir_name}/original_snod'
+    path3 = f'{MEDIA_ROOT}/{dir_name}'
 
     try:
         os.mkdir(path1)

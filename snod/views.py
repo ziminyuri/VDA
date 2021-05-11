@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import View
 
 from model.models import Model, Option
-from services.graph import get_graph_snod
+
 from services.history import checking_already_has_answer
 from services.model import get_model_data
 from services.pairs_of_options import (absolute_value_in_str, data_of_winners,
@@ -170,13 +170,20 @@ class OriginalSnodDetailView(LoginRequiredMixin, CacheMixin, View):
     login_url = 'login'
 
     def get(self, request, id):
-        context = {'response': get_winners_from_model_original_snod(id), 'model_data': (get_model_data(id))[0],
-                   'model_header': (get_model_data(id))[1], 'history': get_context_history_answer_original_snod(id),
-                   'model': Model.objects.get(id=id)}
+        model = Model.objects.get(id=id)
+        context = {'response': get_winners_from_model_original_snod(id),
+                   'history': get_context_history_answer_original_snod(id),
+                   'model': model}
+
+        data_from_model = get_model_data(id)
+        context['model_data'] = data_from_model[0]
+        context['model_header'] = data_from_model[1]
+
         if 'DATABASE_URL' in os.environ:
-            context['graph'] = get_graph_snod(id)
+            context['graph'] = model.graph_snod
 
         else:
-            context['graph'] = 'http://127.0.0.1:8000/media' + get_graph_snod(id)
+            context['graph'] = f'http://127.0.0.1:8000/media{model.graph_snod}'
+
         return render(request, "snod/original_snod_result.html", {'context': context})
 

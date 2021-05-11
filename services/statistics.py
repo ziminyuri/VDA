@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 from model.models import Model, Option
 from services.services import get_userprofile
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT, MEDIA_URL
+from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
 class StatisticsItem:
@@ -114,11 +114,11 @@ def built_statistics(x, y, x_label=None, y_label=None):
     plt.plot(x, y)
 
     path_url = 'http://127.0.0.1:8000/media/files/statisctics/'
-    path = MEDIA_ROOT + '/files/statisctics/'
+    path = f'{MEDIA_ROOT}/files/statisctics/'
     r = random.randint(0, 1000000)
-    png_path = path + str(r) + '.png'
+    png_path = f'{path}{str(r)}.png'
     plt.savefig(png_path)
-    return path_url + str(r) + '.png'
+    return f'{path_url}{str(r)}.png'
 
 
 def get_statistics_original_snod(request):

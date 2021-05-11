@@ -58,6 +58,8 @@
                         <td>
                             {% if model.is_done == False or model.id_delete == True %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm disabled" href="{% url 'park_search' id=model.pk %}">Найти</a>
+                            {% elif model.is_searching_pacom == True and model.already_find_winner_PACOM == False%}
+                                <a class="btn btn-outline-secondary btn-block btn-sm  disabled" href="{% url 'park_search' id=model.pk %}"> Найти</a>
                             {% elif model.already_find_winner_PACOM == False %}
                                 <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'park_search' id=model.pk %}"> Найти</a>
                             {% else %}

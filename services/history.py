@@ -13,9 +13,9 @@ def checking_already_has_answer(data, snod_original=False, request=None):
     model_id = data['model']
 
     if not snod_original:
-        path = MEDIA_ROOT + '/files/models/' + str(model_id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/{str(model_id)}.txt'
     else:
-        path = MEDIA_ROOT + '/files/models/pacom' + str(model_id) + '.txt'
+        path = f'{MEDIA_ROOT}/files/models/pacom{str(model_id)}.txt'
 
     try:
         with open(path) as f:

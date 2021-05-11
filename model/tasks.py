@@ -11,9 +11,9 @@ def delete_model(id):
 
     try:
         import shutil
-        path_files = MEDIA_ROOT + '/files/models/' + str(model.id)
+        path_files = f'{MEDIA_ROOT}/files/models/{str(model.id)}'
         shutil.rmtree(path_files)
-        path_img = MEDIA_ROOT + '/' + str(model.id)
+        path_img =f'{MEDIA_ROOT }/{str(model.id)}'
         shutil.rmtree(path_img)
 
     except:

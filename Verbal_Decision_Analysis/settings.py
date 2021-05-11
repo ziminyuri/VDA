@@ -126,9 +126,9 @@ if 'DATABASE_URL' in os.environ:
     import dj_database_url
     DATABASES = {'default': dj_database_url.config()}
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
+#INTERNAL_IPS = [
+#    '127.0.0.1',
+#]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
@@ -139,3 +139,6 @@ CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+
+"""Debug Celery"""
+# CELERY_TASK_ALWAYS_EAGER = True

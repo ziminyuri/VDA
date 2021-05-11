@@ -5,9 +5,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, View
 
 from model.models import Model
+from pacom.tasks import auto_mode_pacom
 from services.graph import get_graph_pacom
 from services.model import get_model_data
-from services.park import (auto_mode_pacom, get_context_history_answer,
+from services.park import (get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
 from services.settings import settingsPACOMCreate
@@ -23,14 +24,15 @@ class ParkSearchView(LoginRequiredMixin, View):
 
         response = get_park_question(model)
         if response['flag_range'] is False and model.id_settings_pacom.auto_mode is True:
-            auto_mode_pacom(response, request, model)
-            return redirect('park_result', pk=model.id)
+            request_data = request.POST
+            auto_mode_pacom.delay(response, request_data, model.id)
+            return redirect('models')
 
         elif response['flag_range'] is False:
-            return render(request, "spbpu/../templates/pacom/range.html", {'response': response, 'model': model})
+            return render(request, "pacom/range.html", {'response': response, 'model': model})
 
         else:
-            return render(request, 'spbpu/../templates/pacom/compare_alternative.html', {'response': response, 'model': model})
+            return render(request, 'pacom/compare_alternative.html', {'response': response, 'model': model})
 
     def post(self, request, id):
         model = Model.objects.get(id=id)
@@ -47,10 +49,10 @@ class ParkSearchView(LoginRequiredMixin, View):
         if range is True and compare is False:
             """Запись данных после ранжирования"""
 
-            response = write_range_data(request, model)  # TODO Проверить что нет ошибок ранжирования
+            write_range_data(request, model)  # TODO Проверить что нет ошибок ранжирования
             response = get_park_question(model)
 
-            return render(request, 'spbpu/../templates/pacom/compare_alternative.html', {'response': response, 'model': model})
+            return render(request, 'pacom/compare_alternative.html', {'response': response, 'model': model})
 
         if compare is True:
             """ Запись после сравнения критериев """
@@ -61,9 +63,9 @@ class ParkSearchView(LoginRequiredMixin, View):
                 return redirect('park_result', pk=model.id)
 
             elif response['flag_range'] is False:
-                return render(request, "spbpu/../templates/pacom/range.html", {'response': response, 'model': model})
+                return render(request, "pacom/range.html", {'response': response, 'model': model})
             else:
-                return render(request, 'spbpu/../templates/pacom/compare_alternative.html', {'response': response, 'model': model})
+                return render(request, 'pacom/compare_alternative.html', {'response': response, 'model': model})
 
 
 class SettingsPACOMCreateView(LoginRequiredMixin, View):
@@ -73,7 +75,7 @@ class SettingsPACOMCreateView(LoginRequiredMixin, View):
     def get(request, id):
         context = {'model': get_object_or_404(Model, id=id)}
         context['mode'] = ['Классический', 'Только различные значения критериев', 'Автоматический']
-        return render(request, "spbpu/../templates/pacom/settings.html", context)
+        return render(request, "pacom/settings.html", context)
 
     def post(self, request, id, **kwargs):
         settings = settingsPACOMCreate(request)
@@ -85,7 +87,7 @@ class ParkDetailView(LoginRequiredMixin, DetailView):
     login_url = 'login'
 
     model = Model
-    template_name = 'spbpu/../templates/pacom/result.html'
+    template_name = 'pacom/result.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -97,6 +99,6 @@ class ParkDetailView(LoginRequiredMixin, DetailView):
             context['graph'] = get_graph_pacom(self.kwargs['pk'])
 
         else:
-            context['graph'] = 'http://127.0.0.1:8000/media' + get_graph_pacom(self.kwargs['pk'])
+            context['graph'] = f'http://127.0.0.1:8000/media{get_graph_pacom(self.kwargs["pk"])}'
 
         return context
