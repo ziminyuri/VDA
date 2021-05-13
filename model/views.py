@@ -8,7 +8,7 @@ from django.contrib.auth import logout as django_logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
 
@@ -22,7 +22,7 @@ from services.statistics import (built_statistics,
 from snod.views import CacheMixin
 from .tasks import delete_model
 
-from .models import Model
+from .models import Model, Option
 
 
 class LoginView(View):
@@ -161,11 +161,9 @@ class ModelListCreateView(LoginRequiredMixin, View):
 
     @staticmethod
     def get(request):
+        from django.db.models import Count
         user = get_userprofile(request)
-        models = Model.objects.filter(id_user=user).only('name', 'is_done', 'is_delete', 'is_done', 'is_searching_snod',
-                                                         'already_find_winner_SNOD', 'id_winner_option_shnur',
-                                                         'is_searching_pacom', 'already_find_winner_PACOM', 'id').\
-            order_by('id')
+        models = Model.objects.filter(id_user=user).annotate(numbers=Count('model')).order_by('id')
         return render(request, "model/models.html", {'models': models})
 
     @staticmethod

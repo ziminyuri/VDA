@@ -2,6 +2,26 @@
 {% block content %}
     <div class="container">
         <div class="row">
+
+            <div class="card teal darken-3">
+                <div class="card-content white-text">
+                    <span class="card-title">Инструкция</span>
+                    <p>Укажите наименовния критериев, оценки альтернатив по каждому критерию, а также желательное направление изменения оценки</p>
+                    <p>Если критерий качественный(например оценки по критерию "плохая", "средняя", "хорошая"
+                        и т.п.), а не количественное(например – 100, 500, 0.1), то их необходимо шкалировать:</p>
+                    <ul>
+                        <li>1 - плохая(низкая, мало)</li>
+                        <li>3 - средняя</li>
+                        <li>5 – хорошая(высокая, много)</li>
+                        <li>7 - очень хорошая(высокая, много)</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row">
             <div class="col">
                 <div class="card">
                     <div class="card-content">
@@ -35,5 +55,11 @@
                 </div>
             </div>
         </div>
+
+        <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
+            <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
+            <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+        </div>
+
     </div>
 {% endblock %}

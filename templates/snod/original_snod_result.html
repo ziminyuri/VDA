@@ -92,41 +92,69 @@
             </div>
 
             <div id="test3" class="col s12">
-                <h3>Результат</h3>
-                <div class="row">
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-content">
-                                <span class="card-title">Альтернативы наиболее предпочтительные</span>
 
-                                <ul>
-                                    {% for option in context.response.winner_options %}
-                                        <li>{{ option.name }}</li>
-                                    {% endfor %}
-                                </ul>
-                                <p>Кол-во вопрос к ЛПР: <b>{{ context.model.number_of_questions_snod }}</b></p>
-                                <p>Время затраченное на ответы на вопросы ЛПР: <br>{{ context.model.time_answer_snod }}</p>
+                <div class="col s12" >
+                    <ul class="tabs  ">
+                        <li class="tab col s3"><a href="#result" class="teal-text">Основные данные</a></li>
+                        <li class="tab col s3 teal-text"><a href="#visulasation" class="teal-text">Визуализация</a></li>
+                    </ul>
+                </div>
+                <div id="result" class="col s12">
+                    <h3>Результат</h3>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card">
+                                <div class="card-content">
+                                    <span class="card-title">Альтернативы наиболее предпочтительные</span>
 
-                                <br>
-                                <p>Кол-во пар сравнений: <b>{{ context.model.number_of_pairs_snod }}</b></p>
-                                <p>Кол-во несравнимых пар: <b>{{ context.model.number_of_incomparable_snod }}</b></p>
-                                <p>Кол-во вопрос, которые повторились: <b>{{ context.model.number_repeated_questions_snod }}</b></p>
+                                    <ul>
+                                        {% for option in context.response.winner_options %}
+                                            <li>{{ option.name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <p>Кол-во вопрос к ЛПР: <b>{{ context.model.number_of_questions_snod }}</b></p>
+                                    <p>Время затраченное на ответы на вопросы ЛПР: <br>{{ context.model.time_answer_snod }}</p>
 
+                                    <br>
+                                    <p>Кол-во пар сравнений: <b>{{ context.model.number_of_pairs_snod }}</b></p>
+                                    <p>Кол-во несравнимых пар: <b>{{ context.model.number_of_incomparable_snod }}</b></p>
+                                    <p>Кол-во вопрос, которые повторились: <b>{{ context.model.number_repeated_questions_snod }}</b></p>
+                                    <p>В результате есть несравнимая пара: <b>{{ context.model.has_incomparable_pairs_result_snod }}</b></p>
+
+
+                                </div>
 
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="visulasation" class="col s12">
+                    <div class="row">
+                        <div class="col-6">
+                            <h3>Визуализация полученных данных</h3>
+                            <h5>Обозначения:</h5>
+                            <p>Альтернатива 1 лучше Альтерантивы 2</p>
+                            <img src="{{context.graph_example.0}}" class="rounded float-start">
+                             <p>Альтернатива 1 равноценна Альтерантиве 2</p>
+                            <img src="{{context.graph_example.1}}" class="rounded float-start">
+                             <p>Альтернатива 1 несравнима с Альтерантивой 2</p>
+                             <img src="{{context.graph_example.2}}" class="rounded float-start">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                         <h5>Граф полученной модели</h5>
+                        <div class="col-6">
+
+                            <img src="{{context.graph}}" class="rounded float-start">
+                        </div>
+                        <div class="col-6">
 
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-        <div class="col-6">
-            <img src="{{context.graph}}" class="rounded float-start">
-        </div>
-                <div class="col-6">
-
-        </div>
-    </div>
             </div>
         </div>
     </div>

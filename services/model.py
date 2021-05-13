@@ -18,7 +18,7 @@ def create_model(user_id, demo_model: bool = False, path_csv=None, request=None,
         result = True   # Результат создания и заполнения модели
 
         if demo_model:
-            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id)).only('id')
+            model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id))
             result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
         else:
 

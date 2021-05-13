@@ -146,7 +146,7 @@ class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
             return redirect('models')
 
         if model.id_settings_original_snod.auto_mode is False:
-            message = write_original_snod_answer(request, request.POST["answer"], auto=False)
+            message = write_original_snod_answer(request.POST["answer"], auto=False, request=request)
 
         """Проверяем, что нашли лучшую альтернативу в модели"""
         flag_find_winner = message['flag_find_winner']
@@ -155,11 +155,11 @@ class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
             return redirect('snod_original_result', id=id)
 
         else:
-            message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+            message, flag_checking = checking_already_has_answer(message, snod_original=True, request=request)
             while flag_checking:
                 flag_find_winner = message['flag_find_winner']
                 if flag_find_winner != 1:
-                    message, flag_checking = checking_already_has_answer(request, message, snod_original=True)
+                    message, flag_checking = checking_already_has_answer(message, snod_original=True, request=request)
 
             return render(request, "snod/question.html",
                           {'message': message,
@@ -184,6 +184,12 @@ class OriginalSnodDetailView(LoginRequiredMixin, CacheMixin, View):
 
         else:
             context['graph'] = f'http://127.0.0.1:8000/media{model.graph_snod}'
+
+        graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
+                         'http://127.0.0.1:8000/media/graph/example/2.png',
+                         'http://127.0.0.1:8000/media/graph/example/3.png']
+
+        context['graph_example'] = graph_example
 
         return render(request, "snod/original_snod_result.html", {'context': context})
 

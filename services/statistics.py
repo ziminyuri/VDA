@@ -48,6 +48,7 @@ class StatisticsItem:
 
 
 def get_statistics(request):
+    """ Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ПАРК """
     user_profile = get_userprofile(request)
     models = Model.objects.filter(id_user=user_profile)
 
@@ -129,7 +130,7 @@ def get_statistics_original_snod(request):
     for model in models:
         flag_find = False
         for item in statistics_items:
-            if Option.objects.filter(id_model=model).count()  == item.get_number_of_alternatives():
+            if Option.objects.filter(id_model=model).count() == item.get_number_of_alternatives():
 
                 number_of_incomparable = item.get_number_of_incomparable()
                 new_number = (number_of_incomparable + model.number_of_incomparable_snod) / 2
@@ -197,7 +198,7 @@ def built_statistics_number_question(request):
                                   model.number_of_questions_snod, model.number_repeated_questions_snod)
             statistics_items.append(item)
 
-    statistics_items.sort(key=lambda k: k.get_number_of_pairs())
+    statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
 
     x = []
     y = []

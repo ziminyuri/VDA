@@ -101,4 +101,9 @@ class ParkDetailView(LoginRequiredMixin, DetailView):
         else:
             context['graph'] = f'http://127.0.0.1:8000/media{get_graph_pacom(self.kwargs["pk"])}'
 
+        graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
+                         'http://127.0.0.1:8000/media/graph/example/2.png',
+                         'http://127.0.0.1:8000/media/graph/example/3.png']
+
+        context['graph_example'] = graph_example
         return context

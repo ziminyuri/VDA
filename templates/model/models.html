@@ -8,6 +8,7 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Модель</th>
+                    <th scope="col">Кол-во альтернатив</th>
                     <th scope="col">Исходные данные</th>
                     <th scope="col">Метод ШНУР</th>
                     <th scope="col">Модифицированный метод ШНУР</th>
@@ -21,6 +22,7 @@
                     <tr>
                         <th scope="row">{{ forloop.counter }}</th>
                         <td>{{  model.name }}</td>
+                        <td>{{  model.numbers }}</td>
 
                         <td>
                             {% if model.is_done == True %}

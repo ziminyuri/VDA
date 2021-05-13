@@ -33,17 +33,18 @@ class PairsOfOptionsTrueSNOD(models.Model):
 
     id_option_1 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_1_true_snod')
     id_option_2 = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='id_option_2_true_snod')
-    winner_option = models.ForeignKey(Option, on_delete=models.CASCADE, related_name='winner_option_true_snod', blank=True,
-                                      null=True)
-
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
     already_find_winner = models.BooleanField(default=False)
     is_not_comparable = models.BooleanField(default=False)
     flag_winner_option = models.IntegerField(default=-1)
     flag_not_compared = models.BooleanField(default=True)   # Данные не сравнивались ни разу
+    in_result_and_not_comparable = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{str(self.id_option_1)} {str(self.id_option_2)}'
+        try:
+            return f'{str(self.id_option_1)} {str(self.id_option_2)} Победитель: {str(self.flag_winner_option)}'
+        except:
+            return f'{str(self.id_option_1)} {str(self.id_option_2)}'
 
 
 class HistoryAnswerTrueSNOD(models.Model):

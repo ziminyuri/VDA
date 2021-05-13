@@ -50,6 +50,7 @@ class Model(models.Model):
     number_of_pairs = models.IntegerField(default=0)
     number_of_incomparable = models.IntegerField(default=0)
     id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
+    has_incomparable_pairs_result_pacom = models.BooleanField(default=False)
 
     """ True SNOD """
     already_find_winner_SNOD = models.BooleanField(default=False)
@@ -61,6 +62,7 @@ class Model(models.Model):
     id_settings_original_snod = models.OneToOneField(SettingsOrigianlSNOD, null=True, on_delete=models.CASCADE)
     graph_snod = models.CharField(max_length=255, blank=True, null=True)
     quasi_max_order_snod = models.IntegerField(default=0)
+    has_incomparable_pairs_result_snod = models.BooleanField(default=False)
 
     id_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -81,7 +83,7 @@ class Criterion(models.Model):
 class Option(models.Model):
     """ Модель альтернатив """
     name = models.CharField(max_length=200)
-    id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+    id_model = models.ForeignKey(Model, on_delete=models.CASCADE, related_name="model")
     number = models.IntegerField()
     quasi_order_pacom = models.IntegerField(default=-1)
     quasi_order_original_snod = models.IntegerField(default=-1)

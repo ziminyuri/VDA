@@ -113,14 +113,14 @@ def get_park_question(model):
 
 # Записываем данные о ранжировании критериев в паре
 def write_range_data(response, model, auto_mode=False) -> object:
-    criterions = Criterion.objects.filter(id_model=model.id).only('id')
+    criterions = Criterion.objects.filter(id_model=model.id)
 
     if auto_mode:
         pair_id = int(response["pair"])
     else:
         pair_id = int(response.POST["pair"])
 
-    pair: object = PairsOfOptionsPARK.objects.get(id=pair_id).only('id_option_1', 'id_option_2')
+    pair: object = PairsOfOptionsPARK.objects.get(id=pair_id)
 
     range_value_1 = False
     range_value_2 = False
@@ -220,11 +220,11 @@ def write_result_of_compare_pacom(response, model, auto_mode=False):
 def _create_pair(model, FIRST=False, option_1=None, option_2=None):
     if FIRST:
         options = Option.objects.filter(id_model=model)
-        pair = PairsOfOptionsPARK.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model).only('id')
+        pair = PairsOfOptionsPARK.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model)
         return pair
 
     else:
-        pair = PairsOfOptionsPARK.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model).only('id')
+        pair = PairsOfOptionsPARK.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model)
         return pair
 
 
@@ -482,7 +482,7 @@ def _find_winner_in_pair(pair, result=None, is_not_comparable=False, option_2_is
 
 
 def _checking_comparable(pair, set_1, set_2):
-    pair = PairsOfOptionsPARK.objects.get(id=pair.id).only('id_option_1', 'id_option_2')
+    pair = PairsOfOptionsPARK.objects.get(id=pair.id)
     compensable_option = pair.compensable_option
 
     if compensable_option == pair.id_option_1:

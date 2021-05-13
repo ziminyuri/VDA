@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="container">
-
         <div class="row">
             <div class="col s12 m6">
                 <div class="card ">
@@ -11,19 +10,15 @@
 
                             {% csrf_token %}
                             <div class="input-field col s12">
-
                                 <select class="form-select" id="mode" name="mode">
                                     {% for m in mode %}
                                         <option selected value= "{{ m }}">
                                         {{ m }}
                                     {% endfor %}
                                 </select>
-
                                 <label>Режим работы</label>
-
                             </div>
-                        <br>
-
+                            <br>
 
                             <div class="card-action">
                                 <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
@@ -33,12 +28,9 @@
                 </div>
             </div>
         </div>
-
-
-
+        <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
+            <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
+            <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+        </div>
     </div>
-
-
-
-
 {% endblock %}

@@ -22,7 +22,7 @@
                                 <label>Режим работы</label>
 
                             </div>
-                        <br>
+                            <br>
 
 
                             <div class="card-action">
@@ -32,9 +32,26 @@
                     </form>
                 </div>
             </div>
+
+            <div class="col s12 m6">
+                <div class="card ">
+                    <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
+                        <div class="card-content">
+                            <span class="card-title">Описание режимов</span>
+                            <ul>
+                                <li>Классический - пользователю предлагается ответить на вопросы системы</li>
+                                <li>Автоматический - ответы, генерируются автоматически</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
-
+        <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
+            <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
+            <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+        </div>
 
 
     </div>
