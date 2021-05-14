@@ -19,7 +19,7 @@ from services.statistics import (built_statistics,
                                  built_statistics_number_question,
                                  get_statistics, get_statistics_original_snod,
                                  get_table_context)
-from snod.views import CacheMixin
+
 from .tasks import delete_model
 
 from .models import Model, Option
@@ -78,7 +78,7 @@ class LogoutView(View):
         return redirect("login")
 
 
-class IndexView(LoginRequiredMixin, CacheMixin, View):
+class IndexView(LoginRequiredMixin, View):
     login_url = 'login'
 
     def get(self, request):
@@ -188,7 +188,7 @@ class ModelListCreateView(LoginRequiredMixin, View):
                            'error': "Ошибка при заполнении. Повторите попытку ввода"})
 
 
-class ModelView(LoginRequiredMixin, CacheMixin, View):
+class ModelView(LoginRequiredMixin, View):
     login_url = 'login'
 
     @staticmethod
@@ -212,7 +212,7 @@ class ModelView(LoginRequiredMixin, CacheMixin, View):
             return redirect('models')
 
 
-class StatisticsView(LoginRequiredMixin, CacheMixin, View):
+class StatisticsView(LoginRequiredMixin, View):
     login_url = 'login'
 
     def get(self, request):

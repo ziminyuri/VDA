@@ -22,16 +22,6 @@ from .models import HistoryAnswer, PairsOfOptions
 from .services.search import snod_search_auto
 
 
-class CacheMixin(object):
-    cache_timeout = 60
-
-    def get_cache_timeout(self):
-        return self.cache_timeout
-
-    def dispatch(self, *args, **kwargs):
-        return cache_page(self.get_cache_timeout())(super(CacheMixin, self).dispatch)(*args, **kwargs)
-
-
 class SnodSearchView(LoginRequiredMixin, View):
     login_url = 'login'
 
@@ -103,7 +93,7 @@ class SnodDetailView(LoginRequiredMixin, View):
                       response)
 
 
-class SettingsOriginalSnodCreateView(LoginRequiredMixin, CacheMixin, View):
+class SettingsOriginalSnodCreateView(LoginRequiredMixin, View):
     login_url = 'login'
 
     @staticmethod
@@ -117,7 +107,7 @@ class SettingsOriginalSnodCreateView(LoginRequiredMixin, CacheMixin, View):
         return redirect('snod_original_search', id=id)
 
 
-class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
+class OriginalSnodSearchView(LoginRequiredMixin, View):
     login_url = 'login'
 
     def get(self, request, id):
@@ -166,7 +156,7 @@ class OriginalSnodSearchView(LoginRequiredMixin, CacheMixin, View):
                            'model': model, 'original_snod': 1})
 
 
-class OriginalSnodDetailView(LoginRequiredMixin, CacheMixin, View):
+class OriginalSnodDetailView(LoginRequiredMixin, View):
     login_url = 'login'
 
     def get(self, request, id):

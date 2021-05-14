@@ -61,19 +61,19 @@ WSGI_APPLICATION = 'Verbal_Decision_Analysis.wsgi.application'
 
 DATABASES = {
 
-    #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #   'NAME': BASE_DIR / 'db.sqlite3',
-    #}
-
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'verbal',
-        'USER': 'verbal',
-        'PASSWORD': '1',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
 
+    #'default': {
+    #    'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #    'NAME': 'verbal',
+    #    'USER': 'verbal',
+    #    'PASSWORD': '1',
+    #}
+}
+"""
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -83,7 +83,7 @@ CACHES = {
         }
     }
 }
-
+"""
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -130,8 +130,8 @@ if 'DATABASE_URL' in os.environ:
 #    '127.0.0.1',
 #]
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_CACHE_ALIAS = "default"
 
 
 """Celery Configuration Options"""

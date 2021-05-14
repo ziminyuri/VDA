@@ -210,7 +210,7 @@ def get_model_data(model_id):
     model = Model.objects.get(id=model_id)
     options = Option.objects.filter(id_model=model)
 
-    header = ['№','Наименование критерия']
+    header = ['№','Наименование критерия', 'Направление']
     for option in options:
         header.append(option.name)
 
@@ -218,6 +218,10 @@ def get_model_data(model_id):
     criterions = Criterion.objects.filter(id_model=model)
     for criterion in criterions:
         line = [criterion.name]
+        if criterion.direction:
+            line.append('Max')
+        else:
+            line.append('Min')
         for option in options:
             value = Value.objects.get(id_option=option, id_criterion=criterion)
             line.append(value.value)

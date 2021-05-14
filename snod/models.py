@@ -39,6 +39,7 @@ class PairsOfOptionsTrueSNOD(models.Model):
     flag_winner_option = models.IntegerField(default=-1)
     flag_not_compared = models.BooleanField(default=True)   # Данные не сравнивались ни разу
     in_result_and_not_comparable = models.BooleanField(default=False)
+    quasi_level = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         try:
