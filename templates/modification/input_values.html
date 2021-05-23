@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="container">
+
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <div class="row">
+
+                <div class="card teal darken-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">Инструкция</span>
+                        <p>Укажите наименовния критериев, оценки альтернатив по каждому критерию, а также желательное направление изменения оценки</p>
+                        <p>Если критерий качественный(например оценки по критерию "плохая", "средняя", "хорошая"
+                            и т.п.), а не количественное(например – 100, 500, 0.1), то их необходимо шкалировать:</p>
+                        <ul>
+                            <li>1 - плохая(низкая, мало)</li>
+                            <li>3 - средняя</li>
+                            <li>5 – хорошая(высокая, много)</li>
+                            <li>7 - очень хорошая(высокая, много)</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+        </div>
+
+
+        <form  action="{% url 'values_create' id=id  %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="number_of_criterion" value = "{{ number_of_criterion }}">
+            <input type="hidden" name="number_of_alternatives" value = "{{ number_of_alternatives }}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Критерий</th>
+                    <th scope="col">Направление</th>
+                    {% for alternative in number_of_alternatives_for_select %}
+                        <th scope="col"> {{ alternative.parent_option.name }}</th>
+                        <input type="hidden" required class="form-control" name="alternative_{{ forloop.counter }}" value = "Альтернатива {{ number }}">
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for criterion in number_of_criterion_for_select %}
+                    <tr>
+                        <td>{{ criterion.name }} <br> {{ forloop.counter0 }}</td>
+                        <td>                <select class="form-select" id="direction" name="direction_{{ forloop.counter }}">
+
+                            <option value="1">Максимум</option>
+                            <option value="2">Минимум</option>
+                        </select>
+                        </td>
+                        {% for n in number_of_alternatives_for_select %}
+                            <td><p>К: {{  forloop.parentloop.counter }}</p>
+                                <p>A: {{   forloop.counter }} </p>
+                                <input type="text" required class="form-control" name="value_{{  forloop.parentloop.counter }}_{{ forloop.counter }}" placeholder="Значение"></td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+            <div class="btn-group mt-3" role="group" aria-label="Basic example">
+                <a href="{% url 'index' %}" class="btn btn btn-primary mr-2" >Назад</a>
+                <button class="btn btn btn-primary " type="submit">Далее</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

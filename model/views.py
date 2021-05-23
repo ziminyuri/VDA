@@ -15,14 +15,11 @@ from django.views.generic import View
 from services.model import create_model, get_model_data
 from services.pairs_of_options import create_files
 from services.services import get_userprofile
-from services.statistics import (built_statistics,
-                                 built_statistics_number_question,
-                                 get_statistics, get_statistics_original_snod,
-                                 get_table_context)
+
 
 from .tasks import delete_model
 
-from .models import Model, Option
+from .models import Model
 
 
 class LoginView(View):
@@ -38,7 +35,10 @@ class LoginView(View):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect("index")
+            if user.is_superuser:
+                return redirect("users_list")
+            else:
+                return redirect("index")
 
         else:
             login_error = f'Неверный логин или пароль! Повторите попытку.'
@@ -142,10 +142,8 @@ class ModelCreateView(LoginRequiredMixin, View):
     def post(self, request):
         """ Данные для заполнения таблицы """
 
-        number_of_criterion = request.POST["number_of_criterion"]
-        number_of_alternatives = request.POST["number_of_alternatives"]
-        number_of_criterion = int(number_of_criterion)
-        number_of_alternatives = int(number_of_alternatives)
+        number_of_criterion = int(request.POST["number_of_criterion"])
+        number_of_alternatives = int(request.POST["number_of_alternatives"])
         number_of_criterion_for_select = list(range(1, number_of_criterion + 1))
         number_of_alternatives_for_select = list(range(1, number_of_alternatives + 1))
         return render(request, "model/input_data.html",
@@ -212,42 +210,6 @@ class ModelView(LoginRequiredMixin, View):
             return redirect('models')
 
 
-class StatisticsView(LoginRequiredMixin, View):
-    login_url = 'login'
 
-    def get(self, request):
-        try:
-            x_pacom, y_pacom, number_of_alternatives = get_statistics(request)
-            path_img = built_statistics(x_pacom, y_pacom)
-            context_table_pacom = get_table_context(x_pacom, y_pacom, number_of_alternatives)
-
-            x_snod, y_snod, number_of_alternatives = get_statistics_original_snod(request)
-            path_img_snod = built_statistics(x_snod, y_snod)
-            context_table_snod = get_table_context(x_snod, y_snod, number_of_alternatives)
-            error = False
-
-            number_of_alternatives, number_of_question, number_of_repeted_question, path_img_snod_number_question, path_img_snod_number_of_repeted_question = built_statistics_number_question(
-                request)
-            context_table_snod_number_of_question = get_table_context(number_of_repeted_question, number_of_question,
-                                                                      number_of_alternatives)
-
-        except Exception as e:
-            path_img = None
-            path_img_snod = None
-            context_table_snod = None
-            context_table_pacom = None
-            error = True
-            path_img_snod_number_question = None
-            path_img_snod_number_of_repeted_question = None
-            context_table_snod_number_of_question = None
-
-        return render(request, "statistics.html", {'path_img': path_img,
-                                                   'path_img_snod': path_img_snod,
-                                                   'path_img_snod_number_question': path_img_snod_number_question,
-                                                   'path_img_snod_number_of_repeted_question': path_img_snod_number_of_repeted_question,
-                                                   'context_table_pacom': context_table_pacom,
-                                                   'context_table_snod_number_of_question': context_table_snod_number_of_question,
-                                                   'context_table_snod': context_table_snod,
-                                                   'error': error})
 
 

@@ -15,7 +15,6 @@ urlpatterns = [
     path('models/<int:id>', ModelView.as_view(), name='models_id'),
     path('model/create', ModelCreateView.as_view(), name='create_model'),
     path('model/demo/create', DemoModelCreateView.as_view(), name='demo_create'),
-    path('statistics', StatisticsView.as_view(), name='statistics')
 ]
 
 if settings.DEBUG:

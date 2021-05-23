@@ -55,3 +55,5 @@ class HistoryAnswerTrueSNOD(models.Model):
     answer = models.CharField(max_length=255)
     pair = models.ForeignKey(PairsOfOptionsTrueSNOD, on_delete=models.CASCADE, related_name='pair_true_snod')
     id_model = models.ForeignKey(Model, on_delete=models.CASCADE)
+
+

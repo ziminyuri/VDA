@@ -276,7 +276,6 @@ def _update_quasi_order_snod_for_pair(pair, result):
             quasi_order_original_snod=max_quasi_order_original_snod)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_original_snod=lose)
-        # _update_quasi_order_snod_for_other_options(pair.id_option_1.id, max_quasi_order_original_snod)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                                  flag_winner_option=1)
     elif result == 2:
@@ -284,7 +283,6 @@ def _update_quasi_order_snod_for_pair(pair, result):
             quasi_order_original_snod=max_quasi_order_original_snod)
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_original_snod=lose)
-        # _update_quasi_order_snod_for_other_options(pair.id_option_1.id, max_quasi_order_original_snod)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                                  flag_winner_option=2)
     else:
@@ -292,7 +290,6 @@ def _update_quasi_order_snod_for_pair(pair, result):
             quasi_order_original_snod=max_quasi_order_original_snod)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_original_snod=max_quasi_order_original_snod)
-        # _update_quasi_order_snod_for_other_options(pair.id_option_1.id, max_quasi_order_original_snod)
 
         if result == 0:
             PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,

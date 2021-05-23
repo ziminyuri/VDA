@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        {% if pairs|length %}
+            <p>Модель: <b>{{ model.name }}</b></p>
+            <br><br>
+            <h4>Несравнимые пары</h4>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Альтернатива 1</th>
+                    <th scope="col">Альтернатива 2</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for pair in pairs  %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{  pair.id_option_1.name }}</td>
+                        <td>{{  pair.id_option_2.name }}</td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+            <div class="row p5 ">
+                <blockquote class="">У данной модели нет несравнимых пар.</blockquote>
+            </div>
+        {% endif %}
+    <br><br>
+        <h4 class="mt-5">Модификации модели</h4>
+        <br><br>
+
+            <div class="row">
+                <a class="btn btn-outline-secondary" href="{% url 'pairs_incomparable_create' id=model.id%}">Создать</a>
+            </div>
+
+        {% if models_m|length %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Тип</th>
+                    <th scope="col">Исходные данные</th>
+                    <th scope="col">Результат</th>
+                    <th scope="col">Удалить</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for m in models_m  %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <th scope="row">{{ m.type.name }}</th>
+                        <td><a class="btn btn-outline-primary btn-block btn-sm" href="#">Посмотреть</a></td>
+                        <td><a class="btn btn-outline-primary btn-block btn-sm" href="#">Результат</a></td>
+                        <td>
+                            <form  action="{% url 'modification_model_delete' id=m.id %}" method="POST">
+                                <input type="hidden" name="model" value = "{{ model.id }}">
+                                {% csrf_token %}
+                                <input type="submit" class="btn btn-danger btn-sm" value="Удалить" >
+
+                            </form></td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        {% else %}
+            <div class="row p5 ">
+                <blockquote class="">У данной модели нет модификаций.</blockquote>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

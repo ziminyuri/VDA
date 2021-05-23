@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col s12 m6">
+                <div class="card ">
+                    <form  action="{% url 'pairs_incomparable_create' id=id %}" method="POST">
+                        <div class="card-content">
+                            <span class="card-title">Выберите режим модификации</span>
+
+                            {% csrf_token %}
+                            <div class="input-field col s12">
+
+                            {{ form.as_p }}
+
+                            </div>
+                            <br>
+
+
+                            <div class="card-action">
+                                <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col s12 m6">
+                <div class="card ">
+
+                        <div class="card-content">
+                            <span class="card-title">Описание режимов</span>
+                            <ul>
+                                <li>Агрегация критериев - объединение критериев(например в ситуациях когда надо рассматривать макро показатели, а не микро)</li>
+                                <li>Дезагрегация критериев - разбиение на подкритерии или добавление новых (подходит, чтобы лучше детализировать ситуацию выбора)</li>
+                            </ul>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
+            <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
+            <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+        </div>
+
+
+    </div>
+
+
+
+
+{% endblock %}

@@ -64,7 +64,7 @@ class Model(models.Model):
     quasi_max_order_snod = models.IntegerField(default=0)
     has_incomparable_pairs_result_snod = models.BooleanField(default=False)
 
-    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_model")
 
 
 class Criterion(models.Model):
@@ -100,3 +100,8 @@ class Value(models.Model):
 
     def __str__(self):
         return str(self.value)
+
+
+
+
+

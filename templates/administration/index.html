@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        {% if users|length %}
+            <h4>Список пользователей</h4>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Пользователь</th>
+                    <th scope="col">Кол-во моделей</th>
+                    <th scope="col">Последний вход</th>
+                    <th scope="col">Дата регистрации</th>
+                    <th scope="col">Админинстратор</th>
+                    <th scope="col">Редактивароть</th>
+                    <th scope="col">Удалить</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for user in users  %}
+                    <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{  user.username }}</td>
+                    <td>{{ user.numbers_model }}</td>
+                    <td>{{ user.last_login }}</td>
+                    <td>{{ user.date_joined }}</td>
+                     {% if user.is_superuser %}
+                    <td>Да</td>
+                    {% else %}
+                           <td>Нет</td>
+                    {% endif %}
+                    <td><a class="btn btn-outline-primary btn-block btn-sm" href="#">Редактивроать</a></td>
+                    <td><a class="btn btn-outline-primary btn-block btn-sm" href="#">Удалить</a></td>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        {% else %}
+            <div class="row p5 ">
+                <blockquote class="">В системе нет пользователей</blockquote>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

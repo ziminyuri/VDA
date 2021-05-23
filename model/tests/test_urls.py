@@ -3,8 +3,7 @@ from django.urls import resolve, reverse
 
 from model.views import (DemoModelCreateView, DownloadCSVView, IndexView,
                          LoginView, LogoutView, ModelCreateView,
-                         ModelListCreateView, ModelView, RegistrationView,
-                         StatisticsView, UploadView)
+                         ModelListCreateView, ModelView, RegistrationView, UploadView)
 
 
 class TestUrls(SimpleTestCase):
@@ -47,7 +46,3 @@ class TestUrls(SimpleTestCase):
     def test_demo_create_urls_is_resolved(self):
         url = reverse('demo_create')
         self.assertEqual(resolve(url).func.view_class, DemoModelCreateView)
-
-    def test_statistics_urls_is_resolved(self):
-        url = reverse('statistics')
-        self.assertEqual(resolve(url).func.view_class, StatisticsView)

@@ -10,8 +10,8 @@ urlpatterns = [
 
     path('model/origianl_snod/<int:id>', OriginalSnodSearchView.as_view(), name='snod_original_search'),
     path('model/origianl_snod/result/<int:id>', OriginalSnodDetailView.as_view(), name='snod_original_result'),
-    path('model/origianl_snod/<int:id>/settings', SettingsOriginalSnodCreateView.as_view(), name='snod_original_settings_create'),
-
+    path('model/origianl_snod/<int:id>/settings', SettingsOriginalSnodCreateView.as_view(),
+         name='snod_original_settings_create')
 ]
 
 if settings.DEBUG:

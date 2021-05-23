@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 from django.views.generic import View
@@ -18,8 +19,9 @@ from services.snod_original import (get_context_history_answer_original_snod,
                                     write_original_snod_answer)
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
-from .models import HistoryAnswer, PairsOfOptions
+from .models import HistoryAnswer, PairsOfOptions, PairsOfOptionsTrueSNOD
 from .services.search import snod_search_auto
+from .services.modification import check_comparable_in_result
 
 
 class SnodSearchView(LoginRequiredMixin, View):
@@ -163,6 +165,7 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
         model = Model.objects.get(id=id)
         context = {'response': get_winners_from_model_original_snod(id),
                    'history': get_context_history_answer_original_snod(id),
+                   'can_improve_result': check_comparable_in_result(id),
                    'model': model}
 
         data_from_model = get_model_data(id)
@@ -182,4 +185,7 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
         context['graph_example'] = graph_example
 
         return render(request, "snod/original_snod_result.html", {'context': context})
+
+
+
 

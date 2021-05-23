@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 
 from model.models import Model, Option
-from services.services import get_userprofile
 from Verbal_Decision_Analysis.settings import MEDIA_ROOT
 
 
@@ -47,10 +46,10 @@ class StatisticsItem:
         return self.number_of_repeted_question
 
 
-def get_statistics(request):
+def get_statistics_pacom():
     """ Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ПАРК """
-    user_profile = get_userprofile(request)
-    models = Model.objects.filter(id_user=user_profile)
+
+    models = Model.objects.all()
 
     statistics_items = []
     for model in models:
@@ -88,21 +87,60 @@ def get_statistics(request):
     return x, y, z
 
 
+def get_statistics_pacom_v1():
+    """ Доля сравнимых альтернатив по ПАРК """
+
+    models = Model.objects.all()
+
+    statistics_items = []
+    for model in models:
+        flag_find = False
+        for item in statistics_items:
+            if Option.objects.filter(id_model=model).count() == item.get_number_of_alternatives():
+                number_of_incomparable = item.get_number_of_incomparable()
+                new_number = (number_of_incomparable + model.number_of_incomparable) / 2
+                item.set_number_of_incomparable(new_number)
+
+                number_of_pairs = item.get_number_of_pairs()
+                new_number = (number_of_pairs + model.number_of_pairs) / 2
+                item.set_number_of_pairs(new_number)
+
+                flag_find = True
+
+        if not flag_find:
+            number_of_alternative = Option.objects.filter(id_model=model).count()
+            item = StatisticsItem(model.number_of_pairs, model.number_of_incomparable, number_of_alternative,
+                                  model.number_of_questions_snod, model.number_repeated_questions_snod)
+            statistics_items.append(item)
+
+    statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
+
+    x = []
+    y = []
+
+    for item in statistics_items:
+        y.append(item.get_number_of_incomparable() / item.get_number_of_pairs())
+        x.append(item.get_number_of_alternatives())
+
+    return x, y
+
+
 # Строим столбчатую диаграмму
-def built_statistics(x, y, x_label=None, y_label=None):
+def built_statistics(x, y, x_label=None, y_label=None, normalisation=True):
     import random
     fig, ax = plt.subplots(figsize=(5, 5))
 
-    max_x = max(x)
-    max_y = max(y)
+    if normalisation is True:
+        max_x = max(x)
+        max_y = max(y)
 
-    if max_x > max_y:
-        _max = max_x
-    else:
-        _max = max_y
+        if max_x > max_y:
+            _max = max_x
+        else:
+            _max = max_y
 
-    ax.set_xlim([0, _max])
-    ax.set_ylim([0, _max])
+        ax.set_xlim([0, _max])
+        ax.set_ylim([0, _max])
 
     if x_label is None:
         plt.xlabel('Кол-во пар для сравнения')
@@ -122,9 +160,9 @@ def built_statistics(x, y, x_label=None, y_label=None):
     return f'{path_url}{str(r)}.png'
 
 
-def get_statistics_original_snod(request):
-    user_profile = get_userprofile(request)
-    models = Model.objects.filter(id_user=user_profile)
+def get_statistics_original_snod():
+    """Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ШНУР"""
+    models = Model.objects.all()
 
     statistics_items = []
     for model in models:
@@ -161,21 +199,58 @@ def get_statistics_original_snod(request):
     return x, y, z
 
 
-def get_table_context(x, y, number_of_alternatives):
+def get_statistics_original_snod_v1():
+    """ Доля сравнимых по методу ШНУР"""
+    models = Model.objects.all()
+
+    statistics_items = []
+    for model in models:
+        flag_find = False
+        for item in statistics_items:
+            if Option.objects.filter(id_model=model).count() == item.get_number_of_alternatives():
+
+                number_of_incomparable = item.get_number_of_incomparable()
+                new_number = (number_of_incomparable + model.number_of_incomparable_snod) / 2
+                item.set_number_of_incomparable(new_number)
+
+                number_of_pairs = item.get_number_of_pairs()
+                new_number = (number_of_pairs + model.number_of_pairs) / 2
+                item.set_number_of_pairs(new_number)
+
+                flag_find = True
+
+        if not flag_find:
+            number_of_alternative = Option.objects.filter(id_model=model).count()
+            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod, number_of_alternative, None, None)
+            statistics_items.append(item)
+
+    statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
+
+    x = []
+    y = []
+
+    for item in statistics_items:
+        y.append(item.get_number_of_incomparable() / item.get_number_of_pairs())
+        x.append(item.get_number_of_alternatives())
+
+    return x, y
+
+
+def get_table_context(x, y, number_of_alternatives=None):
     object = []
     for i in range(len(x)):
         row = []
         row.append(y[i])
         row.append(x[i])
-        row.append(number_of_alternatives[i])
+        if number_of_alternatives is not None:
+            row.append(number_of_alternatives[i])
         object.append(row)
 
     return object
 
 
 def built_statistics_number_question(request):
-    user_profile = get_userprofile(request)
-    models = Model.objects.filter(id_user=user_profile)
+    models = Model.objects.all()
 
     statistics_items = []
     for model in models:

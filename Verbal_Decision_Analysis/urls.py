@@ -8,5 +8,7 @@ urlpatterns = [
     path('', include('model.urls')),
     path('', include('pacom.urls')),
     path('', include('snod.urls')),
+    path('', include('modification.urls')),
+    path('', include('administration.urls')),
 
 ]

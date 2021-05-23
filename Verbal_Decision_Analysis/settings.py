@@ -20,7 +20,9 @@ INSTALLED_APPS = [
     'model.apps.ModelConfig',
     'pacom.apps.PacomConfig',
     'snod.apps.SnodConfig',
-    
+    'modification.apps.ModificationConfig',
+    'administration.apps.AdministrationConfig',
+
     'debug_toolbar',
 ]
 

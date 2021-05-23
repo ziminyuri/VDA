@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+`{% extends "base.html" %}
 {% block content %}
     <div class="container mt-5">
         <div class="row">
@@ -119,7 +119,17 @@
                                     <p>Кол-во пар сравнений: <b>{{ context.model.number_of_pairs_snod }}</b></p>
                                     <p>Кол-во несравнимых пар: <b>{{ context.model.number_of_incomparable_snod }}</b></p>
                                     <p>Кол-во вопрос, которые повторились: <b>{{ context.model.number_repeated_questions_snod }}</b></p>
-                                    <p>В результате есть несравнимая пара: <b>{{ context.model.has_incomparable_pairs_result_snod }}</b></p>
+                                <br>
+
+                                    {% if context.model.has_incomparable_pairs_result_snod == True %}
+                                        <p>В результате есть несравнимая пара (пары)</p>
+                                        <a class="btn btn-outline-secondary btn-block btn-sm" href="{% url 'pairs_incomparable' id=context.model.id%}">
+                                            Модифицировать
+                                        </a>
+
+                                    {% else %}
+                                        <p>В результате нет несравнимых пар</p>
+                                    {% endif %}
 
 
                                 </div>
@@ -136,15 +146,15 @@
                             <h5>Обозначения:</h5>
                             <p>Альтернатива 1 лучше Альтерантивы 2</p>
                             <img src="{{context.graph_example.0}}" class="rounded float-start">
-                             <p>Альтернатива 1 равноценна Альтерантиве 2</p>
+                            <p>Альтернатива 1 равноценна Альтерантиве 2</p>
                             <img src="{{context.graph_example.1}}" class="rounded float-start">
-                             <p>Альтернатива 1 несравнима с Альтерантивой 2</p>
-                             <img src="{{context.graph_example.2}}" class="rounded float-start">
+                            <p>Альтернатива 1 несравнима с Альтерантивой 2</p>
+                            <img src="{{context.graph_example.2}}" class="rounded float-start">
                         </div>
                     </div>
 
                     <div class="row">
-                         <h5>Граф полученной модели</h5>
+                        <h5>Граф полученной модели</h5>
                         <div class="col-6">
 
                             <img src="{{context.graph}}" class="rounded float-start">
@@ -163,4 +173,4 @@
 
 
 
-{% endblock %}
+{% endblock %}`

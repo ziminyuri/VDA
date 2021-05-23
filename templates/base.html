@@ -17,56 +17,73 @@
 
 <body>
 
-  <nav>
+<nav>
     <div class="nav-wrapper teal darken-1">
-      <a href="{% url 'index' %}" class="brand-logo">Система принятия решений</a>
-      <ul id="nav-mobile" class="right hide-on-med-and-down">
-        <li><a href="{% url 'index' %}">Главная</a></li>
-        <li><a href="{% url 'models' %}">Модели</a></li>
-        <li><a href="{% url 'statistics' %}">Статистики</a></li>
-        <li><a href="{% url 'logout' %}">Выход</a></li>
-      </ul>
+     {% if user.is_superuser %}
+        <a href="{% url 'users_list' %}" class="brand-logo">Система принятия решений</a>
+    {% else %}
+         <a href="{% url 'index' %}" class="brand-logo">Система принятия решений</a>
+    {% endif %}
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            {% if user.is_superuser %}
+                <li><a href="{% url 'users_list' %}">Главная</a></li>
+            {% endif %}
+            {% if not user.is_superuser %}
+                <li><a href="{% url 'index' %}">Главная</a></li>
+            {% endif %}
+            {% if not user.is_superuser %}
+                <li><a href="{% url 'models' %}">Модели</a></li>
+            {% endif %}
+        {% if user.is_superuser %}
+                <li><a href="{% url 'system_settings' %}">Настройки</a></li>
+            {% endif %}
+            {% if user.is_superuser %}
+                <li><a href="{% url 'statistics' %}">Статистики</a></li>
+            {% endif %}
+            <li><a href="{% url 'logout' %}">Выход</a></li>
+        </ul>
     </div>
-  </nav>
-  <div class="row">
+</nav>
+<div class="row">
     <br><br><br>
 </div>
 
-  {% block content %}
+{% block content %}
 
 {% endblock %}
 <div class="row">
     <br><br><br>
 </div>
 
-  <footer class="page-footer teal darken-4">
-          <div class="container">
-            <div class="row">
-              <div class="col l6 s12">
+<footer class="page-footer teal darken-4">
+    <div class="container">
+        <div class="row">
+            <div class="col l6 s12">
                 <h5 class="white-text">Система принятия решений</h5>
                 <p class="grey-text text-lighten-4">Система использует методы Вербального анализа принятия решений</p>
 
-              </div>
-                <div class="col l4 offset-l2 s12">
+            </div>
+            <div class="col l4 offset-l2 s12">
                 <h5 class="white-text">Авторы</h5>
-                 <p class="grey-text text-lighten-4">Зимин Ю.Г. Пархоменко В.А.</p>
-                 <p class="grey-text text-lighten-4">Cанкт-Петербургский политехнический университет Петра Великого</p>
-              </div>
+                <p class="grey-text text-lighten-4">Зимин Ю.Г. Пархоменко В.А.</p>
+                <p class="grey-text text-lighten-4">Cанкт-Петербургский политехнический университет Петра Великого</p>
             </div>
-          </div>
-          <div class="footer-copyright">
-            <div class="container">
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
 
-                © 2020-2021 Все права защищены
-            </div>
-          </div>
-        </footer>
+            © 2020-2021 Все права защищены
+        </div>
+    </div>
+</footer>
 
 
-  <script src="https://yastatic.net/jquery/3.1.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script src="{% static 'model/js/tab.js' %}"></script>
+<script src="https://yastatic.net/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="{% static 'model/js/tab.js' %}"></script>
 <script src="{% static 'model/js/select.js' %}"></script>
+<script src="{% static 'model/js/modal.js' %}"></script>
 
 
 </body>

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+
+
+        {% if criterions_m|length %}
+
+
+            <a class="waves-effect waves-light btn modal-trigger" href="#Add">Создать</a>
+            <a class="waves-effect waves-light btn modal-trigger" href="#Disaggregation">Дезагрегировать</a>
+
+
+
+            <!-- Дезагрегация критерия -->
+            <div id="Disaggregation" class="modal">
+                <form action="{% url 'modification_criterion' id=id  %}" method="post">
+                    <div class="modal-content">
+                        <h6>Дезагрегация критерия</h6>
+                        <input type="hidden" name="type" value = "dissaggregation">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary btn-flat" type="submit">Дезагрегировать</button>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+                    </div>
+                </form>
+            </div>
+
+
+
+            <!-- Добавление критерия критерия -->
+            <div id="Add" class="modal">
+                <form action="{% url 'modification_criterion' id=id  %}" method="post">
+                    <div class="modal-content">
+                        <h6>Добавление критерия</h6>
+                        <input type="hidden" name="type" value = "add">
+                        {% csrf_token %}
+                        <input type="text" name="name">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-primary btn-flat" type="submit">Добавить</button>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+                    </div>
+                </form>
+            </div>
+
+
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Критерий</th>
+                    <th scope="col">Критерий исходный</th>
+                    <th scope="col">Редактировать</th>
+                    <th scope="col">Удалить</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for criterion in criterions_m  %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{  criterion.name }}</td>
+                        <td>
+                            {% with  criterion.criterion.all|first as c %}{{ c.name }}{% endwith %}</td>
+                        <td>
+                            <a class="waves-effect waves-light btn modal-trigger" href="#Edit{{ criterion.id }}">
+                                Редактировать
+                            </a>
+                        </td>
+                        <td>
+                            <form  action="{% url 'modification_delete' id=criterion.id  %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="model_m" value = "{{ id }}">
+                                <button class="btn btn-outline-primary btn-block btn-sm" type="submit">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+
+
+
+                    <!-- Редактировать имя критерия -->
+                    <div id="Edit{{ criterion.id }}" class="modal">
+                        <form action="{% url 'modification_update' id=criterion.id  %}" method="post">
+                            <div class="modal-content">
+                                <h6>Редактировать критерий: {{ criterion.name }}</h6>
+                                {% csrf_token %}
+                                <input type="text" name="name" value = "{{  criterion.name }}">
+                                <input type="hidden" name="model_m" value = "{{ id }}">
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-outline-primary btn-flat" type="submit">Обновить</button>
+                                <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+                            </div>
+                        </form>
+                    </div>
+
+
+
+
+                {% endfor %}
+                </tbody>
+            </table>
+            <br><br>
+            <a href="{% url 'values_create' id=id %}" class="btn btn btn-primary">Заполнить значения</a>
+
+        {% else %}
+            <div class="row p5 ">
+                <blockquote class="">Нет критериев для дезагрегации</blockquote>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
