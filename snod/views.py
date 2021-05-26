@@ -172,15 +172,18 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
         context['model_data'] = data_from_model[0]
         context['model_header'] = data_from_model[1]
 
-        if 'DATABASE_URL' in os.environ:
-            context['graph'] = model.graph_snod
+        if DEPLOY:
+            context['graph'] = f'{MEDIA_URL}{model.graph_snod}'
+            graph_example = [f'{MEDIA_URL}graph/example/1.png',
+                             f'{MEDIA_URL}graph/example/2.png',
+                             f'{MEDIA_URL}graph/example/3.png']
 
         else:
             context['graph'] = f'http://127.0.0.1:8000/media{model.graph_snod}'
 
-        graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
-                         'http://127.0.0.1:8000/media/graph/example/2.png',
-                         'http://127.0.0.1:8000/media/graph/example/3.png']
+            graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
+                             'http://127.0.0.1:8000/media/graph/example/2.png',
+                             'http://127.0.0.1:8000/media/graph/example/3.png']
 
         context['graph_example'] = graph_example
 
