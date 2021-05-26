@@ -32,11 +32,11 @@ def get_graph_snod(model_id):
                 g.edge(pair.id_option_2.name, pair.id_option_1.name, color=colors[1])
                 g.edge(pair.id_option_1.name, pair.id_option_2.name, color=colors[1])
 
-        path = MEDIA_ROOT + f'/graph/{str(model)}_snod'
+        path = MEDIA_ROOT + f'/graph/{str(model_id)}_snod'
         g.render(path, view=False)
 
     except Exception as e:
         print(e)
 
-    Model.objects.filter(id=model_id).update(graph_snod=f'/graph/{str(model)}_snod.png')
+    Model.objects.filter(id=model_id).update(graph_snod=f'graph/{str(model_id)}_snod.png')
 

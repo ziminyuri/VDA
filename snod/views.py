@@ -17,7 +17,7 @@ from services.snod_original import (get_context_history_answer_original_snod,
                                     get_original_snod_question,
                                     get_winners_from_model_original_snod,
                                     write_original_snod_answer)
-from VDA.settings import MEDIA_ROOT, DEPLOY
+from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
 
 from .models import HistoryAnswer, PairsOfOptions, PairsOfOptionsTrueSNOD
 from .services.search import snod_search_auto
@@ -171,12 +171,15 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
         data_from_model = get_model_data(id)
         context['model_data'] = data_from_model[0]
         context['model_header'] = data_from_model[1]
-
+        p = model.graph_snod
         if DEPLOY:
-            context['graph'] = f'{MEDIA_URL}{model.graph_snod}'
-            graph_example = [f'{MEDIA_URL}graph/example/1.png',
-                             f'{MEDIA_URL}graph/example/2.png',
-                             f'{MEDIA_URL}graph/example/3.png']
+            try:
+                context['graph'] = f'{MEDIA_URL}{model.graph_snod}'
+                graph_example = [f'{MEDIA_URL}graph/example/1.png',
+                                 f'{MEDIA_URL}graph/example/2.png',
+                                 f'{MEDIA_URL}graph/example/3.png']
+            except Exception as e:
+                print(e)
 
         else:
             context['graph'] = f'http://127.0.0.1:8000/media{model.graph_snod}'
