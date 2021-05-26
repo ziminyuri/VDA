@@ -144,3 +144,6 @@ CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 
 """Debug Celery"""
 CELERY_TASK_ALWAYS_EAGER = True
+
+"""Production"""
+DEPLOY = True

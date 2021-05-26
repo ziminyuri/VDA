@@ -10,7 +10,7 @@ from services.pairs_of_options import (_create_image_for_pair, _init_file,
                                        _write_file, absolute_value_in_str,
                                        get_data_from_request, get_path, make_snd)
 from snod.models import HistoryAnswerTrueSNOD, PairsOfOptionsTrueSNOD
-from VDA.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
 from snod.tasks import get_graph_snod
 
 
@@ -474,7 +474,10 @@ def get_context_history_answer_original_snod(model) -> list:
         elif pair.flag_winner_option == 0:
             item['winner'] = 'Альтернативы одинаковы'
 
-        item['img'] = f'http://127.0.0.1:8000/media/{str(model)}/{str(pair.id)}.png'
+        if DEPLOY:
+            item['img'] = f'{MEDIA_URL}{str(model)}/{str(pair.id)}.png'
+        else:
+            item['img'] = f'http://127.0.0.1:8000/media/{str(model)}/{str(pair.id)}.png'
 
         absolute_value = absolute_value_in_str(model, pair.id, original_snod=True)
         item['absolute_value'] = absolute_value
