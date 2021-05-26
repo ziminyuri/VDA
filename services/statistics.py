@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 
 from model.models import Model, Option
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 
 
 class StatisticsItem:

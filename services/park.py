@@ -11,7 +11,7 @@ from services.normalisation import normalisation_time
 from services.pairs_of_options import _replace_line_file, _write_file
 from services.range_value import create_range_value
 from services.request import request as request_obj
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 
 
 def get_park_question(model):

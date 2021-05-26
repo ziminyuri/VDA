@@ -5,8 +5,8 @@ import random
 from model.models import Criterion, Model, Option, Value
 from services.pairs_of_options import create_files
 from snod.models import PairsOfOptions
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from Verbal_Decision_Analysis.celery import app
+from VDA.settings import MEDIA_ROOT
+from VDA.celery import app
 from model.models import User
 
 

@@ -1,7 +1,7 @@
 from model.models import Model
 from services.park import auto_mode_range, write_range_data, auto_mode_compare, write_result_of_compare_pacom, \
     get_park_question
-from Verbal_Decision_Analysis.celery import app
+from VDA.celery import app
 
 
 @app.task(serializer='json')

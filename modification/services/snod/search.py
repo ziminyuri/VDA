@@ -7,7 +7,7 @@ from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import ImageFont
 from django.db.models import Max
 
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 from modification.models import ModificationPairsOfOptions, ModificationOption, CriterionModification, ModificationValue, ModelModification
 from services.pairs_of_options import _sort, _write_file
 from services.snod_original import get_data_from_meaage

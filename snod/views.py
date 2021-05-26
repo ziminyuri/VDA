@@ -17,7 +17,7 @@ from services.snod_original import (get_context_history_answer_original_snod,
                                     get_original_snod_question,
                                     get_winners_from_model_original_snod,
                                     write_original_snod_answer)
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 
 from .models import HistoryAnswer, PairsOfOptions, PairsOfOptionsTrueSNOD
 from .services.search import snod_search_auto

@@ -2,7 +2,7 @@ from graphviz import Digraph
 
 from model.models import Option
 from pacom.models import PairsOfOptionsPARK
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 
 
 def get_graph_pacom(model):

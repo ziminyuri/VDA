@@ -1,6 +1,6 @@
 from model.models import Model
 from services.snod_original import write_original_snod_answer
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 
 
 def checking_already_has_answer(data, snod_original=False, request=None):

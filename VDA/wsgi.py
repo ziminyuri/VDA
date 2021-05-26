@@ -1,5 +1,5 @@
 """
-WSGI config for Verbal_Decision_Analysis project.
+WSGI config for VDA project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Verbal_Decision_Analysis.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'VDA.settings')
 
 application = get_wsgi_application()

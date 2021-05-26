@@ -2,7 +2,7 @@ import random
 
 from services.history import checking_already_has_answer
 from services.snod_original import write_original_snod_answer
-from Verbal_Decision_Analysis.celery import app
+from VDA.celery import app
 
 
 @app.task(serializer='json')

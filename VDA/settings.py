@@ -39,7 +39,7 @@ MIDDLEWARE = [
 
 ]
 
-ROOT_URLCONF = 'Verbal_Decision_Analysis.urls'
+ROOT_URLCONF = 'VDA.urls'
 
 TEMPLATES = [
     {
@@ -58,7 +58,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Verbal_Decision_Analysis.wsgi.application'
+WSGI_APPLICATION = 'VDA.wsgi.application'
 
 
 DATABASES = {

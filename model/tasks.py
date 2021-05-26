@@ -1,5 +1,5 @@
-from Verbal_Decision_Analysis.celery import app
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.celery import app
+from VDA.settings import MEDIA_ROOT
 from .models import Model
 
 

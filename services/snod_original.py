@@ -10,7 +10,7 @@ from services.pairs_of_options import (_create_image_for_pair, _init_file,
                                        _write_file, absolute_value_in_str,
                                        get_data_from_request, get_path, make_snd)
 from snod.models import HistoryAnswerTrueSNOD, PairsOfOptionsTrueSNOD
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
+from VDA.settings import MEDIA_ROOT
 from snod.tasks import get_graph_snod
 
 

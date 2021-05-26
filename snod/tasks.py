@@ -2,8 +2,8 @@ from graphviz import Digraph
 
 from model.models import Option, Model
 from snod.models import PairsOfOptionsTrueSNOD
-from Verbal_Decision_Analysis.settings import MEDIA_ROOT
-from Verbal_Decision_Analysis.celery import app
+from VDA.settings import MEDIA_ROOT
+from VDA.celery import app
 
 
 @app.task(serializer='json')
