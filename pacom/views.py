@@ -12,6 +12,7 @@ from services.park import (get_context_history_answer,
                            get_park_question, get_winners_from_model,
                            write_range_data, write_result_of_compare_pacom)
 from services.settings import settingsPACOMCreate
+from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
 
 
 class ParkSearchView(LoginRequiredMixin, View):
@@ -95,15 +96,19 @@ class ParkDetailView(LoginRequiredMixin, DetailView):
         context['model_data'], context['model_header'] = get_model_data(self.kwargs['pk'])
         context['history'] = get_context_history_answer(self.kwargs['pk'])
 
-        if 'DATABASE_URL' in os.environ:
-            context['graph'] = get_graph_pacom(self.kwargs['pk'])
+        if DEPLOY:
+            path = get_graph_pacom(self.kwargs['pk'])
+            context['graph'] = f'{MEDIA_URL}{path}'
+            graph_example = [f'{MEDIA_URL}graph/example/1.png',
+                             f'{MEDIA_URL}graph/example/2.png',
+                             f'{MEDIA_URL}graph/example/3.png']
 
         else:
             context['graph'] = f'http://127.0.0.1:8000/media{get_graph_pacom(self.kwargs["pk"])}'
 
-        graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
-                         'http://127.0.0.1:8000/media/graph/example/2.png',
-                         'http://127.0.0.1:8000/media/graph/example/3.png']
+            graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
+                             'http://127.0.0.1:8000/media/graph/example/2.png',
+                             'http://127.0.0.1:8000/media/graph/example/3.png']
 
         context['graph_example'] = graph_example
         return context

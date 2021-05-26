@@ -3,7 +3,7 @@ from graphviz import Digraph
 from model.models import Option
 from pacom.models import PairsOfOptionsPARK
 from VDA.settings import MEDIA_ROOT
-
+from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
 
 def get_graph_pacom(model):
     #Создаем граф для модели парка
@@ -33,7 +33,10 @@ def get_graph_pacom(model):
     except Exception as e:
         print(e)
 
-    return '/graph/' + str(model) + '_pacom.png'
+    if DEPLOY:
+        return 'graph/' + str(model) + '_pacom.png'
+    else:
+        return '/graph/' + str(model) + '_pacom.png'
 
 
 def generate_exapmle_graph():
