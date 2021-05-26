@@ -58,7 +58,7 @@ def get_park_question(model):
                     if options_with_quasi_0:
                         # Пока есть альтернативы с квазипорядком равным -1
                         for option in options_with_quasi_max_order:
-                            pair = _create_pair(model, option_1=option, option_2=options_with_quasi_0)
+                            pair = _create_pair(model, quasi_max_order=quasi_max_order, option_1=option, option_2=options_with_quasi_0)
 
                             """Создаем идеальный вариант"""
                             _create_perfect_fit(pair, model)
@@ -70,6 +70,8 @@ def get_park_question(model):
                     else:
                         # Нашли победителей
                         print('Нашли победителей')
+                        Model.objects.filter(id=model.id).update(quasi_max_order_pacom=quasi_max_order)
+                        fix_quasi_order_pacom(model.id)
                         update_model_after_find_winner(model)
                         return get_winners_from_model(model)
         except Exception as e:
@@ -217,14 +219,16 @@ def write_result_of_compare_pacom(response, model, auto_mode=False):
         print(15)
 
 
-def _create_pair(model, FIRST=False, option_1=None, option_2=None):
+def _create_pair(model, quasi_max_order=None, FIRST=False, option_1=None, option_2=None):
     if FIRST:
         options = Option.objects.filter(id_model=model)
-        pair = PairsOfOptionsPARK.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model)
+        pair = PairsOfOptionsPARK.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model,
+                                                 quasi_level=1)
         return pair
 
     else:
-        pair = PairsOfOptionsPARK.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model)
+        pair = PairsOfOptionsPARK.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model,
+                                                 quasi_level=quasi_max_order + 1)
         return pair
 
 
@@ -437,47 +441,37 @@ def _find_winner_in_pair(pair, result=None, is_not_comparable=False, option_2_is
         result = _is_comparable(pair, option_1_is_empty, option_2_is_empty)
 
     if pair.id_option_1.quasi_order_pacom == -1 and pair.id_option_2.quasi_order_pacom == -1:
-        max_quasi_order_pacom = 1
         lose = 0
     elif pair.id_option_1.quasi_order_pacom > pair.id_option_2.quasi_order_pacom:
-        max_quasi_order_pacom = pair.id_option_1.quasi_order_pacom + 1
         lose = pair.id_option_1.quasi_order_pacom
     else:
-        max_quasi_order_pacom = pair.id_option_2.quasi_order_pacom + 1
         lose = pair.id_option_1.quasi_order_pacom
 
     if result == 1:
         Option.objects.filter(id=pair.id_option_1.id).update(
-            quasi_order_pacom=max_quasi_order_pacom)
+            quasi_order_pacom=pair.quasi_level)
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_pacom=lose)
-
-        _update_quasi_order_pacom(pair.id_option_1.id, max_quasi_order_pacom)
 
         PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=1)
     elif result == 2:
         Option.objects.filter(id=pair.id_option_2.id).update(
-            quasi_order_pacom=max_quasi_order_pacom)
+            quasi_order_pacom=pair.quasi_level)
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_pacom=lose)
-        _update_quasi_order_pacom(pair.id_option_2.id, max_quasi_order_pacom)
+
         PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=2)
     elif result == 0:
         Option.objects.filter(id=pair.id_option_1.id).update(
-            quasi_order_pacom=max_quasi_order_pacom)
+            quasi_order_pacom=pair.quasi_level)
         Option.objects.filter(id=pair.id_option_2.id).update(
-            quasi_order_pacom=max_quasi_order_pacom)
-
-        _update_quasi_order_pacom(pair.id_option_1.id, max_quasi_order_pacom)
-        _update_quasi_order_pacom(pair.id_option_2.id, max_quasi_order_pacom)
+            quasi_order_pacom=pair.quasi_level)
 
         PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=0)
     else:
-        _update_quasi_order_pacom(pair.id_option_1.id, max_quasi_order_pacom)
-        _update_quasi_order_pacom(pair.id_option_2.id, max_quasi_order_pacom)
         _update_pair_to_not_comparable(pair)
 
 
@@ -509,18 +503,10 @@ def _fill_line_from_list(set: list) -> str:
 
 def _update_pair_to_not_comparable(pair):
     # Делает пару не сравнимой
-    option_1 = Option.objects.filter(id=pair.id_option_1.id).first()
-    option_2 = Option.objects.filter(id=pair.id_option_2.id).first()
-
-    if option_1.quasi_order_pacom > option_2.quasi_order_pacom:
-        max_quasi_order_pacom = option_1.quasi_order_pacom
-    else:
-        max_quasi_order_pacom = option_1.quasi_order_pacom
-
     Option.objects.filter(id=pair.id_option_1.id).update(
-        quasi_order_pacom=max_quasi_order_pacom + 1)
+        quasi_order_pacom=pair.quasi_level)
     Option.objects.filter(id=pair.id_option_2.id).update(
-        quasi_order_pacom=max_quasi_order_pacom + 1)
+        quasi_order_pacom=pair.quasi_level)
 
     PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=True,
                                                          flag_winner_option=3)
@@ -533,55 +519,56 @@ def _get_last_line(path):
 
 
 def _is_comparable(pair, option_1_is_empty, option_2_is_empty):
-    # Проверка что сравнимы
+
     flag_1 = False
     flag_2 = False
-
-    first_line = False
-    flag_1_compensable = False
-    flag_2_compensable = False
+    flag_0 = False
+    flag_3 = False
 
     path = f'{MEDIA_ROOT}/files/models/{str(pair.id_model.id)}/pacom/PAIR{str(pair.id)}.txt'
     f = open(path)
     for line in f.readlines():
-        temp_result = int(line.split('|')[1].split('=')[1])
-        if temp_result == 1 and flag_1 is False:
+        temp_result = int(line.split('=')[1].split('\n')[0])
+        set_1 = line.split('|')[0].split(';')
+        set_2 = line.split('|')[1].split(';')
 
-            if not first_line:
-                flag_2_compensable = True
-                first_line = True
+        if len(set_1) == 1 and len(set_2) == 1:
+            if temp_result == 1:
+                flag_1 = True
+            elif temp_result == 2:
+                flag_2 = True
+            elif temp_result == 3:
+               return 3
+            else:
+                flag_0 = True
 
-            flag_1 = True
 
-        elif temp_result == 2 and flag_2 is False:
 
-            if not first_line:
-                flag_1_compensable = True
-                first_line = True
-
-            flag_2 = True
-
-    if temp_result ==1 and flag_1_compensable :
-        return 1
-    elif temp_result == 2 and flag_2_compensable:
-        return 2
-
-    elif flag_2_compensable and not flag_2 and flag_1:
-        return 1
-    elif flag_1_compensable and not flag_1 and flag_2:
-        return 2
-
-    elif flag_1 and option_1_is_empty and flag_2_compensable:
+    if flag_1 and flag_2:
         return 3
-    elif flag_2 and option_2_is_empty and flag_1_compensable:
+    elif flag_3:
         return 3
-
-    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and not option_2_is_empty:
+    elif flag_1 and not flag_2 and option_1_is_empty and not  option_2_is_empty:
+        return 3
+    elif flag_1 and not flag_2:
         return 1
-    elif not flag_1_compensable and not flag_2_compensable and not option_1_is_empty and option_2_is_empty:
+    elif flag_2 and not flag_1 and  option_2_is_empty and not option_1_is_empty:
+        return 3
+    elif flag_2 and not flag_1:
         return 2
-    elif not flag_1_compensable and not flag_2_compensable and option_1_is_empty and option_2_is_empty:
+    elif flag_0 and option_1_is_empty and not  option_2_is_empty:
+        return 2
+    elif flag_0 and  option_2_is_empty and not option_1_is_empty:
+        return 1
+    elif not flag_1 and not flag_2 and not flag_0 and option_1_is_empty and not  option_2_is_empty:
+        return 2
+    elif not flag_1 and not flag_2 and not flag_0 and  option_2_is_empty and not option_1_is_empty:
+        return 1
+    else:
         return 0
+
+
+
 
 
 def _write_history(pair, model, last_line, answer):
@@ -715,3 +702,29 @@ def auto_mode_compare(input_data, auto_mode=False):
         return post_context
     else:
         request_obj(post_context)
+
+
+
+def fix_quasi_order_pacom(model_id):
+    """Правим квазипорядок после нахождения победителя"""
+    n = Option.objects.filter(id_model=model_id).count()
+    ni = 1
+    model = Model.objects.filter(id=model_id).first()
+    quasi_max_order_pacom = model.quasi_max_order_pacom
+
+    real_quasi = 0
+    for i in range(quasi_max_order_pacom+1):
+        options = Option.objects.filter(id_model=model_id, quasi_order_pacom=i)
+        if options:
+            if real_quasi != i:
+                for option in options:
+                    o = Option.objects.get(id=option.id)
+                    Option.objects.filter(id=o.id).update(quasi_order_pacom=real_quasi)
+                    ni += 1
+                    if ni == n:
+                        Model.objects.filter(id=model_id).update(quasi_max_order_pacom=real_quasi)
+                        options = Option.objects.filter(id_model=model_id)
+                        for option in options:
+                            print(f'{option.name} {str(option.quasi_order_pacom)}')
+                        return
+            real_quasi += 1

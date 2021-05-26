@@ -18,6 +18,7 @@ class PairsOfOptionsPARK(models.Model):
                                       null=True)
     flag_winner_option = models.IntegerField(default=-1)    # Победитель option_1 = 1, option_2 = 2, option_1=option_2: 0
                                                             # Не сравнимы 3
+    quasi_level = models.PositiveIntegerField()
 
     def __str__(self):
         return str(self.id_option_1) + '' + str(self.id_option_2)

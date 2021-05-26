@@ -51,6 +51,7 @@ class Model(models.Model):
     number_of_incomparable = models.IntegerField(default=0)
     id_settings_pacom = models.OneToOneField(SettingsPACOM, null=True, on_delete=models.CASCADE)
     has_incomparable_pairs_result_pacom = models.BooleanField(default=False)
+    quasi_max_order_pacom = models.IntegerField(default=0)
 
     """ True SNOD """
     already_find_winner_SNOD = models.BooleanField(default=False)

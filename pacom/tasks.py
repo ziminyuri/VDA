@@ -18,10 +18,12 @@ def auto_mode_pacom(input_data, request, model_id):
                         data = auto_mode_range(input_data, request)
                     except Exception as e:
                         print(e)
+                        print(123)
                     try:
                         write_range_data(data, model, auto_mode=True)
                     except Exception as e:
                         print(e)
+                        print(124)
                 except Exception as e:
                     print(1)
 

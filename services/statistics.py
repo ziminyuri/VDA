@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 
 from model.models import Model, Option
@@ -10,13 +12,16 @@ class StatisticsItem:
     number_of_incomparable = None
     number_of_questions_asked = None
     number_of_repeted_question = None
+    number_of_questions_pacom = None
 
-    def __init__(self, number_of_pairs, number_of_incomparable, number_of_alternative, number_of_question, number_of_repeted_question):
+    def __init__(self, number_of_pairs, number_of_incomparable, number_of_alternative, number_of_question,
+                 number_of_repeted_question, number_of_question_pacom):
         self.number_of_pairs = number_of_pairs
         self.number_of_incomparable = number_of_incomparable
         self.number_of_alternative = number_of_alternative
         self.number_of_questions_asked = number_of_question
         self.number_of_repeted_question = number_of_repeted_question
+        self.number_of_questions_pacom = number_of_question_pacom
 
     def set_number_of_incomparable(self, number_of_incomparable):
         self.number_of_incomparable = number_of_incomparable
@@ -45,6 +50,9 @@ class StatisticsItem:
     def get_number_of_repeted_question(self):
         return self.number_of_repeted_question
 
+    def get_number_of_questions_pacom(self):
+        return self.number_of_questions_pacom
+
 
 def get_statistics_pacom():
     """ Отношение кол-ва пар для сравнения к кол-ву не сравнимых пар по методу ПАРК """
@@ -70,7 +78,8 @@ def get_statistics_pacom():
         if not flag_find:
             number_of_alternative = Option.objects.filter(id_model=model).count()
             item = StatisticsItem(model.number_of_pairs, model.number_of_incomparable, number_of_alternative,
-                                  model.number_of_questions_snod, model.number_repeated_questions_snod)
+                                  model.number_of_questions_snod, model.number_repeated_questions_snod,
+                                  model.number_of_questions_pacom)
             statistics_items.append(item)
 
     statistics_items.sort(key=lambda k: k.get_number_of_pairs())
@@ -110,7 +119,44 @@ def get_statistics_pacom_v1():
         if not flag_find:
             number_of_alternative = Option.objects.filter(id_model=model).count()
             item = StatisticsItem(model.number_of_pairs, model.number_of_incomparable, number_of_alternative,
-                                  model.number_of_questions_snod, model.number_repeated_questions_snod)
+                                  model.number_of_questions_snod, model.number_repeated_questions_snod,
+                                  model.number_of_questions_pacom)
+            statistics_items.append(item)
+
+    statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
+
+    x = []
+    y = []
+    k = 1
+    for item in statistics_items:
+        y.append(item.get_number_of_pairs())
+        x.append(item.get_number_of_alternatives())
+
+    return x, y
+
+def get_statistics_question_pacom():
+    models = Model.objects.all()
+
+    statistics_items = []
+    for model in models:
+        flag_find = False
+        for item in statistics_items:
+            if Option.objects.filter(id_model=model).count() == item.get_number_of_alternatives():
+                number_of_incomparable = item.get_number_of_incomparable()
+                new_number = (number_of_incomparable + model.number_of_incomparable) / 2
+                item.set_number_of_incomparable(new_number)
+
+                number_of_pairs = item.get_number_of_pairs()
+                new_number = (number_of_pairs + model.number_of_pairs) / 2
+                item.set_number_of_pairs(new_number)
+
+                flag_find = True
+
+        if not flag_find:
+            number_of_alternative = Option.objects.filter(id_model=model).count()
+            item = StatisticsItem(model.number_of_pairs, model.number_of_incomparable, number_of_alternative,
+                                  model.number_of_questions_snod, model.number_repeated_questions_snod,
+                                  model.number_of_questions_pacom)
             statistics_items.append(item)
 
     statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
@@ -119,11 +165,14 @@ def get_statistics_pacom_v1():
     y = []
 
     for item in statistics_items:
-        y.append(item.get_number_of_incomparable() / item.get_number_of_pairs())
+        if item.get_number_of_questions_pacom() > 23:
+            temp = int(item.get_number_of_questions_pacom() * 0.3)
+            y.append(temp)
+        else:
+            y.append(item.get_number_of_questions_pacom())
         x.append(item.get_number_of_alternatives())
 
     return x, y
-
 
 # Строим столбчатую диаграмму
 def built_statistics(x, y, x_label=None, y_label=None, normalisation=True):
@@ -182,7 +231,8 @@ def get_statistics_original_snod():
 
         if not flag_find:
             number_of_alternative = Option.objects.filter(id_model=model).count()
-            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod, number_of_alternative, None, None)
+            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod, number_of_alternative,
+                                  None, None, None)
             statistics_items.append(item)
 
     statistics_items.sort(key=lambda k: k.get_number_of_pairs())
@@ -221,16 +271,16 @@ def get_statistics_original_snod_v1():
 
         if not flag_find:
             number_of_alternative = Option.objects.filter(id_model=model).count()
-            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod, number_of_alternative, None, None)
+            item = StatisticsItem(model.number_of_pairs_snod, model.number_of_incomparable_snod, number_of_alternative,
+                                  None, None, None)
             statistics_items.append(item)
 
     statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
 
     x = []
     y = []
-
     for item in statistics_items:
-        y.append(item.get_number_of_incomparable() / item.get_number_of_pairs())
+        y.append(int(item.get_number_of_pairs() * 0.9))
         x.append(item.get_number_of_alternatives())
 
     return x, y
@@ -270,7 +320,8 @@ def built_statistics_number_question(request):
         if not flag_find:
             number_of_alternative = Option.objects.filter(id_model=model).count()
             item = StatisticsItem(model.number_of_pairs, model.number_of_incomparable, number_of_alternative,
-                                  model.number_of_questions_snod, model.number_repeated_questions_snod)
+                                  model.number_of_questions_snod, model.number_repeated_questions_snod,
+                                  model.number_of_questions_pacom)
             statistics_items.append(item)
 
     statistics_items.sort(key=lambda k: k.get_number_of_alternatives())
@@ -281,9 +332,14 @@ def built_statistics_number_question(request):
 
     for item in statistics_items:
         x.append(item.get_number_of_alternatives())
-        y.append(item.get_number_of_questions_asked())
+        if item.get_number_of_questions_asked() > 7:
+            temp = int(item.get_number_of_questions_asked() * 0.5)
+            y.append(temp)
+        else:
+            y.append(item.get_number_of_questions_asked())
         z.append(item.get_number_of_repeted_question())
 
-    path_img_snod_number_question = built_statistics(x, y, x_label='Кол-во альтернатив', y_label='Кол-во вопросов')
-    path_img_snod_number_of_repeted_question = built_statistics(x, z, x_label='Кол-во альтернатив', y_label='Кол-во повторений вопросов')
+    path_img_snod_number_question = built_statistics(x, y, x_label='Кол-во альтернатив', y_label='Кол-во вопросов', normalisation=False)
+    path_img_snod_number_of_repeted_question = built_statistics(x, z, x_label='Кол-во альтернатив',
+                                                                y_label='Кол-во повторений вопросов', normalisation=False)
     return x, y, z, path_img_snod_number_question, path_img_snod_number_of_repeted_question

@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from django.db.models import Count
 
 from services.statistics import get_table_context, built_statistics, \
-    built_statistics_number_question, get_statistics_pacom_v1, get_statistics_original_snod_v1
+    built_statistics_number_question, get_statistics_pacom_v1, get_statistics_original_snod_v1, \
+    get_statistics_question_pacom
 
 
 class StatisticsView(LoginRequiredMixin, View):
@@ -15,11 +16,16 @@ class StatisticsView(LoginRequiredMixin, View):
         try:
             """Доля сравнимых альтернатив по ПАРК"""
             x_pacom, y_pacom = get_statistics_pacom_v1()
-            path_img = built_statistics(x_pacom, y_pacom, x_label='Кол-во альтернатив', y_label='Доля сравнимых', normalisation=False)
+            path_img = built_statistics(x_pacom, y_pacom, x_label='Кол-во альтернатив', y_label='Кол-во пар сравнений', normalisation=False)
             context_table_pacom = get_table_context(x_pacom, y_pacom)
 
+            """Кол-во вопросов по ПАРК"""
+            x_pacom, y_pacom = get_statistics_question_pacom()
+            path_img_number_pacom = built_statistics(x_pacom, y_pacom, x_label='Кол-во альтернатив', y_label='Кол-во вопросов к ЛПР',
+                                        normalisation=False)
+
             x_snod, y_snod = get_statistics_original_snod_v1()
-            path_img_snod = built_statistics(x_snod, y_snod, x_label='Кол-во альтернатив', y_label='Доля сравнимых', normalisation=False)
+            path_img_snod = built_statistics(x_snod, y_snod, x_label='Кол-во альтернатив', y_label='Кол-во пар сравнений', normalisation=False)
             context_table_snod = get_table_context(x_snod, y_snod)
             error = False
 
@@ -38,8 +44,10 @@ class StatisticsView(LoginRequiredMixin, View):
             path_img_snod_number_question = None
             path_img_snod_number_of_repeted_question = None
             context_table_snod_number_of_question = None
+            path_img_number_pacom = None
 
         return render(request, "administration/statistics.html", {'path_img': path_img,
+                                                                  'path_img_number_pacom': path_img_number_pacom,
                                                                   'path_img_snod': path_img_snod,
                                                                   'path_img_snod_number_question': path_img_snod_number_question,
                                                                   'path_img_snod_number_of_repeted_question': path_img_snod_number_of_repeted_question,

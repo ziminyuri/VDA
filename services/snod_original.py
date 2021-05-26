@@ -220,6 +220,7 @@ def write_original_snod_answer(answer, auto=False, message=None, request=None):
             fix_quasi_order_snod(model_id)
             get_graph_snod.delay(model_id)
             return message
+
     except: pass
 
     if name_1 == '' or name_2 == '':
