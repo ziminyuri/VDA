@@ -7,7 +7,7 @@ SECRET_KEY = '$$o6c5vyswjznfnf%c=s6ux%9v+kcz^%g1la0kw!ljrnlyqdeq'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['glacial-everglades-54891.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['46.229.215.221', '127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -143,4 +143,4 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 
 """Debug Celery"""
-#CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_ALWAYS_EAGER = True
