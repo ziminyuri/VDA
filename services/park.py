@@ -461,16 +461,20 @@ def _find_winner_in_pair(pair, result=None, is_not_comparable=False, option_2_is
     if result == 1:
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_pacom=pair.quasi_level)
-        Option.objects.filter(id=pair.id_option_2.id).update(
-            quasi_order_pacom=lose)
+        option = Option.objects.get(id=pair.id_option_2.id)
+        if option.quasi_order_pacom < lose:
+            Option.objects.filter(id=pair.id_option_2.id).update(
+                quasi_order_pacom=lose)
 
         PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=1)
     elif result == 2:
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_pacom=pair.quasi_level)
-        Option.objects.filter(id=pair.id_option_1.id).update(
-            quasi_order_pacom=lose)
+        option = Option.objects.get(id=pair.id_option_1.id)
+        if option.quasi_order_pacom < lose:
+            Option.objects.filter(id=pair.id_option_1.id).update(
+                quasi_order_pacom=lose)
 
         PairsOfOptionsPARK.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                              flag_winner_option=2)
@@ -725,7 +729,7 @@ def auto_mode_compare(input_data, auto_mode=False):
 def fix_quasi_order_pacom(model_id):
     """Правим квазипорядок после нахождения победителя"""
     n = Option.objects.filter(id_model=model_id).count()
-    ni = 1
+    ni = 0
     model = Model.objects.filter(id=model_id).first()
     quasi_max_order_pacom = model.quasi_max_order_pacom
 

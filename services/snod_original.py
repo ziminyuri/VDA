@@ -275,15 +275,20 @@ def _update_quasi_order_snod_for_pair(pair, result):
 
         Option.objects.filter(id=pair.id_option_1.id).update(
             quasi_order_original_snod=max_quasi_order_original_snod)
-        Option.objects.filter(id=pair.id_option_2.id).update(
-            quasi_order_original_snod=lose)
+        option = Option.objects.get(id=pair.id_option_2.id)
+        if option.quasi_order_original_snod <= lose:
+            Option.objects.filter(id=pair.id_option_2.id).update(
+                quasi_order_original_snod=lose)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                                  flag_winner_option=1)
     elif result == 2:
         Option.objects.filter(id=pair.id_option_2.id).update(
             quasi_order_original_snod=max_quasi_order_original_snod)
-        Option.objects.filter(id=pair.id_option_1.id).update(
-            quasi_order_original_snod=lose)
+
+        option = Option.objects.get(id=pair.id_option_1.id)
+        if option.quasi_order_original_snod <= lose:
+            Option.objects.filter(id=pair.id_option_1.id).update(
+                quasi_order_original_snod=lose)
         PairsOfOptionsTrueSNOD.objects.filter(id=pair.id).update(already_find_winner=True, is_not_comparable=False,
                                                                  flag_winner_option=2)
     else:
@@ -358,7 +363,8 @@ def _find_winner(model: object, pair: object, empty_option_1=False, empty_option
 def _create_pair(model, quasi_max_order, FIRST=False, option_1=None, option_2=None):
     if FIRST:
         options = Option.objects.filter(id_model=model)
-        pair = PairsOfOptionsTrueSNOD.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model)
+        pair = PairsOfOptionsTrueSNOD.objects.create(id_option_1=options[0], id_option_2=options[1], id_model=model,
+                                                     quasi_level=1)
 
     else:
         pair = PairsOfOptionsTrueSNOD.objects.create(id_option_1=option_1, id_option_2=option_2, id_model=model,
@@ -586,7 +592,7 @@ def _get_name_1_and_name_2(model, line_end, line_begin):
 def fix_quasi_order_snod(model_id):
     """Правим квазипорядок после нахождения победителя"""
     n = Option.objects.filter(id_model=model_id).count()
-    ni = 1
+    ni = 0
     model = Model.objects.filter(id=model_id).first()
     quasi_max_order_snod = model.quasi_max_order_snod
 

@@ -180,7 +180,7 @@ class OriginalSnodDetailView(LoginRequiredMixin, View):
 
 
         else:
-            context['graph'] = f'http://127.0.0.1:8000/media{model.graph_snod}'
+            context['graph'] = f'http://127.0.0.1:8000/media/{model.graph_snod}'
 
             graph_example = ['http://127.0.0.1:8000/media/graph/example/1.png',
                              'http://127.0.0.1:8000/media/graph/example/2.png',
