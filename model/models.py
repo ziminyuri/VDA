@@ -96,8 +96,10 @@ class Option(models.Model):
 class Value(models.Model):
     """ Значение варианта у критерия """
     value = models.FloatField()
+    name = models.CharField(max_length=200, default='')
     id_option = models.ForeignKey(Option, on_delete=models.CASCADE)
     id_criterion = models.ForeignKey(Criterion, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return str(self.value)

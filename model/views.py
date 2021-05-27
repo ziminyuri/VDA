@@ -210,6 +210,13 @@ class ModelView(LoginRequiredMixin, View):
             return redirect('models')
 
 
+class ModelDemoVKRCreateView(View):
+    def get(self, request):
+        """Создание модели: выбор 1 конмнатной квартиры"""
+        user_profile = get_userprofile(request)
+        create_model.delay(user_profile.id, demo_model=True, demo_vkr=True)
+        return redirect('models')
+
 
 
 

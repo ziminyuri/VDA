@@ -8,10 +8,11 @@ from snod.models import PairsOfOptions
 from VDA.settings import MEDIA_ROOT
 from VDA.celery import app
 from model.models import User
+from django.db.models import Max
 
 
 @app.task(serializer='json')
-def create_model(user_id, demo_model: bool = False, path_csv=None, request=None, number_of_alternatives=None) -> object:
+def create_model(user_id, demo_model: bool = False, path_csv=None, request=None, number_of_alternatives=None, demo_vkr=False) -> object:
     """ Создание объекта модели (Поиска лучшей альтернативы для задачи выбора) """
 
     try:
@@ -19,7 +20,11 @@ def create_model(user_id, demo_model: bool = False, path_csv=None, request=None,
 
         if demo_model:
             model = Model.objects.create(is_demo=True, name='Демонстрационная', id_user=User.objects.get(id=user_id))
-            result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
+            if demo_vkr:
+                """Выбор 1комнатной квартиры"""
+                result = _filling_demo_model_vkr(model)
+            else:
+                result = _filling_demo_model(model, number_of_alternatives)  # Заполняем модель исходными данными
         else:
 
             model = Model.objects.create(is_demo=False, name='Пользовательская', id_user=User.objects.get(id=user_id))
@@ -192,6 +197,75 @@ def _filling_demo_model(model: object, number_of_alternatives: int):
         return False
 
 
+def _filling_demo_model_vkr(model: object):
+    try:
+        options_obj_list = []
+        for alternative in range(1, 5):
+            option = Option.objects.create(name=f'Alternative { str(alternative)}', id_model=model, number=alternative)
+            options_obj_list.append(option)
+
+        criterions_name = ['Тип жилья', 'Площадь', 'Расстояние до метро',
+                           'Стоимость', 'Год постройки', 'Санузел',
+                           'Расстояние до центра']
+        criterions_directions = [True, True, False, False, True, True, False]
+
+        alternative_1 = [1, 36.5, 5, 6000000, 2020, 1, 7]
+        alternative_2 = [2, 43, 1, 10300000, 2022, 1, 5]
+        alternative_3 = [1, 30, 7, 4900000, 1964, 2, 3]
+        alternative_4 = [1, 34, 3, 4580000, 2017, 1, 9]
+
+        """Данные для качественных критериев"""
+        alternative_1_name =['Вторичное', '', '7 мин. на транспорте', '', '', 'Совмещенный', 'ст. Комменданский проспект']
+        alternative_2_name =['Ноовостройка', '', '17 мин. пешком', '', '', 'Совмещенный', 'ст. Лесная']
+        alternative_3_name =['Вторичное', '', '10 мин. на транспорте', '', '', 'Раздельный', 'ст. Парк Победы']
+        alternative_4_name =['Вторичное', '', '5 мин. на транспорте', '', '', 'Совмещенный', 'ст. Шушары']
+
+        n = len(criterions_name)
+
+        for i in range(n):
+            Criterion.objects.create(name=criterions_name[i], id_model=model, direction=criterions_directions[i],
+                                     number=i, max=0)
+
+        criterions = Criterion.objects.filter(id_model=model)
+        k = 0
+
+        for alternative in options_obj_list:
+            i = 0
+            for criterion in criterions:
+                if k == 0:
+                    Value.objects.create(value=alternative_1[i], id_option=alternative, id_criterion=criterion,
+                                         name=alternative_1_name[i])
+                elif k == 1:
+                    Value.objects.create(value=alternative_2[i], id_option=alternative, id_criterion=criterion,
+                                         name=alternative_2_name[i])
+                elif k == 2:
+                    Value.objects.create(value=alternative_3[i], id_option=alternative, id_criterion=criterion,
+                                         name=alternative_3_name[i])
+                elif k == 3:
+                    Value.objects.create(value=alternative_4[i], id_option=alternative, id_criterion=criterion,
+                                         name=alternative_4_name[i])
+                i += 1
+
+            k +=1
+
+        for criterion in criterions:
+            max_value = Value.objects.filter(id_criterion=criterion).aggregate(Max('value'))['value__max']
+            Criterion.objects.filter(id=criterion.id).update(max=max_value)
+
+
+        n = len(options_obj_list)
+        k = 1
+        for i in range(n):
+            for j in range(k, n):
+                if i != j:
+                    PairsOfOptions.objects.create(id_option_1=options_obj_list[i], id_option_2=options_obj_list[j],
+                                                  id_model=model)
+            k += 1
+
+    except Exception as e:
+        return False
+
+
 def _create_dir(dir_name: str) -> None:
     path1 = f'{MEDIA_ROOT}/files/models/{dir_name}'
     path2 = f'{MEDIA_ROOT}/files/models/{dir_name}/original_snod'
@@ -224,7 +298,10 @@ def get_model_data(model_id):
             line.append('Min')
         for option in options:
             value = Value.objects.get(id_option=option, id_criterion=criterion)
-            line.append(value.value)
+            if value.name != '':
+                line.append(f'{value.value} – ({value.name})')
+            else:
+                line.append(value.value)
         data.append(line)
 
     return data, header

@@ -264,18 +264,22 @@ def _create_perfect_fit(pair: object, model: object) -> None:
             if criterion.direction is True:
                 if value_1.value > value_2.value:
                     ValueOfPerfectAlternativePARK.objects.create(value=value_1.value, criteria=criterion,
-                                                                 perfect_alternative=perfect_alternative)
+                                                                 perfect_alternative=perfect_alternative,
+                                                                 name=value_1.name)
                 else:
                     ValueOfPerfectAlternativePARK.objects.create(value=value_2.value, criteria=criterion,
-                                                                 perfect_alternative=perfect_alternative)
+                                                                 perfect_alternative=perfect_alternative,
+                                                                 name=value_2.name)
             # Направление -> min
             else:
                 if value_1.value < value_2.value:
                     ValueOfPerfectAlternativePARK.objects.create(value=value_1.value, criteria=criterion,
-                                                                 perfect_alternative=perfect_alternative)
+                                                                 perfect_alternative=perfect_alternative,
+                                                                 name=value_1.name)
                 else:
                     ValueOfPerfectAlternativePARK.objects.create(value=value_2.value, criteria=criterion,
-                                                                 perfect_alternative=perfect_alternative)
+                                                                 perfect_alternative=perfect_alternative,
+                                                                 name=value_2.name)
 
     except Exception as e: pass
 
@@ -301,7 +305,7 @@ def _init_file_for_PARK(model: object, pair: object) -> None:
     path_dir = f'{MEDIA_ROOT}/files/models/{str(model.id)}/pacom/'
     try:
         os.mkdir(path_dir)
-    except:
+    except Exception as e:
         pass
 
     path = f'{path_dir}PAIR{str(pair.id)}.txt'
@@ -407,8 +411,15 @@ def _fill_new_alternative(criterions: list, perfect_alternative: object, pair: o
                 print(e)
 
         if already_get_value is True:
-            value_1 = value_1.value
-            value_2 = value_2.value
+            if value_1.name != '':
+                value_1 = f'{value_1.value} – ({value_1.name})'
+            else:
+                value_1 = value_1.value
+
+            if value_2.name != '':
+                value_2 = f'{value_2.value} – ({value_2.name})'
+            else:
+                value_2 = value_2.value
 
             new_alternative_1.append([f'K: {str(iter)}', value_1])
             new_alternative_2.append([f'K: {str(iter)}', value_2])
@@ -590,12 +601,18 @@ def _write_history(pair, model, last_line, answer):
     for s in set_1:
         criterion = Criterion.objects.filter(number=int(s), id_model=model).first()
         value = Value.objects.filter(id_criterion=criterion, id_option=pair.id_option_1).first()
-        left_list_of_values += f' K{str(criterion.number)}: {str(value.value)}'
+        if value.name != '':
+            left_list_of_values += f' K:{criterion.name}: {value.value} – ({value.name})'
+        else:
+            left_list_of_values += f' K:{criterion.name}: {value.value}'
 
     for s in set_2:
         criterion = Criterion.objects.filter(number=int(s), id_model=model).first()
         value = Value.objects.filter(id_criterion=criterion, id_option=pair.id_option_2).first()
-        right_list_of_values += f' K{str(criterion.number)}: {str(value.value)}'
+        if value.name != '':
+            right_list_of_values += f' K:{criterion.name}: {value.value} – ({value.name})'
+        else:
+            right_list_of_values += f' K:{criterion.name}: {value.value}'
 
     question = f'{left_list_of_values} ? {right_list_of_values}'
     HistoryAnswerPACOM.objects.create(question=question, answer=answer_to_history_model, pair=pair, id_model=model)

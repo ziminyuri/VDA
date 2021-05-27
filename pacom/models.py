@@ -51,6 +51,7 @@ class ValueOfPerfectAlternativePARK(models.Model):
     value = models.IntegerField(null=True)
     criteria = models.ForeignKey(Criterion, on_delete=models.CASCADE)
     perfect_alternative = models.ForeignKey(PerfectAlternativePARK, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, default='')
 
 
 class HistoryAnswerPACOM(models.Model):

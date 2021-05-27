@@ -4,16 +4,30 @@
 
         <div class="row">
             <div class="col s12 m6">
-                <div class="card teal darken-3">
+                <div class="card teal darken-3" data-aos="fade-up">
                     <div class="card-content white-text">
                         <span class="card-title">Создать демо модель</span>
                         <p>Модель будет содержать 7 критериев и пользовательское кол-во альтернатив</p>
                     </div>
                     <div class="card-action">
+                         <i class="material-icons left white-text">add_circle</i>
                         <a href="{% url 'demo_create' %}">Создать</a>
                     </div>
                 </div>
             </div>
+             <div class="col s12 m6">
+                <div class="card teal darken-3">
+                    <div class="card-content white-text">
+                        <span class="card-title">Демонстрационная модель: Покупка 1-комнатной квартиры в Спб</span>
+                        <p>Модель будет содержать 7 критериев и 4 альтернативы(квартиры)</p>
+                    </div>
+                    <div class="card-action">
+                         <i class="material-icons left white-text">add_circle</i>
+                        <a href="{% url 'demo_vkr_create' %}">Использовать</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="row">
@@ -24,8 +38,11 @@
                         <p>Загрузите файл в формате CSV или создайте через интерфейс системы</p>
                     </div>
                     <div class="card-action">
-                        <a href="{% url 'upload' %}">Загрузить</a>
-                        <a href="{% url 'create_model' %}">Создать</a>
+                        <a href="{% url 'upload' %}">
+                            <i class="material-icons left white-text">cloud_upload</i>
+                            Загрузить</a>
+                        <a href="{% url 'create_model' %}">
+                            Создать</a>
                     </div>
                 </div>
             </div>
