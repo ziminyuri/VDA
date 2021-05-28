@@ -74,7 +74,9 @@
                             {% if model.is_done == False  or model.is_delete == True%}
                                 <input type="submit" class="btn btn-outline-danger btn-sm btn-block disabled" value="Удалить" >
                             {% else %}
-                                <input type="submit" class="btn btn-outline-danger btn-sm btn-block" value="Удалить" >
+                                <button type="submit" class="btn btn-outline-danger btn-sm btn-block red lighten-3">
+                                    Удалить
+                                </button>
                             {% endif %}
                         </form>
                         </td>
