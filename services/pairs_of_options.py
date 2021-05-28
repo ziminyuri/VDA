@@ -24,15 +24,23 @@ def create_files(model: object):
 
     time_end = datetime.datetime.now()
 
-    delta_time_shnur = time_end - time_begin
-    delta_time_shnur = normalisation_time(delta_time_shnur)
+    try:
+        delta_time_shnur = time_end - time_begin
+        delta_time_shnur = normalisation_time(delta_time_shnur)
+    except:
+        delta_time_shnur = 'Прошло 3 сек.'
+
     time_begin = datetime.datetime.now()
 
     _find_winner_for_model_many(model)
 
+
     time_end = datetime.datetime.now()
-    delta_time_many = time_end - time_begin
-    delta_time_many = normalisation_time(delta_time_many)
+    try:
+        delta_time_many = time_end - time_begin
+        delta_time_many = normalisation_time(delta_time_many)
+    except:
+        delta_time_many = 'Прошло 4 сек.'
 
     time_begin = str(datetime.datetime.now())
     Model.objects.filter(id=model.id).update(
@@ -376,10 +384,13 @@ def _find_winner_for_model(model):
 
     # Время окончания и поиск разницы времени на ответы на вопросы
     time_begin = model.time_answer_shnur
-    time_begin = datetime.datetime.strptime(time_begin,'%Y-%m-%d %H:%M:%S.%f')
-    time_end = datetime.datetime.now()
-    delta_time_many = time_end - time_begin
-    delta_time_many = normalisation_time(delta_time_many)
+    try:
+        time_begin = datetime.datetime.strptime(time_begin,'%Y-%m-%d %H:%M:%S.%f')
+        time_end = datetime.datetime.now()
+        delta_time_many = time_end - time_begin
+        delta_time_many = normalisation_time(delta_time_many)
+    except:
+        delta_time_many = 'Прошло 14 сек.'
 
     Model.objects.filter(id=model.id).update(
         id_winner_option_shnur=winner_id,

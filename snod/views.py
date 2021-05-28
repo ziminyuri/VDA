@@ -72,9 +72,9 @@ class SnodDetailView(LoginRequiredMixin, View):
 
         for pair in pairs:
             absolute_value = absolute_value_in_str(model.id, pair.id)
-            if 'DATABASE_URL' in os.environ:
+            if DEPLOY:
                 img.append({'pair': pair.id_option_1.name + ' и ' + pair.id_option_2.name,
-                            'path': MEDIA_ROOT + str(model.id) + '/' + str(pair.id) + '.png',
+                            'path': f'{MEDIA_URL}{model.id}/{pair.id}.png',
                             'absolute_value': absolute_value})
 
             else:

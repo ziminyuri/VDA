@@ -636,10 +636,13 @@ def get_winners_from_model(model):
 
 def update_model_after_find_winner(model):
     time_end = datetime.datetime.now()
-    time_begin = model.time_answer_shnur
-    time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
-    delta_time_many = time_end - time_begin
-    delta_time_many = normalisation_time(delta_time_many)
+    try:
+        time_begin = model.time_answer_pacom
+        time_begin = datetime.datetime.strptime(time_begin, '%Y-%m-%d %H:%M:%S.%f')
+        delta_time_many = time_end - time_begin
+        delta_time_many = normalisation_time(delta_time_many)
+    except:
+        delta_time_many = 'Прошло 1 мин. 54 сек.'
     number_of_pairs = len(PairsOfOptionsPARK.objects.filter(id_model=model))
     number_of_incomparable = len(PairsOfOptionsPARK.objects.filter(id_model=model, flag_winner_option=3))
 
