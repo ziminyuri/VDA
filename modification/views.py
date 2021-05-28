@@ -14,6 +14,7 @@ from modification.forms import ModelModificationForm, CriterionModificationForm
 from modification.models import ModelModification, CriterionModification, ModificationValue, ModificationOption
 
 
+
 class PairsIncomparableListView(View):
     def get(self, request, id):
         """Список несравнимых пар + список модифированных моделей"""

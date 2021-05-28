@@ -22,7 +22,7 @@ from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
 from .models import HistoryAnswer, PairsOfOptions, PairsOfOptionsTrueSNOD
 from .services.search import snod_search_auto
 from .services.modification import check_comparable_in_result
-
+from snod.forms import SettingsSnodForm
 
 class SnodSearchView(LoginRequiredMixin, View):
     login_url = 'login'
@@ -49,8 +49,7 @@ class SnodSearchView(LoginRequiredMixin, View):
                           {'message': message,
                            'model': model, 'origianl_snod': 0})
         else:
-            return render(request, "snod/result.html",
-                          {})
+            return redirect ('snod_result', id=id)
 
 
 class SnodDetailView(LoginRequiredMixin, View):
@@ -100,7 +99,8 @@ class SettingsOriginalSnodCreateView(LoginRequiredMixin, View):
 
     @staticmethod
     def get(request, id):
-        context = {'model': get_object_or_404(Model, id=id), 'mode': ['Классический', 'Автоматический']}
+        form = SettingsSnodForm()
+        context = {'model': get_object_or_404(Model, id=id), 'form': form}
         return render(request, "snod/settings_original_snod.html", context)
 
     def post(self, request, id, **kwargs):

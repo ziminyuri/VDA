@@ -1,60 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="container">
+<div class="container">
 
-        <div class="row">
-            <div class="col s12 m6">
-                <div class="card ">
-                    <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
-                        <div class="card-content">
-                            <span class="card-title">Выберите режим работы системы по методу ШНУР</span>
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card ">
+                <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
+                    <div class="card-content">
+                        <span class="card-title">Выберите режим работы системы по методу ШНУР</span>
 
-                            {% csrf_token %}
-                            <div class="input-field col s12">
+                        {% csrf_token %}
+                        <div class="input-field col s12">
+                            {{ form.as_p }}
 
-                                <select name="mode">
-                                    {% for m in mode %}
-                                        <option selected value= "{{ m }}">
-                                        {{ m }}
-                                    {% endfor %}
-                                </select>
-
-                                <label>Режим работы</label>
-
-                            </div>
-                            <br>
-
-
-                            <div class="card-action">
-                                <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
-                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <br>
 
-            <div class="col s12 m6">
-                <div class="card ">
-                    <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
-                        <div class="card-content">
-                            <span class="card-title">Описание режимов</span>
-                            <ul>
-                                <li>Классический - пользователю предлагается ответить на вопросы системы</li>
-                                <li>Автоматический - ответы, генерируются автоматически</li>
-                            </ul>
+
+                        <div class="card-action">
+                            <input type="submit" class="btn btn-danger btn-sm" value="Сохранить начальные установки" >
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
-            <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
-            <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+        <div class="col s12 m6">
+            <div class="card ">
+                <form action="{% url 'snod_original_settings_create' id=model.id  %}" method="POST">
+                    <div class="card-content">
+                        <span class="card-title">Описание режимов</span>
+                        <ul>
+                            <li>Классический - пользователю предлагается ответить на вопросы системы</li>
+                            <li>Автоматический - ответы, генерируются автоматически</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
         </div>
-
-
     </div>
+
+    <div class="btn-group pl-3 mt-3" role="group" aria-label="Basic example">
+        <a href="{% url 'models' %}" class="btn btn btn-primary pl-3 mr-2" >К моделям</a>
+        <a href="{% url 'index' %}" class="btn btn btn-primary pl-3 mr-2" >На главную</a>
+    </div>
+
+
+</div>
 
 
 

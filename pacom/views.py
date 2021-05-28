@@ -13,6 +13,7 @@ from services.park import (get_context_history_answer,
                            write_range_data, write_result_of_compare_pacom)
 from services.settings import settingsPACOMCreate
 from VDA.settings import MEDIA_ROOT, DEPLOY, MEDIA_URL
+from pacom.forms import SettingsPACOMForm
 
 
 class ParkSearchView(LoginRequiredMixin, View):
@@ -75,7 +76,8 @@ class SettingsPACOMCreateView(LoginRequiredMixin, View):
     @staticmethod
     def get(request, id):
         context = {'model': get_object_or_404(Model, id=id)}
-        context['mode'] = ['Классический', 'Только различные значения критериев', 'Автоматический']
+        form = SettingsPACOMForm()
+        context['form'] = form
         return render(request, "pacom/settings.html", context)
 
     def post(self, request, id, **kwargs):

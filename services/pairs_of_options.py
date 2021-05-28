@@ -57,8 +57,8 @@ def make_question(model):
             return get_first_question(model, pair)
 
 
-def write_answer(response, answer, auto=False, original_snod=False) -> dict:
-    answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response, answer, auto)
+def write_answer(response, answer, original_snod=False) -> dict:
+    answer, option_1, option_2, option_1_line, option_2_line, model_id, question = get_data_from_request(response, answer)
 
     _write_answer_to_history(question, answer, option_1, option_2, model_id)
 

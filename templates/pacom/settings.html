@@ -9,14 +9,10 @@
                             <span class="card-title">Выберите режим работы системы по методу ПАРК</span>
 
                             {% csrf_token %}
+
                             <div class="input-field col s12">
-                                <select class="form-select" id="mode" name="mode">
-                                    {% for m in mode %}
-                                        <option selected value= "{{ m }}">
-                                        {{ m }}
-                                    {% endfor %}
-                                </select>
-                                <label>Режим работы</label>
+                                    {{ form.as_p }}
+
                             </div>
                             <br>
 
